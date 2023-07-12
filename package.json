@@ -8,7 +8,7 @@
     "@patternfly/react-charts": "6.94.18",
     "@patternfly/react-code-editor": "4.82.113",
     "@patternfly/react-core": "4.267.6",
-    "@patternfly/react-table": "4.112.39",
+    "@patternfly/react-table": "4.113.0",
     "@tanstack/react-query": "^4.3.4",
     "@tanstack/react-query-devtools": "^4.3.5",
     "@testing-library/jest-dom": "^5.16.5",
