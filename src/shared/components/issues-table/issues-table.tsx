@@ -22,9 +22,7 @@ import {
 } from "@patternfly/react-core";
 import ArrowUpIcon from "@patternfly/react-icons/dist/esm/icons/arrow-up-icon";
 import {
-  IAction,
   ICell,
-  IExtraData,
   IRow,
   IRowData,
   cellWidth,
@@ -35,19 +33,15 @@ import { useDebounce } from "usehooks-ts";
 
 import { HintDto } from "@app/api/file";
 import { compareByCategoryFn, compareByEffortFn } from "@app/api/issues";
-import { ALL_APPLICATIONS_ID } from "@app/Constants";
 import { IssueProcessed } from "@app/models/api-enriched";
-import { useAnalysisConfigurationQuery } from "@app/queries/analysis-configuration";
 import { useApplicationsQuery } from "@app/queries/applications";
 import { useFilesQuery } from "@app/queries/files";
 import { useIssuesQuery } from "@app/queries/issues";
-import { useRulesQuery } from "@app/queries/rules";
 import {
   SimpleTableWithToolbar,
   SimpleSelect,
   OptionWithValue,
   FileEditor,
-  RuleEditor,
 } from "@app/shared/components";
 import {
   useModal,
@@ -186,26 +180,10 @@ export const IssuesTable: React.FC<IIssuesTableProps> = ({ applicationId }) => {
   >(filters, 100);
 
   // Queries
-  const analysisConfigurationQuery = useAnalysisConfigurationQuery();
-  const allRulesQuery = useRulesQuery();
   const allApplicationsQuery = useApplicationsQuery();
   const allIssuesQuery = useIssuesQuery();
   const allFilesQuery = useFilesQuery();
 
-  const findRuleByIssueId = useCallback(
-    (issueId: string) => {
-      return allRulesQuery.data?.find((elem) => elem.id === issueId);
-    },
-    [allRulesQuery.data]
-  );
-
-  // Modal
-  const issueModal = useModal<"showRule", TableData>();
-  const issueModalMappedRule = useMemo(() => {
-    return issueModal.data != null
-      ? findRuleByIssueId(issueModal.data.ruleId)
-      : undefined;
-  }, [findRuleByIssueId, issueModal.data]);
 
   const {
     data: fileModalData,
@@ -223,10 +201,6 @@ export const IssuesTable: React.FC<IIssuesTableProps> = ({ applicationId }) => {
       return undefined;
     }
   }, [allFilesQuery.data, fileModalData]);
-
-  const application = useMemo(() => {
-    return allApplicationsQuery.data?.find((f) => f.id === applicationId);
-  }, [allApplicationsQuery.data, applicationId]);
 
   const issues: TableData[] = useMemo(() => {
     if (
@@ -438,20 +412,6 @@ export const IssuesTable: React.FC<IIssuesTableProps> = ({ applicationId }) => {
     return rows;
   }, [pageItems, isRowExpanded, openFileModal]);
 
-  const actions: IAction[] = [
-    {
-      title: "View rule",
-      onClick: (
-        event: React.MouseEvent,
-        rowIndex: number,
-        rowData: IRowData,
-        extraData: IExtraData
-      ) => {
-        const row = getRow(rowData);
-        issueModal.open("showRule", row);
-      },
-    },
-  ];
 
   // Reset pagination when application change
   useEffect(() => {
@@ -508,7 +468,6 @@ export const IssuesTable: React.FC<IIssuesTableProps> = ({ applicationId }) => {
             // Table
             rows={rows}
             cells={columns}
-            actions={actions}
             // Fech data
             isLoading={
               allIssuesQuery.isLoading || allApplicationsQuery.isLoading
@@ -710,43 +669,12 @@ export const IssuesTable: React.FC<IIssuesTableProps> = ({ applicationId }) => {
                     </ToolbarFilter>
                   )}
                 </ToolbarGroup>
-                {analysisConfigurationQuery.data?.exportCSV && (
-                  <>
-                    <ToolbarItem variant="separator" />
-                    <ToolbarItem>
-                      <a
-                        className="pf-c-button pf-m-primary "
-                        href={
-                          ALL_APPLICATIONS_ID === applicationId
-                            ? "./AllIssues.csv"
-                            : `${application?.name
-                                .replaceAll(".", "_")
-                                .replaceAll("-", "_")}.csv`
-                        }
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        Export CSV
-                      </a>
-                    </ToolbarItem>
-                  </>
-                )}
               </>
             }
           />
         )}
       </>
 
-      <Modal
-        title={`Rule: ${issueModalMappedRule?.id}`}
-        isOpen={issueModal.isOpen && issueModal.action === "showRule"}
-        onClose={issueModal.close}
-        variant="large"
-      >
-        {issueModalMappedRule && (
-          <RuleEditor ruleId={issueModalMappedRule.id} />
-        )}
-      </Modal>
       <Modal
         title={`File ${fileModalMappedFile?.prettyPath}`}
         isOpen={isFileModalOpen && fileModalAction === "showFile"}

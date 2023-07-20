@@ -6,55 +6,20 @@ import { Bullseye, Spinner } from "@patternfly/react-core";
 // At least one page should not have lazy() for not having "[mini-css-extract-plugin] Conflicting order." error
 const ApplicationList = lazy(() => import("./pages/application-list"));
 const IssuesList = lazy(() => import("./pages/issues-list"));
-const TechnologiesList = lazy(() => import("./pages/technologies-list"));
 const DependenciesList = lazy(() => import("./pages/dependencies-list"));
-const RulesList = lazy(() => import("./pages/rules-list"));
-const AppEdit = lazy(() => import("./pages/application-edit"));
+const AppEdit = lazy(() => import("./pages/application-details"));
 const AppEditDashboard = lazy(
-  () => import("./pages/application-edit/pages/dashboard")
+  () => import("./pages/application-details/pages/dashboard")
 );
 const AppEditIssues = lazy(
-  () => import("./pages/application-edit/pages/issues")
-);
-const AppEditDetails = lazy(
-  () => import("./pages/application-edit/pages/details")
+  () => import("./pages/application-details/pages/issues")
 );
 const AppEditTechnologies = lazy(
-  () => import("./pages/application-edit/pages/technologies")
+  () => import("./pages/application-details/pages/technologies")
 );
 const AppEditDependencies = lazy(
-  () => import("./pages/application-edit/pages/dependencies")
+  () => import("./pages/application-details/pages/dependencies")
 );
-const AppEditIgnoredFiles = lazy(
-  () => import("./pages/application-edit/pages/ignored-files")
-);
-const AppEJB = lazy(() => import("./pages/application-edit/pages/ejb"));
-const AppJPA = lazy(() => import("./pages/application-edit/pages/jpa"));
-const AppHibernate = lazy(
-  () => import("./pages/application-edit/pages/hibernate")
-);
-const AppSpringBeans = lazy(
-  () => import("./pages/application-edit/pages/spring-beans")
-);
-const AppRemoteServices = lazy(
-  () => import("./pages/application-edit/pages/remote-services")
-);
-const AppServerResources = lazy(
-  () => import("./pages/application-edit/pages/server-resources")
-);
-const AppUnparsableFiles = lazy(
-  () => import("./pages/application-edit/pages/unparsable-files")
-);
-const AppTransactions = lazy(
-  () => import("./pages/application-edit/pages/transactions")
-);
-const AppHardcodedIPAddresses = lazy(
-  () => import("./pages/application-edit/pages/hardcoded-ip-addresses")
-);
-const AppCompatibleFiles = lazy(
-  () => import("./pages/application-edit/pages/compatible-files")
-);
-const AppJBPM = lazy(() => import("./pages/application-edit/pages/jbpm"));
 
 export type ApplicationRoute = {
   applicationId: string;
@@ -83,22 +48,6 @@ export const AppRoutes = () => {
       path: "/issues/applications/:applicationId",
       hasDescendant: false,
     },
-    // Technologies
-    {
-      Component: TechnologiesList,
-      path: "/technologies",
-      hasDescendant: false,
-    },
-    {
-      Component: TechnologiesList,
-      path: "/technologies/applications",
-      hasDescendant: false,
-    },
-    {
-      Component: TechnologiesList,
-      path: "/technologies/applications/:applicationId",
-      hasDescendant: false,
-    },
     // Dependencies
     {
       Component: DependenciesList,
@@ -113,12 +62,6 @@ export const AppRoutes = () => {
     {
       Component: DependenciesList,
       path: "/dependencies/applications/:applicationId",
-      hasDescendant: false,
-    },
-    // Rules
-    {
-      Component: RulesList,
-      path: "/rules",
       hasDescendant: false,
     },
     // Edit application
@@ -139,64 +82,12 @@ export const AppRoutes = () => {
           path: "issues",
         },
         {
-          Component: AppEditDetails,
-          path: "details",
-        },
-        {
-          Component: AppEditTechnologies,
-          path: "technologies",
-        },
-        {
           Component: AppEditDependencies,
           path: "dependencies",
         },
         {
-          Component: AppEditIgnoredFiles,
-          path: "ignored-files",
-        },
-        {
-          Component: AppEJB,
-          path: "ejb",
-        },
-        {
-          Component: AppJPA,
-          path: "jpa",
-        },
-        {
-          Component: AppHibernate,
-          path: "hibernate",
-        },
-        {
-          Component: AppSpringBeans,
-          path: "spring-beans",
-        },
-        {
-          Component: AppRemoteServices,
-          path: "remote-services",
-        },
-        {
-          Component: AppServerResources,
-          path: "server-resources",
-        },
-        {
-          Component: AppUnparsableFiles,
-          path: "unparsable-files",
-        },
-        {
-          Component: AppTransactions,
-          path: "transactions",
-        },
-        {
-          Component: AppHardcodedIPAddresses,
-          path: "hardcoded-ip-addresses",
-        },
-        {
-          Component: AppCompatibleFiles,
-          path: "compatible-files",
-        },
-        {
-          Component: AppJBPM,
-          path: "jbpm",
+          Component: AppEditTechnologies,
+          path: "technologies",
         },
       ],
     },
