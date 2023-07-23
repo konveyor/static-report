@@ -4,7 +4,7 @@ import { HashRouter } from "react-router-dom";
 
 import { SimpleContextProvider } from "@app/context/simple-context";
 import { Theme } from "@app/layout/theme-constants";
-import { useApplicationsQuery } from "@app/queries/applications";
+import { useApplicationsQuery } from "@app/queries/ruleset";
 
 import { ALL_APPLICATIONS_ID } from "./Constants";
 import { DefaultLayout } from "./layout";
@@ -32,7 +32,6 @@ const App: React.FC = () => {
           },
         ].concat(
           (applications.data || [])
-            .filter((e) => !e.isVirtual)
             .map((e) => ({
               key: e.id,
               label: e.name,
