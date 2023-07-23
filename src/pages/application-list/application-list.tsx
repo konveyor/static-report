@@ -198,75 +198,13 @@ export const ApplicationList: React.FC = () => {
             title: (
               <>
                 <Link to={`/applications/${item.id}`}>{item.name}</Link>
-                {item.isVirtual && (
-                  <>
-                    {" "}
-                    <Tooltip
-                      content={
-                        <div>
-                          This groups all issues found in libraries included in
-                          multiple applications.
-                        </div>
-                      }
-                    >
-                      <Label isCompact color="blue" icon={<InfoCircleIcon />}>
-                        Shared libraries
-                      </Label>
-                    </Tooltip>
-                  </>
-                )}
               </>
             ),
           },
           {
             title: (
               <>
-                <Stack>
-                  {[...(assessmentByApp.get(item.id) || [])]
-                    .sort((a, b) =>
-                      a.targetRuntime.name.localeCompare(b.targetRuntime.name)
-                    )
-                    .map((assessment) => (
-                      <StackItem key={assessment.targetRuntime.name}>
-                        <Split>
-                          <SplitItem>
-                            <LabelGroup
-                              categoryName={assessment.assessmentResult}
-                            >
-                              <Label
-                                isCompact
-                                color={
-                                  assessment.assessmentResult === "Supported"
-                                    ? "green"
-                                    : assessment.assessmentResult ===
-                                      "Unsuitable"
-                                    ? "red"
-                                    : "grey"
-                                }
-                              >
-                                {assessment.targetRuntime.name}
-                              </Label>
-                            </LabelGroup>
-                          </SplitItem>
-                          <SplitItem>
-                            <Button
-                              variant="plain"
-                              aria-label="Details"
-                              isSmall
-                              onClick={() =>
-                                applicationModal.open("showLabel", {
-                                  application: item,
-                                  assessment: assessment,
-                                })
-                              }
-                            >
-                              <ExpandIcon />
-                            </Button>
-                          </SplitItem>
-                        </Split>
-                      </StackItem>
-                    ))}
-                </Stack>
+                <Link to={`/applications/${item.id}`}>{item.name}</Link>
               </>
             ),
           },
@@ -477,90 +415,6 @@ export const ApplicationList: React.FC = () => {
             </>
           }
         />
-
-        <Modal
-          title="Runtime label details"
-          isOpen={applicationModal.isOpen}
-          onClose={applicationModal.close}
-          variant="medium"
-        >
-          <DescriptionList>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Application</DescriptionListTerm>
-              <DescriptionListDescription>
-                {applicationModal.data?.application.name}
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Runtime target</DescriptionListTerm>
-              <DescriptionListDescription>
-                {applicationModal.data?.assessment.targetRuntime.name}
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Assessment</DescriptionListTerm>
-              <DescriptionListDescription>
-                {applicationModal.data?.assessment.assessmentResult}
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-
-            <DescriptionListGroup>
-              <DescriptionListTerm>Unsuitable technologies</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Split hasGutter isWrappable>
-                  {[
-                    ...(applicationModal.data?.assessment
-                      .assessedUnsuitableTags || []),
-                  ]
-                    .sort((a, b) => a.localeCompare(b))
-                    .map((e, index) => (
-                      <SplitItem key={index}>
-                        <Label isCompact color="red">
-                          {e}
-                        </Label>
-                      </SplitItem>
-                    ))}
-                </Split>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Supported technologies</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Split hasGutter isWrappable>
-                  {[
-                    ...(applicationModal.data?.assessment
-                      .assessedSupportedTags || []),
-                  ]
-                    .sort((a, b) => a.localeCompare(b))
-                    .map((e, index) => (
-                      <SplitItem key={index}>
-                        <Label isCompact color="green">
-                          {e}
-                        </Label>
-                      </SplitItem>
-                    ))}
-                </Split>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Neutral technologies</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Split hasGutter isWrappable>
-                  {[
-                    ...(applicationModal.data?.assessment.assessedNeutralTags ||
-                      []),
-                  ]
-                    .sort((a, b) => a.localeCompare(b))
-                    .map((e, index) => (
-                      <SplitItem key={index}>
-                        <Label isCompact>{e}</Label>
-                      </SplitItem>
-                    ))}
-                </Split>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-          </DescriptionList>
-        </Modal>
       </PageSection>
     </>
   );
