@@ -80,7 +80,7 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
                   <SimpleMarkdown
                     children={getMarkdown(
                       affectedFile.description || "",
-                      issue.links
+                      []
                     )}
                   />
                 </CardBody>

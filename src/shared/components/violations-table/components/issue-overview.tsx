@@ -20,24 +20,27 @@ import {
   Tr,
 } from "@patternfly/react-table";
 
-import { IssueDto } from "@app/api/issues";
+import { ViolationProcessed } from "@app/models/api-enriched";
 import { useFilesQuery } from "@app/queries/files";
 import { SimpleMarkdown } from "@app/shared/components";
 import { getMarkdown } from "@app/utils/rule-utils";
 
 interface IIssueOverviewProps {
-  issue: IssueDto;
-  onShowFile: (fileId: string, issueDescription?: string) => void;
+  issue: ViolationProcessed;
+  onShowFile: (file: string, issue: ViolationProcessed) => void;
 }
 
 export const IssueOverview: React.FC<IIssueOverviewProps> = ({
   issue,
   onShowFile,
 }) => {
+  Object.keys(issue.files).forEach((uri, index) => {
+    console.log("got file", uri, index)
+  })
+
   return (
     <Stack hasGutter>
-      {issue.affectedFiles.map((affectedFile, index) => (
-        <StackItem key={index}>
+        <StackItem>
           <Grid hasGutter>
             <GridItem md={5}>
               <Card isCompact isFullHeight>
@@ -50,25 +53,24 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {affectedFile.files.map((file, index) => (
+                        {Object.keys(issue.files).map((uri, index) => (
                         <Tr key={index}>
                           <Td dataLabel="File" modifier="breakWord">
                             <FileLink
-                              fileId={file.fileId}
-                              defaultText={file.fileName}
+                              file={uri}
+                              defaultText={uri}
                               onClick={() =>
                                 onShowFile(
-                                  file.fileId,
-                                  affectedFile.description
+                                  uri,
+                                  issue
                                 )
                               }
                             />
                           </Td>
                           <Td dataLabel="Incidents found" width={10}>
-                            <Badge isRead>{file.occurrences}</Badge>
+                            <Badge isRead>{issue.files[uri]?.length}</Badge>
                           </Td>
-                        </Tr>
-                      ))}
+                        </Tr>))}
                     </Tbody>
                   </TableComposable>
                 </CardBody>
@@ -79,8 +81,8 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
                 <CardBody>
                   <SimpleMarkdown
                     children={getMarkdown(
-                      affectedFile.description || "",
-                      issue.links
+                      issue.description || "",
+                      issue.links,
                     )}
                   />
                 </CardBody>
@@ -88,33 +90,27 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
             </GridItem>
           </Grid>
         </StackItem>
-      ))}
     </Stack>
   );
 };
 
 interface IFileLinkProps {
-  fileId: string;
+  file: string;
   defaultText: string;
   onClick: () => void;
 }
 
 export const FileLink: React.FC<IFileLinkProps> = ({
-  fileId,
+  file,
   defaultText,
   onClick,
 }) => {
-  const allFiles = useFilesQuery();
-  const file = useMemo(() => {
-    const result = allFiles.data?.find((e) => e.id === fileId);
-    return result;
-  }, [allFiles.data, fileId]);
-
+  console.log("got file", file)
   return (
     <>
       {file ? (
         <Button variant="link" isInline onClick={onClick}>
-          <Truncate content={defaultText || file.prettyPath} />
+          <Truncate content={defaultText || file} />
         </Button>
       ) : (
         defaultText

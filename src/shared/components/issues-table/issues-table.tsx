@@ -675,7 +675,7 @@ export const IssuesTable: React.FC<IIssuesTableProps> = ({ applicationId }) => {
         )}
       </>
 
-      <Modal
+      {/* <Modal
         title={`File ${fileModalMappedFile?.prettyPath}`}
         isOpen={isFileModalOpen && fileModalAction === "showFile"}
         onClose={closeFileModal}
@@ -706,7 +706,7 @@ export const IssuesTable: React.FC<IIssuesTableProps> = ({ applicationId }) => {
               }, undefined as HintDto | undefined)}
           />
         )}
-      </Modal>
+      </Modal> */}
     </>
   );
 };

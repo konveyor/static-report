@@ -1,6 +1,6 @@
 import { IssueCategoryType, IssueDto } from "@app/api/issues";
 import { RuleDto } from "@app/api/rule";
-import { ViolationDto, AppDto } from "@app/api/ruleset";
+import { ViolationDto, AppDto, IncidentDto } from "@app/api/ruleset";
 import { TechnologyGroup } from "@app/api/technologies";
 
 export interface ApplicationIssuesProcessed {
@@ -58,4 +58,7 @@ export interface ViolationProcessed extends ViolationDto {
   totalEffort: number;
   sourceTechnologies: string[];
   targetTechnologies: string[];
+  files: {
+    [key: string]: IncidentDto[], 
+  }
 }

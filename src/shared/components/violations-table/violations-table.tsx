@@ -31,7 +31,6 @@ import {
 } from "@patternfly/react-table";
 import { useDebounce } from "usehooks-ts";
 
-import { RulesetDto } from "@app/api/ruleset";
 import { ViolationProcessed } from "@app/models/api-enriched";
 import { compareByCategoryFn } from "@app/api/ruleset";
 import { useApplicationsQuery } from "@app/queries/ruleset";
@@ -146,6 +145,11 @@ const getRow = (rowData: IRowData): TableData => {
   return rowData[DataKey];
 };
 
+interface SelectedFile {
+  file: string;
+  issue: ViolationProcessed;
+}
+
 export interface IViolationsTableProps {
   applicationId?: string;
 }
@@ -168,13 +172,13 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
 
   const allApplications = useApplicationsQuery();
 
-  // const {
-  //   data: fileModalData,
-  //   isOpen: isFileModalOpen,
-  //   action: fileModalAction,
-  //   open: openFileModal,
-  //   close: closeFileModal,
-  // } = useModal<"showFile", SelectedFile>();
+  const {
+    data: fileModalData,
+    isOpen: isFileModalOpen,
+    action: fileModalAction,
+    open: openFileModal,
+    close: closeFileModal,
+  } = useModal<"showFile", SelectedFile>();
   // const fileModalMappedFile = useMemo(() => {
   //   if (allFilesQuery.data !== undefined && fileModalData !== undefined) {
   //     return allFilesQuery.data.find(
@@ -359,31 +363,30 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
       });
 
       // Expanded area
-      // if (isExpanded) {
-      //   rows.push({
-      //     [DataKey]: item,
-      //     parent: rows.length - 1,
-      //     fullWidth: true,
-      //     cells: [
-      //       {
-      //         title: (
-      //           <div className="pf-u-m-sm">
-      //             {/* <IssueOverview
-      //               issue={item}
-      //               onShowFile={(file, issueDescription) =>
-      //                 openFileModal("showFile", {
-      //                   fileId: file,
-      //                   ruleId: item.ruleId,
-      //                   issueDescription: issueDescription,
-      //                 })
-      //               }
-      //             /> */}
-      //           </div>
-      //         ),
-      //       },
-      //     ],
-      //   });
-      // }
+      if (isExpanded) {
+        rows.push({
+          [DataKey]: item,
+          parent: rows.length - 1,
+          fullWidth: true,
+          cells: [
+            {
+              title: (
+                <div className="pf-u-m-sm">
+                  <IssueOverview
+                    issue={item}
+                    onShowFile={(file, issue) =>
+                      openFileModal("showFile", {
+                        file,
+                        issue,
+                      })
+                    }
+                  />
+                </div>
+              ),
+            },
+          ],
+        });
+      }
     });
 
     return rows;
@@ -650,8 +653,8 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
         )}
       </>
 
-      {/* <Modal
-        title={`File ${fileModalMappedFile?.prettyPath}`}
+      <Modal
+        title={`File ${fileModalData?.file}`}
         isOpen={isFileModalOpen && fileModalAction === "showFile"}
         onClose={closeFileModal}
         variant="default"
@@ -663,25 +666,16 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
           </Button>,
         ]}
       >
-        {fileModalMappedFile && (
+        {fileModalData?.file && (
           <FileEditor
-            file={fileModalMappedFile}
-            hintToFocus={fileModalMappedFile.hints
-              .filter((hint) => {
-                return (
-                  hint.ruleId === fileModalData?.ruleId &&
-                  hint.content === fileModalData.issueDescription
-                );
-              })
-              .reduce((prev, current) => {
-                if (!prev) {
-                  return current;
-                }
-                return current.line < prev.line ? current : prev;
-              }, undefined as HintDto | undefined)}
+            file={fileModalData.file}
+            description={fileModalData.issue.description}
+            incidents={fileModalData.issue.incidents}
+            links={fileModalData.issue.links}
+            title={fileModalData.issue.name}
           />
         )}
-      </Modal> */}
+      </Modal>
     </>
   );
 };

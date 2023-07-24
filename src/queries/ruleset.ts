@@ -2,11 +2,12 @@ import { useCallback } from "react";
 
 import axios, { AxiosError } from "axios";
 
-import { AppDto, ViolationDto } from "@app/api/ruleset";
+import { AppDto, IncidentDto, ViolationDto } from "@app/api/ruleset";
 import { ApplicationProcessed, TagProcessed, ViolationProcessed } from "@app/models/api-enriched";
 
 import { useMockableQuery } from "./helpers";
 import { MOCK_APPS } from "./mocks/ruleset.mock";
+import { useQuery } from "@tanstack/react-query";
 
 export const useApplicationsQuery = () => {
   const transformCallback = useCallback(
@@ -25,6 +26,10 @@ export const useApplicationsQuery = () => {
             const targetTechnologies: string[] = violation.labels
               .filter(s => s.startsWith("konveyor.io/target="))
               .map(s => s.slice(s.indexOf("=") + 1))
+            const files = violation.incidents.reduce<{ [key: string]: IncidentDto[] }>((acc, incident) => {
+              acc[incident.uri] = acc[incident.uri] ? [...acc[incident.uri], incident] : [incident];
+              return acc
+            }, {});
 
             const violationProcessed: ViolationProcessed = {
               ...violation,
@@ -37,6 +42,7 @@ export const useApplicationsQuery = () => {
               name,
               sourceTechnologies,
               targetTechnologies,
+              files,
             }
             return violationProcessed;
           })
@@ -72,3 +78,6 @@ export const useApplicationsQuery = () => {
     (window as any)["apps"],
   );
 }
+
+export const useFileQuery = (uri: string) => 
+  useQuery(["files"], async () => (await axios.get(uri)).data)

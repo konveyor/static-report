@@ -1,12 +1,13 @@
-import { LinkDto } from "@app/api/issues";
+import { LinkDto } from "@app/api/ruleset";
 import { TechnologyDto } from "@app/api/rule";
 
 export const getMarkdown = (body: string, links: LinkDto[]): string => {
   const formattedLinks = links
-    .map((link, index) => `${index + 1}. [${link.title}](${link.href})`)
+    .map((link, index) => `${index + 1}. [${link.title}](${link.url})`)
     .join("\n");
   return [body, formattedLinks].join("\n");
 };
+
 
 export const technologiesToArray = (technologies: TechnologyDto[]) => {
   const technologyVersionMap: Map<string, Set<string>> = new Map();
