@@ -73,10 +73,6 @@ const columnKeys: ColumnKey[] = Object.values(ColumnKey) as ColumnKey[];
 const columns: ICell[] = [
   { title: "Name", transforms: [cellWidth(30), sortable] },
   {
-    title: "Runtime labels",
-    transforms: [cellWidth(40)],
-  },
-  {
     title: "Tags",
     transforms: [cellWidth(10)],
     cellTransforms: [compoundExpand],
@@ -204,13 +200,6 @@ export const ApplicationList: React.FC = () => {
           {
             title: (
               <>
-                <Link to={`/applications/${item.id}`}>{item.name}</Link>
-              </>
-            ),
-          },
-          {
-            title: (
-              <>
                 <TagIcon key="tags" /> {item.tags.length}
               </>
             ),
@@ -239,7 +228,7 @@ export const ApplicationList: React.FC = () => {
 
       rows.push({
         parent: parentIndex,
-        compoundParent: 2,
+        compoundParent: 1,
         cells: [
           {
             title: (
@@ -262,7 +251,7 @@ export const ApplicationList: React.FC = () => {
 
       rows.push({
         parent: parentIndex,
-        compoundParent: 3,
+        compoundParent: 2,
         cells: [
           {
             title: (
