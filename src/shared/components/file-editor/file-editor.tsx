@@ -50,7 +50,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
   const useFileQueryResult = useFileQuery(file);
   const filteredIncidents = incidents.filter((inc) => inc.lineNumber && inc.lineNumber != 0)
 
-  const fileContent: string = useMemo(() => useFileQueryResult.data, [useFileQueryResult]);
+  const fileContent = useMemo(() => useFileQueryResult.data, [useFileQueryResult]);
 
   // Editor
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor>();
@@ -293,7 +293,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
               isMinimapVisible
               isLanguageLabelVisible
               isDownloadEnabled
-              code={fileContent}
+              code={fileContent ? fileContent: ""}
               language={Object.values(Language).find(
                 (l) => l === fileExtension?.toLowerCase()
               )}

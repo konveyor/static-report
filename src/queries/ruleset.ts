@@ -79,5 +79,18 @@ export const useApplicationsQuery = () => {
   );
 }
 
-export const useFileQuery = (uri: string) => 
-  useQuery(["files"], async () => (await axios.get(uri)).data)
+export const useFileQuery = (uri: string) => {
+  let prefixRegex = /^[\S-]+?:\/\//;
+  if (process.env.REACT_APP_DATA_SOURCE==="mock") {
+      uri = uri.replace(prefixRegex, "./files/")
+  } else {
+    uri = uri.replace(prefixRegex, "./files/")
+  }
+  return useQuery(["files"], async () => {
+    const response = await fetch(uri)
+    if (!response.ok) {
+      throw new Error("failed getting file")
+    }
+    return await response.text()
+  })
+}
