@@ -3,6 +3,7 @@ export interface AppDto {
     name: string;
     location: string;
     rulesets: RulesetDto[];
+    dependencies: DependencyDto[];
 }
 
 export interface RulesetDto {
@@ -36,6 +37,15 @@ export interface IncidentDto {
 export interface LinkDto {
     url: string;
     title: string;
+}
+
+export interface DependencyDto {
+  name: string;
+  version: string;
+  indirect: boolean;
+  resolvedIdentifier: string;
+  labels: string[];
+  fileURIPrefix: string;
 }
 
 export const ISSUE_CATEGORIES = [

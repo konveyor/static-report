@@ -1,4 +1,4 @@
-import { RulesetDto, ISSUE_CATEGORIES, AppDto } from "@app/api/ruleset";
+import { RulesetDto, ISSUE_CATEGORIES, AppDto, DependencyDto } from "@app/api/ruleset";
 
 export let MOCK_APPS: AppDto[];
 
@@ -156,11 +156,37 @@ if (
     },
   }
 
+  const deps: DependencyDto[] = [
+    {
+        name: "test-dep-00",
+        fileURIPrefix: "file:///test-file",
+        indirect: false,
+        labels: [
+            "konveyor.io/source=downloadable",
+            "label",
+        ],
+        resolvedIdentifier: "1234",
+        version: "v1.0.0",
+    },
+    {
+        name: "test-dep-01",
+        fileURIPrefix: "file:///test-file",
+        indirect: false,
+        labels: [
+            "konveyor.io/source=open-source",
+            "label",
+        ],
+        resolvedIdentifier: "1234",
+        version: "v1.0.0",
+    }
+  ]
+
   const app1: AppDto = {
     id: "01",
     name: "app-01",
     location: "./app-01/",
     rulesets: [rs1, rs2],
+    dependencies: deps,
   }
 
   const app2: AppDto = {
@@ -168,6 +194,7 @@ if (
     name: "app-02",
     location: "./app-02",
     rulesets: [rs1, rs2],
+    dependencies: deps,
   }
 
   MOCK_APPS = [app1, app2]

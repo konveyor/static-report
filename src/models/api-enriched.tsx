@@ -1,6 +1,6 @@
 import { IssueCategoryType, IssueDto } from "@app/api/issues";
 import { RuleDto } from "@app/api/rule";
-import { ViolationDto, AppDto, IncidentDto } from "@app/api/ruleset";
+import { ViolationDto, AppDto, IncidentDto, DependencyDto } from "@app/api/ruleset";
 import { TechnologyGroup } from "@app/api/technologies";
 
 export interface ApplicationIssuesProcessed {
