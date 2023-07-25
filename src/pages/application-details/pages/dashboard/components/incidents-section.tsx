@@ -24,22 +24,21 @@ import {
   Tr,
 } from "@patternfly/react-table";
 
-import { ApplicationDto } from "@app/api/application";
+import { ApplicationProcessed } from "@app/models/api-enriched";
 import {
-  ALL_SUPPORTED_ISSUE_CATEGORY,
+  ISSUE_CATEGORIES,
+  IssueCatType,
   compareByCategoryFn,
-  IssueCategoryType,
-} from "@app/api/issues";
-import { useIssuesQuery } from "@app/queries/issues";
+} from "@app/api/ruleset";
 
 interface IncidentsData {
-  category: IssueCategoryType;
+  category: IssueCatType;
   totalIncidents: number;
   totalStoryPoints: number;
 }
 
 const DEFAULT_INCIDENTS_DATA: IncidentsData[] =
-  ALL_SUPPORTED_ISSUE_CATEGORY.map((e) => ({
+  ISSUE_CATEGORIES.map((e) => ({
     category: e,
     totalIncidents: 0,
     totalStoryPoints: 0,
@@ -67,21 +66,17 @@ const INCIDENTS_CHART: IncidentsChart = {
 };
 
 export interface IIncidentsSectionProps {
-  application: ApplicationDto;
+  application: ApplicationProcessed;
 }
 
 export const IncidentsSection: React.FC<IIncidentsSectionProps> = ({
   application,
 }) => {
-  const allIssues = useIssuesQuery();
-
-  const applicationIssues = useMemo(() => {
-    return allIssues.data?.find((f) => f.applicationId === application.id);
-  }, [application, allIssues.data]);
+  const applicationIssues = application.issues
 
   // Incidents Chart
   const incidents = useMemo(() => {
-    return (applicationIssues?.issues || []).reduce((prev, current) => {
+    return (applicationIssues || []).reduce((prev, current) => {
       const prevVal: IncidentsData | undefined = prev.find(
         (e) => e.category === current.category
       );
@@ -94,7 +89,7 @@ export const IncidentsSection: React.FC<IIncidentsSectionProps> = ({
             category: current.category,
             totalIncidents: prevVal.totalIncidents + current.totalIncidents,
             totalStoryPoints:
-              prevVal.totalStoryPoints + current.totalStoryPoints,
+              prevVal.totalStoryPoints + current.totalEffort,
           },
         ];
       } else {

@@ -1,5 +1,3 @@
-import internal from "stream";
-
 export interface AppDto {
     id: string;
     name: string;

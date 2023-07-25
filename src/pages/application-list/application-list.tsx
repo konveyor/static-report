@@ -48,8 +48,7 @@ import {
   IssueCategoryType,
   issueCategoryTypeBeautifier,
 } from "@app/api/issues";
-import { useApplicationsQuery } from "@app/queries/applications";
-import { useLabelsQuery } from "@app/queries/labels";
+import { useApplicationsQuery } from "@app/queries/ruleset";
 import { SimpleTableWithToolbar, SimpleSelect } from "@app/shared/components";
 import {
   useModal,
@@ -58,9 +57,9 @@ import {
   useToolbar,
   useCellSelectionState,
 } from "@app/shared/hooks";
-import { RuntimeAssessment, evaluateRuntime } from "@app/utils/label-utils";
 
 import "./application-list.css";
+import { ApplicationProcessed } from "@app/models/api-enriched";
 
 const DataKey = "DataKey";
 
@@ -91,8 +90,8 @@ const columns: ICell[] = [
 ];
 
 export const compareByColumnIndex = (
-  a: ApplicationDto,
-  b: ApplicationDto,
+  a: ApplicationProcessed,
+  b: ApplicationProcessed,
   columnIndex?: number
 ) => {
   switch (columnIndex) {
@@ -112,39 +111,18 @@ const getColumn = (colIndex: number): ColumnKey => {
 };
 
 export const ApplicationList: React.FC = () => {
-  const applicationModal = useModal<
-    "showLabel",
-    { application: ApplicationDto; assessment: RuntimeAssessment }
-  >();
-
   const [filterText, setFilterText] = useState("");
   const { filters, setFilter, removeFilter, clearAllFilters } = useToolbar<
     "tag",
     string
   >();
 
-  const labels = useLabelsQuery();
   const applications = useApplicationsQuery();
-  const tags = useMemo(() => {
-    const allTags = (applications.data || []).flatMap((f) => f.tags);
+
+  const allTags = useMemo(() => {
+    const allTags = (applications.data || []).flatMap((f) => f.tagsFlat);
     return Array.from(new Set(allTags)).sort((a, b) => a.localeCompare(b));
   }, [applications.data]);
-
-  const assessmentByApp = useMemo(() => {
-    const asssessmentsByApp: Map<string, RuntimeAssessment[]> = new Map();
-    if (applications.data && labels.data) {
-      applications.data.forEach((app) => {
-        const assessments = labels.data.map((label) => {
-          return evaluateRuntime(label, app.tags);
-        });
-        asssessmentsByApp.set(app.id, assessments);
-      });
-
-      return asssessmentsByApp;
-    } else {
-      return asssessmentsByApp;
-    }
-  }, [labels.data, applications.data]);
 
   const {
     page: currentPage,
@@ -153,7 +131,7 @@ export const ApplicationList: React.FC = () => {
     changeSortBy: onChangeSortBy,
   } = useTableControls();
 
-  const { pageItems, filteredItems } = useTable<ApplicationDto>({
+  const { pageItems, filteredItems } = useTable<ApplicationProcessed>({
     items: applications.data || [],
     currentPage: currentPage,
     currentSortBy: currentSortBy,
@@ -169,7 +147,7 @@ export const ApplicationList: React.FC = () => {
       const selectedTags = filters.get("tag") || [];
       if (selectedTags.length > 0) {
         isTagFilterCompliant = selectedTags.some((f) =>
-          item.tags.some((t) => f === t)
+          item.tags.flatMap((t) => t.tag).some((t) => f === t)
         );
       }
 
@@ -183,7 +161,7 @@ export const ApplicationList: React.FC = () => {
       columns: columnKeys,
     });
 
-  const itemsToRow = (items: ApplicationDto[]) => {
+  const itemsToRow = (items: ApplicationProcessed[]) => {
     const rows: IRow[] = [];
     items.forEach((item) => {
       rows.push({
@@ -200,7 +178,7 @@ export const ApplicationList: React.FC = () => {
           {
             title: (
               <>
-                <TagIcon key="tags" /> {item.tags.length}
+                <TagIcon key="tags" /> {item.tagsFlat.length}
               </>
             ),
             props: {
@@ -211,7 +189,7 @@ export const ApplicationList: React.FC = () => {
             title: (
               <>
                 <TaskIcon key="incidents" />{" "}
-                {Object.values(item.incidents).reduce((a, b) => a + b, 0)}
+                {item.issues.reduce((total, violation) => total + violation.totalIncidents, 0)}
               </>
             ),
             props: {
@@ -219,7 +197,7 @@ export const ApplicationList: React.FC = () => {
             },
           },
           {
-            title: item.storyPoints,
+            title: item.issues.reduce((total, violation) => total + violation.totalEffort, 0),
           },
         ],
       });
@@ -234,8 +212,7 @@ export const ApplicationList: React.FC = () => {
             title: (
               <div className="pf-u-m-lg">
                 <Split hasGutter isWrappable>
-                  {[...item.tags]
-                    .sort((a, b) => a.localeCompare(b))
+                  {item.tagsFlat
                     .map((e, index) => (
                       <SplitItem key={index}>
                         <Label isCompact>{e}</Label>
@@ -249,42 +226,42 @@ export const ApplicationList: React.FC = () => {
         ],
       });
 
-      rows.push({
-        parent: parentIndex,
-        compoundParent: 2,
-        cells: [
-          {
-            title: (
-              <div className="pf-u-m-lg">
-                <DescriptionList
-                  isHorizontal
-                  isCompact
-                  horizontalTermWidthModifier={{
-                    default: "12ch",
-                    md: "20ch",
-                  }}
-                >
-                  {Object.keys(item.incidents)
-                    .sort(compareByCategoryFn((e) => e as IssueCategoryType))
-                    .map((incident) => (
-                      <DescriptionListGroup key={incident}>
-                        <DescriptionListTerm>
-                          {issueCategoryTypeBeautifier(
-                            incident as IssueCategoryType
-                          )}
-                        </DescriptionListTerm>
-                        <DescriptionListDescription>
-                          {item.incidents[incident]}
-                        </DescriptionListDescription>
-                      </DescriptionListGroup>
-                    ))}
-                </DescriptionList>
-              </div>
-            ),
-            props: { colSpan: 6, className: "pf-m-no-padding" },
-          },
-        ],
-      });
+      // rows.push({
+      //   parent: parentIndex,
+      //   compoundParent: 2,
+      //   cells: [
+      //     {
+      //       title: (
+      //         <div className="pf-u-m-lg">
+      //           <DescriptionList
+      //             isHorizontal
+      //             isCompact
+      //             horizontalTermWidthModifier={{
+      //               default: "12ch",
+      //               md: "20ch",
+      //             }}
+      //           >
+      //             {Object.keys(item.incidents)
+      //               .sort(compareByCategoryFn((e) => e as IssueCategoryType))
+      //               .map((incident) => (
+      //                 <DescriptionListGroup key={incident}>
+      //                   <DescriptionListTerm>
+      //                     {issueCategoryTypeBeautifier(
+      //                       incident as IssueCategoryType
+      //                     )}
+      //                   </DescriptionListTerm>
+      //                   <DescriptionListDescription>
+      //                     {item.incidents[incident]}
+      //                   </DescriptionListDescription>
+      //                 </DescriptionListGroup>
+      //               ))}
+      //           </DescriptionList>
+      //         </div>
+      //       ),
+      //       props: { colSpan: 6, className: "pf-m-no-padding" },
+      //     },
+      //   ],
+      // });
     });
 
     return rows;
@@ -375,7 +352,7 @@ export const ApplicationList: React.FC = () => {
                     aria-labelledby="tag"
                     placeholderText="Tag"
                     value={filters.get("tag")}
-                    options={tags}
+                    options={allTags}
                     onChange={(option) => {
                       const optionValue = option as string;
 

@@ -47,19 +47,22 @@ export const useApplicationsQuery = () => {
             return violationProcessed;
           })
         }) 
-        
+
         const tags: TagProcessed[] = a.rulesets.flatMap((rs) => 
           rs.tags.flatMap((tagStr) => {
             const [category, values] = tagStr.split('=');
-            return !values ? 
+            return !values ?
               [] : values.split(',').map(value => ({tag: value, category}))
           })
         )
+
+        const tagsFlat: string[] = Array.from(new Set(tags.flatMap((t) => t.tag))).sort((a, b) => a.localeCompare(b))
 
         const appProcessed: ApplicationProcessed = {
           ...a,
           issues,
           tags,
+          tagsFlat,
         }
 
         return appProcessed;

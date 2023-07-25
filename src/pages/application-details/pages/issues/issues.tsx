@@ -3,15 +3,15 @@ import { useOutletContext } from "react-router-dom";
 
 import { PageSection } from "@patternfly/react-core";
 
-import { ApplicationDto } from "@app/api/application";
-import { IssuesTable } from "@app/shared/components";
+import { ApplicationProcessed } from "@app/models/api-enriched";
+import { ViolationsTable } from "@app/shared/components";
 
 export const Issues: React.FC = () => {
-  const application = useOutletContext<ApplicationDto | null>();
+  const application = useOutletContext<ApplicationProcessed | null>();
 
   return (
     <PageSection>
-      <IssuesTable applicationId={application?.id} />
+      <ViolationsTable applicationId={application?.id} />
     </PageSection>
   );
 };

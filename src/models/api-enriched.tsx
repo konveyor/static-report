@@ -41,11 +41,12 @@ export interface ApplicationTechnologiesProcessed {
 export interface ApplicationProcessed extends AppDto {
   issues: ViolationProcessed[];
   tags: TagProcessed[];
+  tagsFlat: string[];
 }
 
 export interface TagProcessed {
   tag: string;
-  category?: string;
+  category: string;
 }
 
 export interface ViolationProcessed extends ViolationDto {
