@@ -1,6 +1,6 @@
-import { RulesetDto, ISSUE_CATEGORIES, AppDto, DependencyDto } from "@app/api/ruleset";
+import { RulesetDto, ISSUE_CATEGORIES, ApplicationDto, DependencyDto } from "@app/api/output";
 
-export let MOCK_APPS: AppDto[];
+export let MOCK_APPS: ApplicationDto[];
 
 if (
     process.env.NODE_ENV === "test" ||
@@ -181,7 +181,7 @@ if (
     }
   ]
 
-  const app1: AppDto = {
+  const app1: ApplicationDto = {
     id: "01",
     name: "app-01",
     location: "./app-01/",
@@ -189,7 +189,7 @@ if (
     dependencies: deps,
   }
 
-  const app2: AppDto = {
+  const app2: ApplicationDto = {
     id: "02",
     name: "app-02",
     location: "./app-02",

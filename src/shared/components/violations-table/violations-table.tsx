@@ -31,8 +31,9 @@ import {
 } from "@patternfly/react-table";
 import { useDebounce } from "usehooks-ts";
 
+import { compareByCategoryFn } from "@app/api/output";
+import { ALL_APPLICATIONS_ID } from "@app/Constants";
 import { ViolationProcessed } from "@app/models/api-enriched";
-import { compareByCategoryFn } from "@app/api/ruleset";
 import { useApplicationsQuery } from "@app/queries/ruleset";
 import {
   SimpleTableWithToolbar,
@@ -46,7 +47,6 @@ import {
   useTableControls,
   useToolbar,
 } from "@app/shared/hooks";
-import { ALL_APPLICATIONS_ID } from "@app/Constants";
 
 import { IssueOverview } from "./components/issue-overview";
 

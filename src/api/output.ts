@@ -1,4 +1,4 @@
-export interface AppDto {
+export interface ApplicationDto {
     id: string;
     name: string;
     location: string;

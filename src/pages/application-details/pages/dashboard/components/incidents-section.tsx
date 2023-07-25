@@ -24,12 +24,12 @@ import {
   Tr,
 } from "@patternfly/react-table";
 
-import { ApplicationProcessed } from "@app/models/api-enriched";
 import {
   ISSUE_CATEGORIES,
   IssueCatType,
   compareByCategoryFn,
-} from "@app/api/ruleset";
+} from "@app/api/output";
+import { ApplicationProcessed } from "@app/models/api-enriched";
 
 interface IncidentsData {
   category: IssueCatType;

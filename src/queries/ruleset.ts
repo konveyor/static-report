@@ -1,17 +1,17 @@
 import { useCallback } from "react";
 
+import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 
-import { AppDto, IncidentDto, ViolationDto } from "@app/api/ruleset";
+import { ApplicationDto, IncidentDto, ViolationDto } from "@app/api/output";
 import { ApplicationProcessed, TagProcessed, ViolationProcessed } from "@app/models/api-enriched";
 
 import { useMockableQuery } from "./helpers";
 import { MOCK_APPS } from "./mocks/ruleset.mock";
-import { useQuery } from "@tanstack/react-query";
 
 export const useApplicationsQuery = () => {
   const transformCallback = useCallback(
-    (data: AppDto[]): ApplicationProcessed[] =>
+    (data: ApplicationDto[]): ApplicationProcessed[] =>
       data.map((a) => {
         const issues: ViolationProcessed[] = a.rulesets.flatMap((rs) => {
           return Object.keys(rs.violations).map((ruleID) => {
@@ -70,11 +70,11 @@ export const useApplicationsQuery = () => {
     []
   );
 
-  return useMockableQuery<AppDto[], AxiosError, ApplicationProcessed[]>(
+  return useMockableQuery<ApplicationDto[], AxiosError, ApplicationProcessed[]>(
     {
       queryKey: ["apps"],
       queryFn: async() => 
-      (await axios.get<AppDto[]>("apps")).data,
+      (await axios.get<ApplicationDto[]>("apps")).data,
       select: transformCallback,
     },
     MOCK_APPS,

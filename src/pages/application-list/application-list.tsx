@@ -42,12 +42,7 @@ import {
   sortable,
 } from "@patternfly/react-table";
 
-import { ApplicationDto } from "@app/api/application";
-import {
-  compareByCategoryFn,
-  IssueCategoryType,
-  issueCategoryTypeBeautifier,
-} from "@app/api/issues";
+import { ApplicationProcessed } from "@app/models/api-enriched";
 import { useApplicationsQuery } from "@app/queries/ruleset";
 import { SimpleTableWithToolbar, SimpleSelect } from "@app/shared/components";
 import {
@@ -59,7 +54,6 @@ import {
 } from "@app/shared/hooks";
 
 import "./application-list.css";
-import { ApplicationProcessed } from "@app/models/api-enriched";
 
 const DataKey = "DataKey";
 
@@ -102,7 +96,7 @@ export const compareByColumnIndex = (
   }
 };
 
-const getRow = (rowData: IRowData): ApplicationDto => {
+const getRow = (rowData: IRowData): ApplicationProcessed => {
   return rowData[DataKey];
 };
 

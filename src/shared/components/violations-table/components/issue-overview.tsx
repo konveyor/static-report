@@ -21,9 +21,8 @@ import {
 } from "@patternfly/react-table";
 
 import { ViolationProcessed } from "@app/models/api-enriched";
-import { useFilesQuery } from "@app/queries/files";
 import { SimpleMarkdown } from "@app/shared/components";
-import { getMarkdown } from "@app/utils/rule-utils";
+import { getMarkdown } from "@app/utils/utils";
 
 interface IIssueOverviewProps {
   issue: ViolationProcessed;

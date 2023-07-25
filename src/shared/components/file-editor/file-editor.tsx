@@ -23,10 +23,10 @@ import {
 } from "@patternfly/react-core";
 import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
 
+import { IncidentDto, LinkDto } from "@app/api/output";
 import { useFileQuery } from "@app/queries/ruleset";
 import { ConditionalRender, SimpleMarkdown } from "@app/shared/components";
-import { getMarkdown } from "@app/utils/rule-utils";
-import { IncidentDto, LinkDto } from "@app/api/ruleset";
+import { getMarkdown } from "@app/utils/utils";
 
 interface IFileEditorProps {
   file: string;

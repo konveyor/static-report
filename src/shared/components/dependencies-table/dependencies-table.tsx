@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
-import { useDebounce } from "usehooks-ts";
+
 
 import { useSelectionState } from "@migtools/lib-ui";
 import {
@@ -29,13 +29,14 @@ import {
   sortable,
   truncate,
 } from "@patternfly/react-table";
+import { useDebounce } from "usehooks-ts";
 
 
-import { DependencyDto } from "@app/api/ruleset";
+import { DependencyDto } from "@app/api/output";
+import { ALL_APPLICATIONS_ID } from "@app/Constants";
 import { useApplicationsQuery } from "@app/queries/ruleset";
 import { SimpleTableWithToolbar, SimpleSelect, OptionWithValue } from "@app/shared/components";
 import { useTable, useTableControls, useToolbar } from "@app/shared/hooks";
-import { ALL_APPLICATIONS_ID } from "@app/Constants";
 
 const areDependenciesEquals = (a: DependencyDto, b: DependencyDto) => {
   return a.name === b.name && a.version === b.version && a.resolvedIdentifier === b.resolvedIdentifier;
