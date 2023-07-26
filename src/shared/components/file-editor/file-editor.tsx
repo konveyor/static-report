@@ -49,8 +49,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
 }) => {
   const useFileQueryResult = useFileQuery(file);
   const filteredIncidents = incidents.filter((inc) => inc.lineNumber && inc.lineNumber != 0)
-
-  const fileContent = useMemo(() => useFileQueryResult.data, [useFileQueryResult]);
+  const fileContent = useMemo(() => useFileQueryResult.data, [useFileQueryResult.data, file]);
 
   // Editor
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor>();

@@ -29,7 +29,6 @@ export const Technologies: React.FC = () => {
     acc[tag.category] = acc[tag.category] ? [...acc[tag.category], tag.tag] : [tag.tag];
     return acc
   }, {})
-  console.log("got application", tagsByCategory)
 
   return (
     <>

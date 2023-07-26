@@ -200,7 +200,6 @@ export const FileLink: React.FC<IFileLinkProps> = ({
   defaultText,
   onClick,
 }) => {
-  console.log("got file", file)
   return (
     <>
       {file ? (

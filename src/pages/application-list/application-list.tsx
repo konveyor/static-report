@@ -138,8 +138,6 @@ export const ApplicationList: React.FC = () => {
     }, {} as { [appId: string]: { [issueKey: string]: number } });
   }, [applications.data])
 
-  console.log(issueByCategory)
-
   const {
     page: currentPage,
     sortBy: currentSortBy,
