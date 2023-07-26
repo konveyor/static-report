@@ -42,7 +42,7 @@ export const SidebarApp: React.FC = () => {
           <NavLink
             to={
               !currentContext
-                ? "/dependencies"
+                ? "/dependencies/applications"
                 : "/dependencies/applications/" + currentContext.key
             }
             className={({ isActive }) =>

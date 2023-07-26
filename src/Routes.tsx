@@ -14,9 +14,6 @@ const AppEditDashboard = lazy(
 const AppEditIssues = lazy(
   () => import("./pages/application-details/pages/issues")
 );
-const AppEditTechnologies = lazy(
-  () => import("./pages/application-details/pages/technologies")
-);
 const AppEditDependencies = lazy(
   () => import("./pages/application-details/pages/dependencies")
 );
@@ -84,10 +81,6 @@ export const AppRoutes = () => {
         {
           Component: AppEditDependencies,
           path: "dependencies",
-        },
-        {
-          Component: AppEditTechnologies,
-          path: "technologies",
         },
       ],
     },
