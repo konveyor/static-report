@@ -42,9 +42,17 @@ import {
   sortable,
 } from "@patternfly/react-table";
 
+import { 
+  compareByCategoryFn, 
+  IssueCatType 
+} from "@app/api/output"
+import { capitalizeFirstLetter } from "@app/utils/utils"
 import { ApplicationProcessed } from "@app/models/api-enriched";
 import { useApplicationsQuery } from "@app/queries/ruleset";
-import { SimpleTableWithToolbar, SimpleSelect } from "@app/shared/components";
+import { 
+  SimpleTableWithToolbar,
+  SimpleSelect 
+} from "@app/shared/components";
 import {
   useModal,
   useTable,
@@ -117,6 +125,20 @@ export const ApplicationList: React.FC = () => {
     const allTags = (applications.data || []).flatMap((f) => f.tagsFlat);
     return Array.from(new Set(allTags)).sort((a, b) => a.localeCompare(b));
   }, [applications.data]);
+
+  const issueByCategory: { [id: string]: { [cat: string]: number } } = useMemo(() => {
+    return (applications?.data || []).reduce((result, app) => {
+      const issueData = app.issues.reduce((acc, issue) => {
+        acc[issue.category] = acc[issue.category] || 0;
+        acc[issue.category] += issue.totalIncidents;
+        return acc;
+      }, {} as { [issueKey: string]: number });
+      result[app.id] = issueData;
+      return result;
+    }, {} as { [appId: string]: { [issueKey: string]: number } });
+  }, [applications.data])
+
+  console.log(issueByCategory)
 
   const {
     page: currentPage,
@@ -220,42 +242,39 @@ export const ApplicationList: React.FC = () => {
         ],
       });
 
-      // rows.push({
-      //   parent: parentIndex,
-      //   compoundParent: 2,
-      //   cells: [
-      //     {
-      //       title: (
-      //         <div className="pf-u-m-lg">
-      //           <DescriptionList
-      //             isHorizontal
-      //             isCompact
-      //             horizontalTermWidthModifier={{
-      //               default: "12ch",
-      //               md: "20ch",
-      //             }}
-      //           >
-      //             {Object.keys(item.incidents)
-      //               .sort(compareByCategoryFn((e) => e as IssueCategoryType))
-      //               .map((incident) => (
-      //                 <DescriptionListGroup key={incident}>
-      //                   <DescriptionListTerm>
-      //                     {issueCategoryTypeBeautifier(
-      //                       incident as IssueCategoryType
-      //                     )}
-      //                   </DescriptionListTerm>
-      //                   <DescriptionListDescription>
-      //                     {item.incidents[incident]}
-      //                   </DescriptionListDescription>
-      //                 </DescriptionListGroup>
-      //               ))}
-      //           </DescriptionList>
-      //         </div>
-      //       ),
-      //       props: { colSpan: 6, className: "pf-m-no-padding" },
-      //     },
-      //   ],
-      // });
+      rows.push({
+        parent: parentIndex,
+        compoundParent: 2,
+        cells: [
+          {
+            title: (
+              <div className="pf-u-m-lg">
+                <DescriptionList
+                  isHorizontal
+                  isCompact
+                  horizontalTermWidthModifier={{
+                    default: "12ch",
+                    md: "20ch",
+                  }}
+                >
+                  {Object.entries(issueByCategory[item.id])
+                    .map(([cat, total], index) => (
+                      <DescriptionListGroup key={index}>
+                        <DescriptionListTerm>
+                          {capitalizeFirstLetter(cat)} issues
+                        </DescriptionListTerm>
+                        <DescriptionListDescription>
+                          {total}
+                        </DescriptionListDescription>
+                      </DescriptionListGroup>
+                    ))}
+                </DescriptionList>
+              </div>
+            ),
+            props: { colSpan: 6, className: "pf-m-no-padding" },
+          },
+        ],
+      });
     });
 
     return rows;
