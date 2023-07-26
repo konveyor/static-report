@@ -127,6 +127,8 @@ export interface IDependenciesTableProps {
 export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
   applicationId,
 }) => {
+  const allApplicationsQuery = useApplicationsQuery();
+
   // Filters
   const [filterText, setFilterText] = useState("");
   const { filters, setFilter, removeFilter, clearAllFilters } = useToolbar<
@@ -141,8 +143,6 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
       ToolbarChip[]
     >
   >(filters, 100);
-
-  const allApplicationsQuery = useApplicationsQuery();
 
   const dependencies = useMemo(() => {
     if (

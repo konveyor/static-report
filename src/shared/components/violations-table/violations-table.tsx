@@ -155,6 +155,8 @@ export interface IViolationsTableProps {
 }
 
 export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId }) => {
+  const allApplications = useApplicationsQuery();
+
   // Filters
   const [filterText, setFilterText] = useState("");
   const { filters, setFilter, removeFilter, clearAllFilters } = useToolbar<
@@ -170,7 +172,6 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
     >
   >(filters, 100);
 
-  const allApplications = useApplicationsQuery();
 
   const {
     data: fileModalData,
@@ -179,15 +180,6 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
     open: openFileModal,
     close: closeFileModal,
   } = useModal<"showFile", SelectedFile>();
-  // const fileModalMappedFile = useMemo(() => {
-  //   if (allFilesQuery.data !== undefined && fileModalData !== undefined) {
-  //     return allFilesQuery.data.find(
-  //       (file) => file.id === fileModalData?.fileId
-  //     );
-  //   } else {
-  //     return undefined;
-  //   }
-  // }, [allFilesQuery.data, fileModalData]);
 
   const issues: TableData[] = useMemo(() => {
     if (
