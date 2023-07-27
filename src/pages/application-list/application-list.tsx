@@ -2,22 +2,17 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import {
-  Button,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
   Label,
-  LabelGroup,
-  Modal,
   PageSection,
   PageSectionVariants,
   SearchInput,
   SelectVariant,
   Split,
   SplitItem,
-  Stack,
-  StackItem,
   Text,
   TextContent,
   ToolbarChip,
@@ -25,11 +20,8 @@ import {
   ToolbarFilter,
   ToolbarGroup,
   ToolbarItem,
-  Tooltip,
 } from "@patternfly/react-core";
-import ExpandIcon from "@patternfly/react-icons/dist/esm/icons/expand-icon";
 import FilterIcon from "@patternfly/react-icons/dist/esm/icons/filter-icon";
-import InfoCircleIcon from "@patternfly/react-icons/dist/esm/icons/info-circle-icon";
 import TagIcon from "@patternfly/react-icons/dist/esm/icons/tag-icon";
 import TaskIcon from "@patternfly/react-icons/dist/esm/icons/task-icon";
 import {
@@ -42,10 +34,6 @@ import {
   sortable,
 } from "@patternfly/react-table";
 
-import { 
-  compareByCategoryFn, 
-  IssueCatType 
-} from "@app/api/output"
 import { capitalizeFirstLetter } from "@app/utils/utils"
 import { ApplicationProcessed } from "@app/models/api-enriched";
 import { useApplicationsQuery } from "@app/queries/ruleset";
@@ -54,7 +42,6 @@ import {
   SimpleSelect 
 } from "@app/shared/components";
 import {
-  useModal,
   useTable,
   useTableControls,
   useToolbar,

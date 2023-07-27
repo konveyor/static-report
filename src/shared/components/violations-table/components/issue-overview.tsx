@@ -2,7 +2,6 @@ import React, { useState, useCallback, useMemo } from "react";
 import { useDebounce } from "usehooks-ts";
 
 import {
-  Badge,
   Button,
   Card,
   CardBody,
@@ -11,20 +10,14 @@ import {
   Stack,
   StackItem,
   Truncate,
+  ToolbarItem,
+  SearchInput,
 } from "@patternfly/react-core";
 import {
   ICell,
-  TableComposable,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
   IRow,
-  IRowData,
   cellWidth,
   sortable,
-  truncate,
 } from "@patternfly/react-table";
 
 import {
@@ -147,7 +140,7 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
     });
 
     return rows;
-  }, [pageItems]);
+  }, [pageItems, issue]);
 
   return (
     <Stack hasGutter>
@@ -168,6 +161,17 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
                 cells={columns}
                 rows={rows}
                 isLoading={false}
+                toolbarToggle={
+                  <>
+                    <ToolbarItem variant="search-filter">
+                      <SearchInput
+                        value={filterText}
+                        onChange={setFilterText}
+                        onClear={() => setFilterText("")}
+                      />
+                    </ToolbarItem>
+                    </>
+                }
               >
               </SimpleTableWithToolbar>
             </GridItem>
