@@ -47,12 +47,12 @@ const DataKey = "DataKey";
 const columns: ICell[] = [
   {
     title: "Name",
-    transforms: [cellWidth(35), sortable],
+    transforms: [cellWidth(50), sortable],
     cellTransforms: [truncate],
   },
   {
     title: "Labels",
-    transforms: [cellWidth(10)],
+    transforms: [cellWidth(30)],
   },
   {
     title: "Version",
@@ -159,8 +159,13 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
   }, [allApplicationsQuery.data, applicationId]);
 
   const allLabels: string[] = useMemo(() => {
-    return Array.from(new Set(dependencies.flatMap((d) => d.labels)))
-  }, [dependencies])
+    return Array.from(new Set(dependencies.flatMap((d) => d.labels))).reduce((acc, label) => {
+      return [
+        ...acc,
+        label.replace("konveyor.io/source=", "")
+      ]
+    }, [] as string[])
+  }, [dependencies, applicationId])
 
   // Rows
   const {
@@ -192,7 +197,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
       const selectedLabels = debouncedFilters.get("labels") || [];
       if (selectedLabels.length > 0) {
         isLabelFilterCompliant = selectedLabels.some(
-          (f) => item.labels?.includes(f.key)
+          (f) => item.labels.flatMap((l) => l.replace("konveyor.io/source=", ""))?.includes(f.key)
         );
       }
 
@@ -212,7 +217,6 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
     },
     [debouncedFilterText, debouncedFilters]
   );
-
 
   const { pageItems, filteredItems } = useTable<DependencyDto>({
     items: dependencies,
@@ -241,7 +245,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
                   {item.labels?.map((label, index) => (
                     <SplitItem key={index}>
                       <Label isCompact color="blue">
-                        {label}
+                        {label.replace("konveyor.io/source=", "")}
                       </Label>
                     </SplitItem>
                   ))}
@@ -312,6 +316,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
           fetchError={allApplicationsQuery.isError}
           // Toolbar filters
           filtersApplied={filterText.trim().length > 0}
+          toolbarClearAllFilters={clearAllFilters}
           toolbarToggle={
             <>
               <ToolbarItem variant="search-filter">
@@ -365,7 +370,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
                   </ToolbarFilter>
                 </ToolbarGroup>
                 <ToolbarGroup variant="filter-group">
-                <ToolbarFilter
+                  <ToolbarFilter
                     chips={filters.get("relationship")}
                     deleteChip={(
                       category: string | ToolbarChipGroup,
