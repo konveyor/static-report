@@ -165,11 +165,10 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
         label.replace("konveyor.io/source=", "")
       ]
     }, [] as string[])
-  }, [dependencies, applicationId])
+  }, [dependencies])
 
   // Rows
   const {
-    isItemSelected: isRowExpanded,
     toggleItemSelected: toggleRowExpanded,
   } = useSelectionState<DependencyDto>({
     items: dependencies,
@@ -229,11 +228,8 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
   const itemsToRow = (items: DependencyDto[]) => {
     const rows: IRow[] = [];
     items.forEach((item) => {
-      const isExpanded = isRowExpanded(item);
-
       rows.push({
         [DataKey]: item,
-        isOpen: isExpanded,
         cells: [
           {
             title: item.name,

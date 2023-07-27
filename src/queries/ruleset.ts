@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 
 import { ApplicationDto, IncidentDto, ViolationDto } from "@app/api/output";
-import { ApplicationProcessed, TagProcessed, ViolationProcessed } from "@app/models/api-enriched";
+import { ApplicationProcessed, FileProcessed, TagProcessed, ViolationProcessed } from "@app/models/api-enriched";
 
 import { useMockableQuery } from "./helpers";
 import { MOCK_APPS } from "./mocks/ruleset.mock";
@@ -19,17 +19,34 @@ export const useApplicationsQuery = () => {
 
             const totalIncidents: number = violation.incidents.length
             const totalEffort: number = violation.effort * totalIncidents;
-            const name: string = violation.description?.split("\n")[0]
+            const name: string = violation.description?.split("\n")[0] 
             const sourceTechnologies: string[] = violation.labels
               .filter(s => s.startsWith("konveyor.io/source="))
               .map(s => s.slice(s.indexOf("=")+1))
             const targetTechnologies: string[] = violation.labels
               .filter(s => s.startsWith("konveyor.io/target="))
               .map(s => s.slice(s.indexOf("=") + 1))
-            const files = violation.incidents.reduce<{ [key: string]: IncidentDto[] }>((acc, incident) => {
+            const allFiles = violation.incidents.reduce<{ [key: string]: IncidentDto[] }>((acc, incident) => {
               acc[incident.uri] = acc[incident.uri] ? [...acc[incident.uri], incident] : [incident];
               return acc
             }, {});
+            const files: FileProcessed[] = Object.entries(allFiles).reduce<FileProcessed[]>((acc, [name, incidents]) => {
+              const isLocal: boolean = name.startsWith("file://")
+              if (isLocal) {
+                acc = [...acc, { name, isLocal, incidents } ]
+              } else {
+                const depIncidents: FileProcessed[] = incidents.flatMap((i) => {
+                  return {
+                    name,
+                    isLocal,
+                    codeSnip: i.codeSnip,
+                    incidents: [i],
+                  }
+                })
+                acc = [...acc, ...depIncidents]
+              }
+              return acc
+            }, [] as FileProcessed[])
 
             const violationProcessed: ViolationProcessed = {
               ...violation,
@@ -85,7 +102,6 @@ export const useApplicationsQuery = () => {
 export const useFileQuery = (uri: string) => {
   let prefixRegex = /^[\S-]+?:\/\//;
   uri = uri.replace(prefixRegex, "/files/")
-  console.log("query for ", uri)
   // return useQuery(["files", uri], async () => (await axios.get(uri)).data)
   return useQuery(["files", uri], async () => {
     const response = await fetch(uri)

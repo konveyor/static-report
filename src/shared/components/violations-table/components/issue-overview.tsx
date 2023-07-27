@@ -28,13 +28,13 @@ import {
   useTableControls
 } from "@app/shared/hooks"
 
-import { ViolationProcessed } from "@app/models/api-enriched";
+import { FileProcessed, ViolationProcessed } from "@app/models/api-enriched";
 import { SimpleMarkdown } from "@app/shared/components";
 import { getMarkdown } from "@app/utils/utils";
 
 interface IIssueOverviewProps {
   issue: ViolationProcessed;
-  onShowFile: (file: string, issue: ViolationProcessed) => void;
+  onShowFile: (file: FileProcessed, issue: ViolationProcessed) => void;
 }
 
 const DataKey = "DataKey"
@@ -51,10 +51,7 @@ const columns: ICell[] = [
   },
 ]
 
-interface TableData {
-  name: string, 
-  totalIncidents: number,
-}
+interface TableData extends FileProcessed {}
 
 export const compareByColumnIndex = (
   a: TableData,
@@ -76,15 +73,7 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
   const [filterText, setFilterText] = useState("");
   const debouncedFilterText = useDebounce<string>(filterText, 250);
 
-  const items: TableData[] = Object.keys(issue.files).reduce<TableData[]>((acc, name) => {
-    return [
-      ...acc,
-      {
-        name: name,
-        totalIncidents: issue.files[name].length
-      }
-    ]
-  }, [] as TableData[])
+  const items: TableData[] = issue.files
 
   const filterItem = useCallback(
     (item: TableData) => {
@@ -126,21 +115,21 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
                 defaultText={item.name}
                 onClick={() =>
                   onShowFile(
-                    item.name,
+                    item,
                     issue
                   )
                 }/>
             </>,
           },
           {
-            title: item.totalIncidents,
+            title: item.incidents.length,
           }
         ],
       });
     });
 
     return rows;
-  }, [pageItems, issue]);
+  }, [pageItems, issue, onShowFile]);
 
   return (
     <Stack hasGutter>

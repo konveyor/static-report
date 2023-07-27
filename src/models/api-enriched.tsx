@@ -21,7 +21,12 @@ export interface ViolationProcessed extends ViolationDto {
   totalEffort: number;
   sourceTechnologies: string[];
   targetTechnologies: string[];
-  files: {
-    [key: string]: IncidentDto[], 
-  }
+  files: FileProcessed[];
+}
+
+export interface FileProcessed {
+  name: string;
+  isLocal: boolean;
+  codeSnip?: string;
+  incidents: IncidentDto[];
 }

@@ -33,7 +33,7 @@ import { useDebounce } from "usehooks-ts";
 
 import { compareByCategoryFn } from "@app/api/output";
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
-import { ViolationProcessed } from "@app/models/api-enriched";
+import { FileProcessed, ViolationProcessed } from "@app/models/api-enriched";
 import { useApplicationsQuery } from "@app/queries/ruleset";
 import {
   SimpleTableWithToolbar,
@@ -146,7 +146,7 @@ const getRow = (rowData: IRowData): TableData => {
 };
 
 interface SelectedFile {
-  file: string;
+  file: FileProcessed;
   issue: ViolationProcessed;
 }
 
@@ -382,7 +382,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
     });
 
     return rows;
-  }, [pageItems, isRowExpanded]);
+  }, [pageItems, isRowExpanded, openFileModal]);
 
 
   // Reset pagination when application change
@@ -661,10 +661,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
         {fileModalData?.file && (
           <FileEditor
             file={fileModalData.file}
-            description={fileModalData.issue.description}
-            incidents={fileModalData.issue.incidents}
-            links={fileModalData.issue.links}
-            title={fileModalData.issue.name}
+            issue={fileModalData.issue}
           />
         )}
       </Modal>

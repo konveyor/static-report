@@ -27,13 +27,11 @@ import { IncidentDto, LinkDto } from "@app/api/output";
 import { useFileQuery } from "@app/queries/ruleset";
 import { ConditionalRender, SimpleMarkdown } from "@app/shared/components";
 import { getMarkdown } from "@app/utils/utils";
+import { ViolationProcessed, FileProcessed } from "@app/models/api-enriched";
 
 interface IFileEditorProps {
-  file: string;
-  title: string;
-  description: string;
-  links: LinkDto[];
-  incidents: IncidentDto[];
+  file: FileProcessed;
+  issue: ViolationProcessed;
   props?: Partial<
     Omit<CodeEditorProps, "ref" | "code" | "options" | "onEditorDidMount">
   >;
@@ -41,15 +39,16 @@ interface IFileEditorProps {
 
 export const FileEditor: React.FC<IFileEditorProps> = ({
   file,
-  title,
-  description,
-  links,
-  incidents,
+  issue,
   props,
 }) => {
-  const useFileQueryResult = useFileQuery(file);
-  const filteredIncidents = incidents.filter((inc) => inc.lineNumber && inc.lineNumber != 0)
-  const fileContent = useMemo(() => useFileQueryResult.data, [useFileQueryResult.data, file]);
+  const useFileQueryResult = useFileQuery(file.name);
+  
+  const filteredIncidents = useMemo(() => {
+    return file.incidents.filter((i) => i.lineNumber && i.lineNumber !== 0)
+  }, [file.incidents])
+
+  const fileContent = useMemo(() => useFileQueryResult.data, [useFileQueryResult.data]);
 
   // Editor
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor>();
@@ -79,80 +78,15 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
     drawerRef.current && drawerRef.current.focus();
   };
 
-  const fileExtension = file?.split('.')?.pop();
-
-  /**
-   * Adds the left Windup icon to the editor
-   */
-  // const addDeltaDecorations = (
-  //   editor: monacoEditor.editor.IStandaloneCodeEditor,
-  //   monaco: typeof monacoEditor,
-  //   hints: HintDto[]
-  // ) => {
-  //   const decorations = hints.map((hint) => {
-  //     const decoration = {
-  //       range: new monaco.Range(hint.line, 1, hint.line, 1),
-  //       options: {
-  //         isWholeLine: true,
-  //         glyphMarginClassName: "windupGlyphMargin",
-  //       },
-  //     };
-  //     return decoration;
-  //   });
-
-  //   editor.deltaDecorations([], decorations);
-  // };
-
-  /**
-   * Adds actions on top of the line with a Hint
-   */
-  // const addCodeLens = (
-  //   editor: monacoEditor.editor.IStandaloneCodeEditor,
-  //   monaco: typeof monacoEditor,
-  //   hints: HintDto[]
-  // ) => {
-  //   const lenses = hints.map((hint) => {
-  //     const lense: monacoEditor.languages.CodeLens = {
-  //       range: new monaco.Range(hint.line!, 1, hint.line!, 1),
-  //       id: "view-hint",
-  //       command: {
-  //         title: "View Hint",
-  //         id: editor.addCommand(
-  //           0,
-  //           () => {hintToFocus
-  //             setDrawerHint(hint);
-  //             setIsDrawerExpanded(true);
-  //           },
-  //           ""
-  //         )!,
-  //       },
-  //     };
-  //     return lense;
-  //   });
-
-  //   const codeLens = monaco.languages.registerCodeLensProvider("*", {
-  //     provideCodeLenses: (model, token) => {
-  //       return {
-  //         lenses: lenses,
-  //         dispose: () => {
-  //           // codeLens.dispose();
-  //         },
-  //       };
-  //     },
-  //     resolveCodeLens: (model, codeLens, token) => {
-  //       return codeLens;
-  //     },
-  //   });
-
-  //   return codeLens;
-  // };
+  const fileExtension = file?.name?.split('.')?.pop();
 
   /**
    * Adds a hover text to the hint line
    */
   const addHover = (
     monaco: typeof monacoEditor,
-    incidents: IncidentDto[]
+    incidents: IncidentDto[],
+    links: LinkDto[]
   ) => {
     return incidents.map((inc) => {
       return monaco.languages.registerHoverProvider("*", {
@@ -165,7 +99,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
             range: new monaco.Range(inc.lineNumber!, 1, inc.lineNumber!, 1),
             contents: [
               {
-                value: getMarkdown(inc.message, []),
+                value: getMarkdown(inc.message, links),
               },
             ],
           };
@@ -182,14 +116,14 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
     incidents: IncidentDto[]
   ) => {
     const markers = incidents
-      .filter((inc) => inc.lineNumber && inc.lineNumber != 0)
+      .filter((inc) => inc.lineNumber && inc.lineNumber !== 0)
       ?.map((inc) => {
         const marker: monacoEditor.editor.IMarkerData = {
           startLineNumber: inc.lineNumber,
           endLineNumber: inc.lineNumber, 
           startColumn: 0,
           endColumn: 1000,
-          message: inc.message,
+          message: issue.description,
           severity: monaco.MarkerSeverity.Warning,
         }
         return marker
@@ -210,7 +144,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
     let newDisposables: monacoEditor.IDisposable[] = [];
 
     // Add markers
-    addMarkers(monaco, incidents);
+    addMarkers(monaco, file.incidents);
 
     // Add code lenses
     // const codeLens = addCodeLens(editor, monaco, hints);
@@ -220,7 +154,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
     // addDeltaDecorations(editor, monaco, hints);
 
     // Add hovers
-    const hovers = addHover(monaco, incidents);
+    const hovers = addHover(monaco, file.incidents, issue.links);
     newDisposables = newDisposables.concat(hovers);
 
     setDisposables(newDisposables);
@@ -261,16 +195,16 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
                   </CardActions>
                   <CardTitle>
                     <TextContent>
-                      <Text component="h1">{title}</Text>
+                      <Text component="h1">{issue.name}</Text>
                     </TextContent>
                   </CardTitle>
                 </CardHeader>
                 <CardBody>
-                  {description && (
+                  {issue.description && (
                     <SimpleMarkdown
                       children={getMarkdown(
-                        description,
-                        links
+                        issue.description,
+                        issue.links,
                       )}
                     />
                   )}
@@ -287,11 +221,11 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
           >
             <CodeEditor
               isDarkTheme
-              isLineNumbersVisible
+              isLineNumbersVisible={file.isLocal ? true : false}
               isReadOnly
               isMinimapVisible
               isLanguageLabelVisible
-              isDownloadEnabled
+              isDownloadEnabled={false}
               code={fileContent ? fileContent: ""}
               language={Object.values(Language).find(
                 (l) => l === fileExtension?.toLowerCase()
