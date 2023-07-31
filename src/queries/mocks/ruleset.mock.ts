@@ -2,6 +2,8 @@ import { RulesetDto, ISSUE_CATEGORIES, ApplicationDto, DependencyDto } from "@ap
 
 export let MOCK_APPS: ApplicationDto[];
 
+export let MOCK_RULESETS: RulesetDto[];
+
 if (
     process.env.NODE_ENV === "test" ||
     process.env.REACT_APP_DATA_SOURCE === "mock"
@@ -184,7 +186,7 @@ if (
   const app1: ApplicationDto = {
     id: "01",
     name: "app-01",
-    location: "./app-01/",
+    outputPath: "./app-01/",
     rulesets: [rs1, rs2],
     dependencies: deps,
   }
@@ -192,10 +194,11 @@ if (
   const app2: ApplicationDto = {
     id: "02",
     name: "app-02",
-    location: "./app-02",
+    outputPath: "./app-02",
     rulesets: [rs1, rs2],
     dependencies: deps,
   }
 
   MOCK_APPS = [app1, app2]
+  MOCK_RULESETS = [rs1, rs2]
 }

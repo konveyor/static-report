@@ -1,7 +1,7 @@
 export interface ApplicationDto {
     id: string;
     name: string;
-    location: string;
+    outputPath: string;
     rulesets: RulesetDto[];
     dependencies: DependencyDto[];
 }

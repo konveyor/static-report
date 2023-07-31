@@ -17,6 +17,9 @@ const AppEditIssues = lazy(
 const AppEditDependencies = lazy(
   () => import("./pages/application-details/pages/dependencies")
 );
+const AppTechnologies = lazy(
+  () => import("./pages/application-details/pages/technologies")
+);
 
 export type ApplicationRoute = {
   applicationId: string;
@@ -81,6 +84,10 @@ export const AppRoutes = () => {
         {
           Component: AppEditDependencies,
           path: "dependencies",
+        },
+        {
+          Component: AppTechnologies,
+          path: "technologies",
         },
       ],
     },

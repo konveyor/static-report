@@ -29,6 +29,8 @@ import { ConditionalRender, SimpleMarkdown } from "@app/shared/components";
 import { getMarkdown } from "@app/utils/utils";
 import { ViolationProcessed, FileProcessed } from "@app/models/api-enriched";
 
+const codeLineRegex = /^\s*([0-9]+)( {2})?(.*)$/;
+
 interface IFileEditorProps {
   file: FileProcessed;
   issue: ViolationProcessed;
@@ -42,13 +44,36 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
   issue,
   props,
 }) => {
-  const useFileQueryResult = useFileQuery(file.name);
+  const useFileQueryResult = useFileQuery(file.name, file.isLocal);
+  let fileContent = file.codeSnip || "";
+  let isLoading = false;
+  let absoluteToRelativeLineNum = (lineNum: number) => lineNum;
+  let relativeToAbsoluteLineNum = (lineNum: number) => lineNum;
+  if (file.isLocal) {
+    fileContent = useFileQueryResult.data;
+    isLoading = useFileQueryResult.isLoading;
+  } else {
+    const codeSnipNumberedLines = fileContent.split("\n");
+    const codeSnipTrimmedLines: string[] = [];
+    let codeSnipStartLine = 1;
+    codeSnipNumberedLines.forEach((numberedLine, index) => {
+      const match = numberedLine.match(codeLineRegex);
+      if (match && !isNaN(Number(match[1]))) {
+        const lineNum = Number(match[1]);
+        if (index === 0) codeSnipStartLine = lineNum;
+        const lineCode = match[3] || "";
+        codeSnipTrimmedLines.push(lineCode);
+      }
+    });
+    fileContent = codeSnipTrimmedLines.join("\n");
+    absoluteToRelativeLineNum = (lineNum: number) => lineNum - (codeSnipStartLine - 1);
+    relativeToAbsoluteLineNum = (lineNum: number) => lineNum + (codeSnipStartLine - 1);
+  }
+
   
   const filteredIncidents = useMemo(() => {
     return file.incidents.filter((i) => i.lineNumber && i.lineNumber !== 0)
   }, [file.incidents])
-
-  const fileContent = useMemo(() => useFileQueryResult.data, [useFileQueryResult.data]);
 
   // Editor
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor>();
@@ -119,8 +144,8 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
       .filter((inc) => inc.lineNumber && inc.lineNumber !== 0)
       ?.map((inc) => {
         const marker: monacoEditor.editor.IMarkerData = {
-          startLineNumber: inc.lineNumber,
-          endLineNumber: inc.lineNumber, 
+          startLineNumber: absoluteToRelativeLineNum(inc.lineNumber),
+          endLineNumber: absoluteToRelativeLineNum(inc.lineNumber), 
           startColumn: 0,
           endColumn: 1000,
           message: issue.description,
@@ -146,29 +171,11 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
     // Add markers
     addMarkers(monaco, file.incidents);
 
-    // Add code lenses
-    // const codeLens = addCodeLens(editor, monaco, hints);
-    // newDisposables.push(codeLens);
-
-    // Add delta decorations
-    // addDeltaDecorations(editor, monaco, hints);
-
     // Add hovers
     const hovers = addHover(monaco, file.incidents, issue.links);
     newDisposables = newDisposables.concat(hovers);
 
     setDisposables(newDisposables);
-
-    // const offset = 5;
-    // if (hintToFocus && hintToFocus.line) {
-    //   editor.revealLineNearTop(hintToFocus.line + offset);
-    // }
-    // if (lineToFocus) {
-    //   editor.revealLineNearTop(lineToFocus + offset);
-    // }
-
-    // Open warning programatically
-    // editor.trigger("anystring", `editor.action.marker.next`, "s");
 
     editorRef.current = editor;
     monacoRef.current = monaco;
@@ -216,12 +223,12 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
       >
         <DrawerContentBody>
           <ConditionalRender
-            when={useFileQueryResult.isLoading}
+            when={isLoading}
             then={<span>Loading...</span>}
           >
             <CodeEditor
               isDarkTheme
-              isLineNumbersVisible={file.isLocal ? true : false}
+              isLineNumbersVisible
               isReadOnly
               isMinimapVisible
               isLanguageLabelVisible
@@ -234,6 +241,8 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
                 glyphMargin: true,
                 "semanticHighlighting.enabled": true,
                 renderValidationDecorations: "on",
+                lineNumbers: (lineNum: number) => 
+                  String(relativeToAbsoluteLineNum(lineNum))
               }}
               onEditorDidMount={(
                 editor: monacoEditor.editor.IStandaloneCodeEditor,

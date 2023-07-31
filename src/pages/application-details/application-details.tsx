@@ -18,14 +18,14 @@ import {
   TextContent,
 } from "@patternfly/react-core";
 
-import { useApplicationsQuery } from "@app/queries/ruleset";
+import { useAllApplications } from "@app/queries/ruleset";
 
 export const ApplicationEdit: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const routeParams = useMatch("/applications/:applicationId/*");
 
-  const allApplicationsQuery = useApplicationsQuery();
+  const allApplicationsQuery = useAllApplications();
 
   const application = useMemo(() => {
     const applicationId = routeParams?.params.applicationId;

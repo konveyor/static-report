@@ -34,7 +34,7 @@ import { useDebounce } from "usehooks-ts";
 
 import { DependencyDto } from "@app/api/output";
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
-import { useApplicationsQuery } from "@app/queries/ruleset";
+import { useAllApplications } from "@app/queries/ruleset";
 import { SimpleTableWithToolbar, SimpleSelect, OptionWithValue } from "@app/shared/components";
 import { useTable, useTableControls, useToolbar } from "@app/shared/hooks";
 
@@ -127,7 +127,7 @@ export interface IDependenciesTableProps {
 export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
   applicationId,
 }) => {
-  const allApplicationsQuery = useApplicationsQuery();
+  const allApplicationsQuery = useAllApplications();
 
   // Filters
   const [filterText, setFilterText] = useState("");
@@ -153,13 +153,13 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
     }
     return (
       applicationId === ALL_APPLICATIONS_ID ? 
-      allApplicationsQuery.data?.flatMap((a) => a.dependencies) : 
+      allApplicationsQuery.data?.flatMap((a) => a.dependencies || []) : 
       allApplicationsQuery.data?.find((f) => f.id === applicationId)?.dependencies || []
     );
   }, [allApplicationsQuery.data, applicationId]);
 
   const allLabels: string[] = useMemo(() => {
-    return Array.from(new Set(dependencies.flatMap((d) => d.labels))).reduce((acc, label) => {
+    return Array.from(new Set(dependencies?.flatMap((d) => d.labels))).reduce((acc, label) => {
       return [
         ...acc,
         label.replace("konveyor.io/source=", "")

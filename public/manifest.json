@@ -1,6 +1,6 @@
 {
-  "short_name": "windup-ui",
-  "name": "Windup UI",
+  "short_name": "konveyor-analyzer-static-report",
+  "name": "Konveyor Analyzer Static Report",
   "icons": [
     {
       "src": "favicon.ico",

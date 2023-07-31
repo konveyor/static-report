@@ -36,7 +36,7 @@ import {
 
 import { capitalizeFirstLetter } from "@app/utils/utils"
 import { ApplicationProcessed } from "@app/models/api-enriched";
-import { useApplicationsQuery } from "@app/queries/ruleset";
+import { useAllApplications } from "@app/queries/ruleset";
 import { 
   SimpleTableWithToolbar,
   SimpleSelect 
@@ -106,7 +106,7 @@ export const ApplicationList: React.FC = () => {
     string
   >();
 
-  const applications = useApplicationsQuery();
+  const applications = useAllApplications();
 
   const allTags = useMemo(() => {
     const allTags = (applications.data || []).flatMap((f) => f.tagsFlat);

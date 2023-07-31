@@ -34,7 +34,7 @@ import { useDebounce } from "usehooks-ts";
 import { compareByCategoryFn } from "@app/api/output";
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
 import { FileProcessed, ViolationProcessed } from "@app/models/api-enriched";
-import { useApplicationsQuery } from "@app/queries/ruleset";
+import { useAllApplications } from "@app/queries/ruleset";
 import {
   SimpleTableWithToolbar,
   SimpleSelect,
@@ -155,7 +155,7 @@ export interface IViolationsTableProps {
 }
 
 export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId }) => {
-  const allApplications = useApplicationsQuery();
+  const allApplications = useAllApplications();
 
   // Filters
   const [filterText, setFilterText] = useState("");
@@ -646,7 +646,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
       </>
 
       <Modal
-        title={`File ${fileModalData?.file}`}
+        title={`File ${fileModalData?.file?.name || ""}`}
         isOpen={isFileModalOpen && fileModalAction === "showFile"}
         onClose={closeFileModal}
         variant="default"

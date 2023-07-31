@@ -1,7 +1,7 @@
 import { LinkDto } from "@app/api/output";
 
 export const getMarkdown = (body: string, links: LinkDto[]): string => {
-  const formattedLinks = links
+  const formattedLinks = (links || [])
     .map((link, index) => `${index + 1}. [${link.title}](${link.url})`)
     .join("\n");
   return [body, formattedLinks].join("\n");
