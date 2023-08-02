@@ -2,22 +2,17 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import {
-  Button,
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
   Label,
-  LabelGroup,
-  Modal,
   PageSection,
   PageSectionVariants,
   SearchInput,
   SelectVariant,
   Split,
   SplitItem,
-  Stack,
-  StackItem,
   Text,
   TextContent,
   ToolbarChip,
@@ -25,11 +20,8 @@ import {
   ToolbarFilter,
   ToolbarGroup,
   ToolbarItem,
-  Tooltip,
 } from "@patternfly/react-core";
-import ExpandIcon from "@patternfly/react-icons/dist/esm/icons/expand-icon";
 import FilterIcon from "@patternfly/react-icons/dist/esm/icons/filter-icon";
-import InfoCircleIcon from "@patternfly/react-icons/dist/esm/icons/info-circle-icon";
 import TagIcon from "@patternfly/react-icons/dist/esm/icons/tag-icon";
 import TaskIcon from "@patternfly/react-icons/dist/esm/icons/task-icon";
 import {
@@ -42,23 +34,19 @@ import {
   sortable,
 } from "@patternfly/react-table";
 
-import { ApplicationDto } from "@app/api/application";
+import { capitalizeFirstLetter } from "@app/utils/utils"
+import { ApplicationProcessed } from "@app/models/api-enriched";
+import { useAllApplications } from "@app/queries/report";
+import { 
+  SimpleTableWithToolbar,
+  SimpleSelect 
+} from "@app/shared/components";
 import {
-  compareByCategoryFn,
-  IssueCategoryType,
-  issueCategoryTypeBeautifier,
-} from "@app/api/issues";
-import { useApplicationsQuery } from "@app/queries/applications";
-import { useLabelsQuery } from "@app/queries/labels";
-import { SimpleTableWithToolbar, SimpleSelect } from "@app/shared/components";
-import {
-  useModal,
   useTable,
   useTableControls,
   useToolbar,
   useCellSelectionState,
 } from "@app/shared/hooks";
-import { RuntimeAssessment, evaluateRuntime } from "@app/utils/label-utils";
 
 import "./application-list.css";
 
@@ -72,10 +60,6 @@ const columnKeys: ColumnKey[] = Object.values(ColumnKey) as ColumnKey[];
 
 const columns: ICell[] = [
   { title: "Name", transforms: [cellWidth(30), sortable] },
-  {
-    title: "Runtime labels",
-    transforms: [cellWidth(40)],
-  },
   {
     title: "Tags",
     transforms: [cellWidth(10)],
@@ -95,8 +79,8 @@ const columns: ICell[] = [
 ];
 
 export const compareByColumnIndex = (
-  a: ApplicationDto,
-  b: ApplicationDto,
+  a: ApplicationProcessed,
+  b: ApplicationProcessed,
   columnIndex?: number
 ) => {
   switch (columnIndex) {
@@ -107,7 +91,7 @@ export const compareByColumnIndex = (
   }
 };
 
-const getRow = (rowData: IRowData): ApplicationDto => {
+const getRow = (rowData: IRowData): ApplicationProcessed => {
   return rowData[DataKey];
 };
 
@@ -116,39 +100,30 @@ const getColumn = (colIndex: number): ColumnKey => {
 };
 
 export const ApplicationList: React.FC = () => {
-  const applicationModal = useModal<
-    "showLabel",
-    { application: ApplicationDto; assessment: RuntimeAssessment }
-  >();
-
   const [filterText, setFilterText] = useState("");
   const { filters, setFilter, removeFilter, clearAllFilters } = useToolbar<
     "tag",
     string
   >();
 
-  const labels = useLabelsQuery();
-  const applications = useApplicationsQuery();
-  const tags = useMemo(() => {
-    const allTags = (applications.data || []).flatMap((f) => f.tags);
+  const applications = useAllApplications();
+
+  const allTags = useMemo(() => {
+    const allTags = (applications.data || []).flatMap((f) => f.tagsFlat);
     return Array.from(new Set(allTags)).sort((a, b) => a.localeCompare(b));
   }, [applications.data]);
 
-  const assessmentByApp = useMemo(() => {
-    const asssessmentsByApp: Map<string, RuntimeAssessment[]> = new Map();
-    if (applications.data && labels.data) {
-      applications.data.forEach((app) => {
-        const assessments = labels.data.map((label) => {
-          return evaluateRuntime(label, app.tags);
-        });
-        asssessmentsByApp.set(app.id, assessments);
-      });
-
-      return asssessmentsByApp;
-    } else {
-      return asssessmentsByApp;
-    }
-  }, [labels.data, applications.data]);
+  const issueByCategory: { [id: string]: { [cat: string]: number } } = useMemo(() => {
+    return (applications?.data || []).reduce((result, app) => {
+      const issueData = app.issues.reduce((acc, issue) => {
+        acc[issue.category] = acc[issue.category] || 0;
+        acc[issue.category] += issue.totalIncidents;
+        return acc;
+      }, {} as { [issueKey: string]: number });
+      result[app.id] = issueData;
+      return result;
+    }, {} as { [appId: string]: { [issueKey: string]: number } });
+  }, [applications.data])
 
   const {
     page: currentPage,
@@ -157,7 +132,7 @@ export const ApplicationList: React.FC = () => {
     changeSortBy: onChangeSortBy,
   } = useTableControls();
 
-  const { pageItems, filteredItems } = useTable<ApplicationDto>({
+  const { pageItems, filteredItems } = useTable<ApplicationProcessed>({
     items: applications.data || [],
     currentPage: currentPage,
     currentSortBy: currentSortBy,
@@ -173,7 +148,7 @@ export const ApplicationList: React.FC = () => {
       const selectedTags = filters.get("tag") || [];
       if (selectedTags.length > 0) {
         isTagFilterCompliant = selectedTags.some((f) =>
-          item.tags.some((t) => f === t)
+          item.tags.flatMap((t) => t.tag).some((t) => f === t)
         );
       }
 
@@ -187,7 +162,7 @@ export const ApplicationList: React.FC = () => {
       columns: columnKeys,
     });
 
-  const itemsToRow = (items: ApplicationDto[]) => {
+  const itemsToRow = (items: ApplicationProcessed[]) => {
     const rows: IRow[] = [];
     items.forEach((item) => {
       rows.push({
@@ -198,82 +173,13 @@ export const ApplicationList: React.FC = () => {
             title: (
               <>
                 <Link to={`/applications/${item.id}`}>{item.name}</Link>
-                {item.isVirtual && (
-                  <>
-                    {" "}
-                    <Tooltip
-                      content={
-                        <div>
-                          This groups all issues found in libraries included in
-                          multiple applications.
-                        </div>
-                      }
-                    >
-                      <Label isCompact color="blue" icon={<InfoCircleIcon />}>
-                        Shared libraries
-                      </Label>
-                    </Tooltip>
-                  </>
-                )}
               </>
             ),
           },
           {
             title: (
               <>
-                <Stack>
-                  {[...(assessmentByApp.get(item.id) || [])]
-                    .sort((a, b) =>
-                      a.targetRuntime.name.localeCompare(b.targetRuntime.name)
-                    )
-                    .map((assessment) => (
-                      <StackItem key={assessment.targetRuntime.name}>
-                        <Split>
-                          <SplitItem>
-                            <LabelGroup
-                              categoryName={assessment.assessmentResult}
-                            >
-                              <Label
-                                isCompact
-                                color={
-                                  assessment.assessmentResult === "Supported"
-                                    ? "green"
-                                    : assessment.assessmentResult ===
-                                      "Unsuitable"
-                                    ? "red"
-                                    : "grey"
-                                }
-                              >
-                                {assessment.targetRuntime.name}
-                              </Label>
-                            </LabelGroup>
-                          </SplitItem>
-                          <SplitItem>
-                            <Button
-                              variant="plain"
-                              aria-label="Details"
-                              isSmall
-                              onClick={() =>
-                                applicationModal.open("showLabel", {
-                                  application: item,
-                                  assessment: assessment,
-                                })
-                              }
-                            >
-                              <ExpandIcon />
-                            </Button>
-                          </SplitItem>
-                        </Split>
-                      </StackItem>
-                    ))}
-                </Stack>
-              </>
-            ),
-          },
-          {
-            title: (
-              <>
-                <TagIcon key="tags" /> {item.tags.length}
+                <TagIcon key="tags" /> {item.tagsFlat.length}
               </>
             ),
             props: {
@@ -284,7 +190,7 @@ export const ApplicationList: React.FC = () => {
             title: (
               <>
                 <TaskIcon key="incidents" />{" "}
-                {Object.values(item.incidents).reduce((a, b) => a + b, 0)}
+                {item.issues.reduce((total, violation) => total + violation.totalIncidents, 0)}
               </>
             ),
             props: {
@@ -292,7 +198,7 @@ export const ApplicationList: React.FC = () => {
             },
           },
           {
-            title: item.storyPoints,
+            title: item.issues.reduce((total, violation) => total + violation.totalEffort, 0),
           },
         ],
       });
@@ -301,14 +207,13 @@ export const ApplicationList: React.FC = () => {
 
       rows.push({
         parent: parentIndex,
-        compoundParent: 2,
+        compoundParent: 1,
         cells: [
           {
             title: (
               <div className="pf-u-m-lg">
                 <Split hasGutter isWrappable>
-                  {[...item.tags]
-                    .sort((a, b) => a.localeCompare(b))
+                  {item.tagsFlat
                     .map((e, index) => (
                       <SplitItem key={index}>
                         <Label isCompact>{e}</Label>
@@ -324,7 +229,7 @@ export const ApplicationList: React.FC = () => {
 
       rows.push({
         parent: parentIndex,
-        compoundParent: 3,
+        compoundParent: 2,
         cells: [
           {
             title: (
@@ -337,17 +242,14 @@ export const ApplicationList: React.FC = () => {
                     md: "20ch",
                   }}
                 >
-                  {Object.keys(item.incidents)
-                    .sort(compareByCategoryFn((e) => e as IssueCategoryType))
-                    .map((incident) => (
-                      <DescriptionListGroup key={incident}>
+                  {Object.entries(issueByCategory[item.id])
+                    .map(([cat, total], index) => (
+                      <DescriptionListGroup key={index}>
                         <DescriptionListTerm>
-                          {issueCategoryTypeBeautifier(
-                            incident as IssueCategoryType
-                          )}
+                          {capitalizeFirstLetter(cat)} issues
                         </DescriptionListTerm>
                         <DescriptionListDescription>
-                          {item.incidents[incident]}
+                          {total}
                         </DescriptionListDescription>
                       </DescriptionListGroup>
                     ))}
@@ -448,7 +350,7 @@ export const ApplicationList: React.FC = () => {
                     aria-labelledby="tag"
                     placeholderText="Tag"
                     value={filters.get("tag")}
-                    options={tags}
+                    options={allTags}
                     onChange={(option) => {
                       const optionValue = option as string;
 
@@ -477,90 +379,6 @@ export const ApplicationList: React.FC = () => {
             </>
           }
         />
-
-        <Modal
-          title="Runtime label details"
-          isOpen={applicationModal.isOpen}
-          onClose={applicationModal.close}
-          variant="medium"
-        >
-          <DescriptionList>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Application</DescriptionListTerm>
-              <DescriptionListDescription>
-                {applicationModal.data?.application.name}
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Runtime target</DescriptionListTerm>
-              <DescriptionListDescription>
-                {applicationModal.data?.assessment.targetRuntime.name}
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Assessment</DescriptionListTerm>
-              <DescriptionListDescription>
-                {applicationModal.data?.assessment.assessmentResult}
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-
-            <DescriptionListGroup>
-              <DescriptionListTerm>Unsuitable technologies</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Split hasGutter isWrappable>
-                  {[
-                    ...(applicationModal.data?.assessment
-                      .assessedUnsuitableTags || []),
-                  ]
-                    .sort((a, b) => a.localeCompare(b))
-                    .map((e, index) => (
-                      <SplitItem key={index}>
-                        <Label isCompact color="red">
-                          {e}
-                        </Label>
-                      </SplitItem>
-                    ))}
-                </Split>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Supported technologies</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Split hasGutter isWrappable>
-                  {[
-                    ...(applicationModal.data?.assessment
-                      .assessedSupportedTags || []),
-                  ]
-                    .sort((a, b) => a.localeCompare(b))
-                    .map((e, index) => (
-                      <SplitItem key={index}>
-                        <Label isCompact color="green">
-                          {e}
-                        </Label>
-                      </SplitItem>
-                    ))}
-                </Split>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-            <DescriptionListGroup>
-              <DescriptionListTerm>Neutral technologies</DescriptionListTerm>
-              <DescriptionListDescription>
-                <Split hasGutter isWrappable>
-                  {[
-                    ...(applicationModal.data?.assessment.assessedNeutralTags ||
-                      []),
-                  ]
-                    .sort((a, b) => a.localeCompare(b))
-                    .map((e, index) => (
-                      <SplitItem key={index}>
-                        <Label isCompact>{e}</Label>
-                      </SplitItem>
-                    ))}
-                </Split>
-              </DescriptionListDescription>
-            </DescriptionListGroup>
-          </DescriptionList>
-        </Modal>
       </PageSection>
     </>
   );

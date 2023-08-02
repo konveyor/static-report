@@ -28,21 +28,13 @@ export const useMockableQuery = <
 >(
   params: UseQueryOptions<TQueryFnData, TError, TData>,
   mockData: TQueryFnData,
-  offlineData: TQueryFnData
+  offlineData: TQueryFnData,
 ) => {
   return useQuery<TQueryFnData, TError, TData>({
     ...params,
     queryFn:
-      (process.env.REACT_APP_DATA_SOURCE !== "mock" &&
-        process.env.REACT_APP_DATA_SOURCE !== "offline") ||
-      (window as any)["WINDUP_SETTINGS"].forceOnline
-        ? params.queryFn
-        : () => {
-            return mockPromise(
-              process.env.REACT_APP_DATA_SOURCE === "offline"
-                ? offlineData
-                : mockData
-            );
-          },
+      (process.env.REACT_APP_DATA_SOURCE === "mock")
+        ? () => mockPromise(mockData)
+        : () => mockPromise(offlineData)
   });
 };

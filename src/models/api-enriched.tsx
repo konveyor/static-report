@@ -1,38 +1,40 @@
-import { IssueCategoryType, IssueDto } from "@app/api/issues";
-import { RuleDto } from "@app/api/rule";
-import { TechnologyGroup } from "@app/api/technologies";
+import { ViolationDto, ApplicationDto, IncidentDto, DependencyDto } from "@app/api/report";
 
-export interface ApplicationIssuesProcessed {
-  applicationId: string;
-  issues: IssueProcessed[];
+export interface ApplicationProcessed extends ApplicationDto {
+  issues: ViolationProcessed[];
+  dependencies: DependencyProcessed[];
+  tags: TagProcessed[];
+  tagsFlat: string[];
 }
 
-export interface IssueProcessed extends IssueDto {
-  category: IssueCategoryType;
+export interface TagProcessed {
+  tag: string;
+  category: string;
 }
 
-export interface RuleProcessed extends RuleDto {
-  phase: string;
+export interface ViolationProcessed extends ViolationDto {
+  id: string;
+  appID: string;
+  name: string;
+  ruleID: string;
+  rule: string;
+  totalIncidents: number;
+  totalEffort: number;
+  sourceTechnologies: string[];
+  targetTechnologies: string[];
+  files: FileProcessed[];
 }
 
-export interface TechnologyTagValue {
-  [tagName: string]: number;
+export interface FileProcessed {
+  name: string;
+  isLocal: boolean;
+  codeSnip?: string;
+  incidents: IncidentDto[];
 }
 
-export interface TechnologyValueProcessed {
-  total: number;
-  tags: TechnologyTagValue;
-}
-
-export interface TechnologyGroupValueProcessed {
-  [technologyName: string]: TechnologyValueProcessed;
-}
-
-export type TechnologyGroupsProcessed = {
-  [groupName in TechnologyGroup]: TechnologyGroupValueProcessed;
-};
-
-export interface ApplicationTechnologiesProcessed {
-  applicationId: string;
-  technologyGroups: TechnologyGroupsProcessed;
+export interface DependencyProcessed extends DependencyDto {
+  source: string;
+  language: string;
+  fileURI: string;
+  provider: string;
 }

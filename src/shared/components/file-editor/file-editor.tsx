@@ -1,10 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 
-import {
-  CodeEditor,
-  CodeEditorProps,
-  Language,
-} from "@patternfly/react-code-editor";
 import {
   Card,
   CardActions,
@@ -21,18 +16,26 @@ import {
   Text,
   TextContent,
 } from "@patternfly/react-core";
+
+import {
+  CodeEditor,
+  CodeEditorProps,
+  Language,
+} from "@patternfly/react-code-editor";
+
 import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
 
-import { FileDto, HintDto } from "@app/api/file";
-import { useFileQuery } from "@app/queries/files";
-import { useRulesQuery } from "@app/queries/rules";
+import { IncidentDto, LinkDto } from "@app/api/report";
+import { useFileQuery } from "@app/queries/report";
 import { ConditionalRender, SimpleMarkdown } from "@app/shared/components";
-import { getMarkdown } from "@app/utils/rule-utils";
+import { getMarkdown } from "@app/utils/utils";
+import { ViolationProcessed, FileProcessed } from "@app/models/api-enriched";
+
+const codeLineRegex = /^\s*([0-9]+)( {2})?(.*)$/;
 
 interface IFileEditorProps {
-  file: FileDto;
-  lineToFocus?: number;
-  hintToFocus?: HintDto;
+  file: FileProcessed;
+  issue: ViolationProcessed;
   props?: Partial<
     Omit<CodeEditorProps, "ref" | "code" | "options" | "onEditorDidMount">
   >;
@@ -40,12 +43,39 @@ interface IFileEditorProps {
 
 export const FileEditor: React.FC<IFileEditorProps> = ({
   file,
+  issue,
   props,
-  lineToFocus,
-  hintToFocus,
 }) => {
-  const allRules = useRulesQuery();
-  const fileContent = useFileQuery(file.id);
+  const useFileQueryResult = useFileQuery(file.name, issue.appID, file.isLocal);
+  let fileContent = file.codeSnip || "";
+  let isLoading = false;
+  let absoluteToRelativeLineNum = (lineNum: number) => lineNum;
+  let relativeToAbsoluteLineNum = (lineNum: number) => lineNum;
+  if (file.isLocal) {
+    fileContent = useFileQueryResult.data || "";
+    isLoading = useFileQueryResult.isLoading;
+  } else {
+    const codeSnipNumberedLines = fileContent.split("\n");
+    const codeSnipTrimmedLines: string[] = [];
+    let codeSnipStartLine = 1;
+    codeSnipNumberedLines.forEach((numberedLine, index) => {
+      const match = numberedLine.match(codeLineRegex);
+      if (match && !isNaN(Number(match[1]))) {
+        const lineNum = Number(match[1]);
+        if (index === 0) codeSnipStartLine = lineNum;
+        const lineCode = match[3] || "";
+        codeSnipTrimmedLines.push(lineCode);
+      }
+    });
+    fileContent = codeSnipTrimmedLines.join("\n");
+    absoluteToRelativeLineNum = (lineNum: number) => lineNum - (codeSnipStartLine - 1);
+    relativeToAbsoluteLineNum = (lineNum: number) => lineNum + (codeSnipStartLine - 1);
+  }
+
+  
+  const filteredIncidents = useMemo(() => {
+    return file.incidents.filter((i) => i.lineNumber && i.lineNumber !== 0)
+  }, [file.incidents])
 
   // Editor
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor>();
@@ -69,99 +99,34 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
 
   const drawerRef = React.useRef<any>();
   const [isDrawerExpanded, setIsDrawerExpanded] = useState(
-    hintToFocus ? true : false
+    filteredIncidents ? true : false
   );
-  const [drawerHint, setDrawerHint] = useState(hintToFocus);
   const onDrawerExpand = () => {
     drawerRef.current && drawerRef.current.focus();
   };
 
-  /**
-   * Adds the left Windup icon to the editor
-   */
-  const addDeltaDecorations = (
-    editor: monacoEditor.editor.IStandaloneCodeEditor,
-    monaco: typeof monacoEditor,
-    hints: HintDto[]
-  ) => {
-    const decorations = hints.map((hint) => {
-      const decoration = {
-        range: new monaco.Range(hint.line, 1, hint.line, 1),
-        options: {
-          isWholeLine: true,
-          glyphMarginClassName: "windupGlyphMargin",
-        },
-      };
-      return decoration;
-    });
-
-    editor.deltaDecorations([], decorations);
-  };
-
-  /**
-   * Adds actions on top of the line with a Hint
-   */
-  const addCodeLens = (
-    editor: monacoEditor.editor.IStandaloneCodeEditor,
-    monaco: typeof monacoEditor,
-    hints: HintDto[]
-  ) => {
-    const lenses = hints.map((hint) => {
-      const lense: monacoEditor.languages.CodeLens = {
-        range: new monaco.Range(hint.line!, 1, hint.line!, 1),
-        id: "view-hint",
-        command: {
-          title: "View Hint",
-          id: editor.addCommand(
-            0,
-            () => {
-              setDrawerHint(hint);
-              setIsDrawerExpanded(true);
-            },
-            ""
-          )!,
-        },
-      };
-      return lense;
-    });
-
-    const codeLens = monaco.languages.registerCodeLensProvider("*", {
-      provideCodeLenses: (model, token) => {
-        return {
-          lenses: lenses,
-          dispose: () => {
-            // codeLens.dispose();
-          },
-        };
-      },
-      resolveCodeLens: (model, codeLens, token) => {
-        return codeLens;
-      },
-    });
-
-    return codeLens;
-  };
+  const fileExtension = file?.name?.split('.')?.pop();
 
   /**
    * Adds a hover text to the hint line
    */
   const addHover = (
-    editor: monacoEditor.editor.IStandaloneCodeEditor,
     monaco: typeof monacoEditor,
-    hints: HintDto[]
+    incidents: IncidentDto[],
+    links: LinkDto[]
   ) => {
-    return hints.map((hint) => {
+    return incidents.map((inc) => {
       return monaco.languages.registerHoverProvider("*", {
         provideHover: (model, position) => {
-          if (position.lineNumber !== hint.line) {
+          if (position.lineNumber !== inc.lineNumber) {
             return undefined;
           }
 
           return {
-            range: new monaco.Range(hint.line!, 1, hint.line!, 1),
+            range: new monaco.Range(inc.lineNumber!, 1, inc.lineNumber!, 1),
             contents: [
               {
-                value: getMarkdown(hint.content, hint.links),
+                value: getMarkdown(inc.message, links),
               },
             ],
           };
@@ -174,23 +139,22 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
    * Underlines the hint line
    */
   const addMarkers = (
-    editor: monacoEditor.editor.IStandaloneCodeEditor,
     monaco: typeof monacoEditor,
-    hints: HintDto[]
+    incidents: IncidentDto[]
   ) => {
-    const markers = hints.map((hint) => {
-      const rule = allRules.data?.find((f) => f.id === hint.ruleId);
-      const marker: monacoEditor.editor.IMarkerData = {
-        startLineNumber: hint.line,
-        startColumn: 0,
-        endLineNumber: hint.line,
-        endColumn: 1000,
-        message: hint.content,
-        source: rule?.id,
-        severity: monaco.MarkerSeverity.Warning,
-      };
-      return marker;
-    });
+    const markers = incidents
+      .filter((inc) => inc.lineNumber && inc.lineNumber !== 0)
+      ?.map((inc) => {
+        const marker: monacoEditor.editor.IMarkerData = {
+          startLineNumber: absoluteToRelativeLineNum(inc.lineNumber),
+          endLineNumber: absoluteToRelativeLineNum(inc.lineNumber), 
+          startColumn: 0,
+          endColumn: 1000,
+          message: issue.description,
+          severity: monaco.MarkerSeverity.Warning,
+        }
+        return marker
+      })
 
     const model = monaco.editor.getModels()[0];
     monaco.editor.setModelMarkers(model, "*", markers);
@@ -204,35 +168,16 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
     editor.focus();
     monaco.editor.getModels()[0].updateOptions({ tabSize: 5 });
 
-    const hints = file?.hints || [];
     let newDisposables: monacoEditor.IDisposable[] = [];
 
     // Add markers
-    addMarkers(editor, monaco, file?.hints || []);
-
-    // Add code lenses
-    const codeLens = addCodeLens(editor, monaco, hints);
-    newDisposables.push(codeLens);
-
-    // Add delta decorations
-    addDeltaDecorations(editor, monaco, hints);
+    addMarkers(monaco, file.incidents);
 
     // Add hovers
-    const hovers = addHover(editor, monaco, hints);
+    const hovers = addHover(monaco, file.incidents, issue.links);
     newDisposables = newDisposables.concat(hovers);
 
     setDisposables(newDisposables);
-
-    const offset = 5;
-    if (hintToFocus && hintToFocus.line) {
-      editor.revealLineNearTop(hintToFocus.line + offset);
-    }
-    if (lineToFocus) {
-      editor.revealLineNearTop(lineToFocus + offset);
-    }
-
-    // Open warning programatically
-    // editor.trigger("anystring", `editor.action.marker.next`, "s");
 
     editorRef.current = editor;
     monacoRef.current = monaco;
@@ -259,17 +204,16 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
                   </CardActions>
                   <CardTitle>
                     <TextContent>
-                      <Text component="h1">{drawerHint?.title}</Text>
-                      <Text component="small">Line: {drawerHint?.line}</Text>
+                      <Text component="h1">{issue.name}</Text>
                     </TextContent>
                   </CardTitle>
                 </CardHeader>
                 <CardBody>
-                  {drawerHint && (
+                  {issue.description && (
                     <SimpleMarkdown
                       children={getMarkdown(
-                        drawerHint.content,
-                        drawerHint.links
+                        issue.description,
+                        issue.links,
                       )}
                     />
                   )}
@@ -281,7 +225,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
       >
         <DrawerContentBody>
           <ConditionalRender
-            when={fileContent.isLoading}
+            when={isLoading}
             then={<span>Loading...</span>}
           >
             <CodeEditor
@@ -290,15 +234,17 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
               isReadOnly
               isMinimapVisible
               isLanguageLabelVisible
-              isDownloadEnabled
-              code={fileContent.data?.content}
+              isDownloadEnabled={false}
+              code={fileContent ? fileContent: ""}
               language={Object.values(Language).find(
-                (l) => l === file.sourceType.toLowerCase()
+                (l) => l === fileExtension?.toLowerCase()
               )}
               options={{
                 glyphMargin: true,
                 "semanticHighlighting.enabled": true,
                 renderValidationDecorations: "on",
+                lineNumbers: (lineNum: number) => 
+                  String(relativeToAbsoluteLineNum(lineNum))
               }}
               onEditorDidMount={(
                 editor: monacoEditor.editor.IStandaloneCodeEditor,

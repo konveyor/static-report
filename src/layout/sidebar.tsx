@@ -28,7 +28,7 @@ export const SidebarApp: React.FC = () => {
           <NavLink
             to={
               !currentContext
-                ? "/issues"
+                ? "/issues/applications"
                 : "/issues/applications/" + currentContext.key
             }
             className={({ isActive }) =>
@@ -42,21 +42,7 @@ export const SidebarApp: React.FC = () => {
           <NavLink
             to={
               !currentContext
-                ? "/technologies"
-                : "/technologies/applications/" + currentContext.key
-            }
-            className={({ isActive }) =>
-              css("pf-c-nav__link", isActive ? "pf-m-current" : "")
-            }
-          >
-            Technologies
-          </NavLink>
-        </NavList>
-        <NavList>
-          <NavLink
-            to={
-              !currentContext
-                ? "/dependencies"
+                ? "/dependencies/applications"
                 : "/dependencies/applications/" + currentContext.key
             }
             className={({ isActive }) =>
@@ -64,16 +50,6 @@ export const SidebarApp: React.FC = () => {
             }
           >
             Dependencies
-          </NavLink>
-        </NavList>
-        <NavList>
-          <NavLink
-            to="/rules"
-            className={({ isActive }) =>
-              css("pf-c-nav__link", isActive ? "pf-m-current" : "")
-            }
-          >
-            Rules
           </NavLink>
         </NavList>
       </Nav>

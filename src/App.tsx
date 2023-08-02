@@ -4,15 +4,14 @@ import { HashRouter } from "react-router-dom";
 
 import { SimpleContextProvider } from "@app/context/simple-context";
 import { Theme } from "@app/layout/theme-constants";
-import { useApplicationsQuery } from "@app/queries/applications";
+import { useAllApplications } from "@app/queries/report";
 
 import { ALL_APPLICATIONS_ID } from "./Constants";
 import { DefaultLayout } from "./layout";
 import { AppRoutes } from "./Routes";
 
 const App: React.FC = () => {
-  const applications = useApplicationsQuery();
-
+  const applications = useAllApplications();
   useEffect(() => {
     document.title = Theme.name;
 
@@ -32,7 +31,6 @@ const App: React.FC = () => {
           },
         ].concat(
           (applications.data || [])
-            .filter((e) => !e.isVirtual)
             .map((e) => ({
               key: e.id,
               label: e.name,

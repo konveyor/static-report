@@ -14,7 +14,7 @@ import {
 
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
 import { Context, SimpleContextSelector } from "@app/context/simple-context";
-import { IssuesTable } from "@app/shared/components";
+import { ViolationsTable } from "@app/shared/components/violations-table";
 
 export const IssuesList: React.FC = () => {
   const matchIssuesPage = useMatch("/issues");
@@ -60,7 +60,7 @@ export const IssuesList: React.FC = () => {
         </TextContent>
       </PageSection>
       <PageSection variant={PageSectionVariants.default}>
-        <IssuesTable applicationId={applicationId} />
+        <ViolationsTable applicationId={applicationId} />
       </PageSection>
     </>
   );

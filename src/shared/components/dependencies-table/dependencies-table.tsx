@@ -1,20 +1,23 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
+
 
 import { useSelectionState } from "@migtools/lib-ui";
 import {
   Bullseye,
-  DescriptionList,
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
   EmptyState,
   EmptyStateBody,
   EmptyStateIcon,
-  List,
-  ListItem,
+  Label,
+  Split,
+  SplitItem,
+  SelectVariant,
   SearchInput,
   Title,
   ToolbarItem,
+  ToolbarChip,
+  ToolbarChipGroup,
+  ToolbarFilter,
+  ToolbarGroup,
 } from "@patternfly/react-core";
 import ArrowUpIcon from "@patternfly/react-icons/dist/esm/icons/arrow-up-icon";
 import {
@@ -26,17 +29,17 @@ import {
   sortable,
   truncate,
 } from "@patternfly/react-table";
+import { useDebounce } from "usehooks-ts";
 
 
-import { DependencyDto } from "@app/api/dependencies";
+import { DependencyDto } from "@app/api/report";
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
-import { useApplicationsQuery } from "@app/queries/applications";
-import { useDependenciesQuery } from "@app/queries/dependencies";
-import { SimpleTableWithToolbar } from "@app/shared/components";
-import { useTable, useTableControls } from "@app/shared/hooks";
+import { useAllApplications } from "@app/queries/report";
+import { SimpleTableWithToolbar, SimpleSelect, OptionWithValue } from "@app/shared/components";
+import { useTable, useTableControls, useToolbar } from "@app/shared/hooks";
 
 const areDependenciesEquals = (a: DependencyDto, b: DependencyDto) => {
-  return a.name === b.name && a.version === b.version && a.sha1 === b.sha1;
+  return a.name === b.name && a.version === b.version && a.resolvedIdentifier === b.resolvedIdentifier;
 };
 
 const DataKey = "DataKey";
@@ -44,12 +47,26 @@ const DataKey = "DataKey";
 const columns: ICell[] = [
   {
     title: "Name",
-    transforms: [cellWidth(100), sortable],
+    transforms: [cellWidth(50), sortable],
+    cellTransforms: [truncate],
+  },
+  {
+    title: "Labels",
+    transforms: [cellWidth(30)],
+  },
+  {
+    title: "Version",
+    transforms: [cellWidth(10)],
+    cellTransforms: [truncate],
+  },
+  {
+    title: "Relation",
+    transforms: [cellWidth(10), sortable],
     cellTransforms: [truncate],
   },
 ];
 
-const compareByColumnIndex = (
+const compareToByColumn = (
   a: DependencyDto,
   b: DependencyDto,
   columnIndex?: number
@@ -57,9 +74,46 @@ const compareByColumnIndex = (
   switch (columnIndex) {
     case 1: // name
       return a.name.localeCompare(b.name);
+    case 3: // version
+      return a.version === b.version ? 0 : 1
+    case 4: // indirect
+      return a.indirect === b.indirect ? 0 : 1
     default:
       return 0;
   }
+};
+
+const toOption = (option: string | ToolbarChip): OptionWithValue => {
+  if (typeof option === "string") {
+    const toStringFn = () => option;
+    return {
+      value: option,
+      toString: toStringFn,
+      compareTo: (other: string | OptionWithValue) => {
+        return typeof other === "string"
+          ? toStringFn().toLowerCase().includes(other.toLocaleLowerCase())
+          : option === other.value;
+      },
+    };
+  } else {
+    const toStringFn = () => option.node as string;
+    return {
+      value: option.key,
+      toString: toStringFn,
+      compareTo: (other: string | OptionWithValue) => {
+        return typeof other === "string"
+          ? toStringFn().toLowerCase().includes(other.toLowerCase())
+          : option.key === other.value;
+      },
+    };
+  }
+};
+
+const toToolbarChip = (option: OptionWithValue): ToolbarChip => {
+  return {
+    key: option.value,
+    node: option.toString(),
+  };
 };
 
 const getRow = (rowData: IRowData): DependencyDto => {
@@ -73,55 +127,43 @@ export interface IDependenciesTableProps {
 export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
   applicationId,
 }) => {
+  const allApplicationsQuery = useAllApplications();
+
   // Filters
   const [filterText, setFilterText] = useState("");
+  const { filters, setFilter, removeFilter, clearAllFilters } = useToolbar<
+    "labels" | "relationship",
+    ToolbarChip
+  >();
 
-  // Queries
-  const allApplicationsQuery = useApplicationsQuery();
-  const allDependenciesQuery = useDependenciesQuery();
+  const debouncedFilterText = useDebounce<string>(filterText, 250);
+  const debouncedFilters = useDebounce<
+    Map<
+      "labels" | "relationship",
+      ToolbarChip[]
+    >
+  >(filters, 100);
 
   const dependencies = useMemo(() => {
-    if (applicationId === ALL_APPLICATIONS_ID) {
-      return [...(allDependenciesQuery.data || [])]
-        .filter((e) => {
-          const application = allApplicationsQuery.data?.find(
-            (app) => app.id === e.applicationId
-          );
-          return !application?.isVirtual;
-        })
-        .flatMap((e) => e.dependencies)
-        .reduce((prev, current) => {
-          const duplicateDependency = prev.find((f) => {
-            return areDependenciesEquals(f, current);
-          });
-
-          if (duplicateDependency) {
-            return [
-              ...prev.filter((f) => !areDependenciesEquals(f, current)),
-              {
-                ...current,
-                foundPaths: [
-                  ...duplicateDependency.foundPaths,
-                  ...current.foundPaths,
-                ],
-              },
-            ];
-          } else {
-            return [...prev, current];
-          }
-        }, [] as DependencyDto[]);
-    } else {
-      return (
-        allDependenciesQuery.data?.find(
-          (f) => f.applicationId === applicationId
-        )?.dependencies || []
-      );
+    if (
+      !allApplicationsQuery.data ||
+      applicationId === undefined
+    ) {
+      return [];
     }
-  }, [allDependenciesQuery.data, allApplicationsQuery.data, applicationId]);
+    return (
+      applicationId === ALL_APPLICATIONS_ID ? 
+      allApplicationsQuery.data?.flatMap((a) => a.dependencies || []) : 
+      allApplicationsQuery.data?.find((f) => f.id === applicationId)?.dependencies || []
+    );
+  }, [allApplicationsQuery.data, applicationId]);
+
+  const allLabels: string[] = useMemo(() => {
+    return Array.from(new Set(dependencies?.flatMap((d) => d.labels)))
+  }, [dependencies])
 
   // Rows
   const {
-    isItemSelected: isRowExpanded,
     toggleItemSelected: toggleRowExpanded,
   } = useSelectionState<DependencyDto>({
     items: dependencies,
@@ -135,98 +177,80 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
     changeSortBy: onChangeSortBy,
   } = useTableControls();
 
-  const { pageItems, filteredItems } = useTable<DependencyDto>({
-    items: dependencies,
-    currentPage: currentPage,
-    currentSortBy: currentSortBy,
-    compareToByColumn: compareByColumnIndex,
-    filterItem: (item) => {
+  const filterItem = useCallback(
+    (item: DependencyDto) => {
       let isFilterTextFilterCompliant = true;
-      if (filterText && filterText.trim().length > 0) {
+      if (debouncedFilterText && debouncedFilterText.trim().length > 0) {
         isFilterTextFilterCompliant =
-          item.name.toLowerCase().indexOf(filterText.toLowerCase()) !== -1;
+          item.name.toLowerCase().indexOf(debouncedFilterText.toLowerCase()) !==
+          -1;
       }
 
-      return isFilterTextFilterCompliant;
+      let isLabelFilterCompliant = true;
+      const selectedLabels = debouncedFilters.get("labels") || [];
+      if (selectedLabels.length > 0) {
+        isLabelFilterCompliant = selectedLabels.some(
+          (f) => item.labels?.includes(f.key)
+        );
+      }
+
+      let isRelationshipFilterCompliant = true;
+      const selectedRelation = debouncedFilters.get("relationship") || [];
+      if (selectedRelation.length > 0) {
+        isLabelFilterCompliant = selectedRelation.some(
+          (f) => (f.key === "Direct" && !item.indirect) || (f.key === "Indirect" && item.indirect)
+        );
+      }
+
+      return (
+        isFilterTextFilterCompliant &&
+        isLabelFilterCompliant &&
+        isRelationshipFilterCompliant
+      );
     },
+    [debouncedFilterText, debouncedFilters]
+  );
+
+  const { pageItems, filteredItems } = useTable<DependencyDto>({
+    items: dependencies,
+    currentPage,
+    currentSortBy,
+    compareToByColumn,
+    filterItem,
   });
 
   const itemsToRow = (items: DependencyDto[]) => {
     const rows: IRow[] = [];
     items.forEach((item) => {
-      const isExpanded = isRowExpanded(item);
-
       rows.push({
         [DataKey]: item,
-        isOpen: isExpanded,
         cells: [
           {
             title: item.name,
           },
+          {
+            title: (
+              <>
+                <Split hasGutter>
+                  {item.labels?.map((label, index) => (
+                    <SplitItem key={index}>
+                      <Label isCompact color="blue">
+                        {label.replace("konveyor.io/source=", "")}
+                      </Label>
+                    </SplitItem>
+                  ))}
+                </Split>
+              </>
+            ),
+          },
+          {
+            title: item.version,
+          },
+          {
+            title: item.indirect ? "Indirect" : "Direct",
+          },
         ],
       });
-
-      // Expanded area
-      if (isExpanded) {
-        rows.push({
-          parent: rows.length - 1,
-          fullWidth: true,
-          cells: [
-            {
-              title: (
-                <div className="pf-u-m-md">
-                  <DescriptionList isHorizontal>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Maven URL</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        <a
-                          target="_blank"
-                          rel="noreferrer"
-                          href={`http://search.maven.org/?eh#search|ga|1|1:"${item.sha1}"`}
-                        >
-                          Maven Central Link
-                        </a>
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>SHA1 hash</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        {item.sha1}
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
-                    {item.version && (
-                      <DescriptionListGroup>
-                        <DescriptionListTerm>Version</DescriptionListTerm>
-                        <DescriptionListDescription>
-                          {item.version}
-                        </DescriptionListDescription>
-                      </DescriptionListGroup>
-                    )}
-                    {item.organization && (
-                      <DescriptionListGroup>
-                        <DescriptionListTerm>Organization</DescriptionListTerm>
-                        <DescriptionListDescription>
-                          {item.organization}
-                        </DescriptionListDescription>
-                      </DescriptionListGroup>
-                    )}
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Found at path</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        <List>
-                          {item.foundPaths.map((path, index) => (
-                            <ListItem key={index}>{path}</ListItem>
-                          ))}
-                        </List>
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
-                  </DescriptionList>
-                </div>
-              ),
-            },
-          ],
-        });
-      }
     });
 
     return rows;
@@ -277,11 +301,12 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
           cells={columns}
           actions={actions}
           // Fech data
-          isLoading={allDependenciesQuery.isFetching}
+          isLoading={allApplicationsQuery.isFetching}
           loadingVariant="skeleton"
-          fetchError={allDependenciesQuery.isError}
+          fetchError={allApplicationsQuery.isError}
           // Toolbar filters
           filtersApplied={filterText.trim().length > 0}
+          toolbarClearAllFilters={clearAllFilters}
           toolbarToggle={
             <>
               <ToolbarItem variant="search-filter">
@@ -291,6 +316,92 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
                   onClear={() => setFilterText("")}
                 />
               </ToolbarItem>
+              <ToolbarGroup variant="filter-group">
+                  <ToolbarFilter
+                    chips={filters.get("labels")}
+                    deleteChip={(
+                      category: string | ToolbarChipGroup,
+                      chip: ToolbarChip | string
+                    ) => removeFilter("labels", chip)}
+                    deleteChipGroup={() => setFilter("labels", [])}
+                    categoryName={{ key: "labels", name: "Labels" }}
+                  >
+                    <SimpleSelect
+                      maxHeight={300}
+                      variant={SelectVariant.checkbox}
+                      aria-label="labels"
+                      aria-labelledby="labels"
+                      placeholderText="Labels"
+                      value={filters.get("labels")?.map(toOption)}
+                      options={allLabels.map(toOption)}
+                      onChange={(option) => {
+                        const optionValue = option as OptionWithValue<string>;
+
+                        const elementExists = (
+                          filters.get("labels") || []
+                        ).some((f) => f.key === optionValue.value);
+                        let newElements: ToolbarChip[];
+                        if (elementExists) {
+                          newElements = (filters.get("labels") || []).filter(
+                            (f) => f.key !== optionValue.value
+                          );
+                        } else {
+                          newElements = [
+                            ...(filters.get("labels") || []),
+                            toToolbarChip(optionValue),
+                          ];
+                        }
+
+                        setFilter("labels", newElements);
+                      }}
+                      hasInlineFilter
+                      onClear={() => setFilter("labels", [])}
+                    />
+                  </ToolbarFilter>
+                </ToolbarGroup>
+                <ToolbarGroup variant="filter-group">
+                  <ToolbarFilter
+                    chips={filters.get("relationship")}
+                    deleteChip={(
+                      category: string | ToolbarChipGroup,
+                      chip: ToolbarChip | string
+                    ) => removeFilter("relationship", chip)}
+                    deleteChipGroup={() => setFilter("relationship", [])}
+                    categoryName={{ key: "relationship", name: "Relation" }}
+                  >
+                    <SimpleSelect
+                      maxHeight={300}
+                      variant={SelectVariant.checkbox}
+                      aria-label="relationship"
+                      aria-labelledby="relationship"
+                      placeholderText="Relation"
+                      value={filters.get("relationship")?.map(toOption)}
+                      options={["Direct", "Indirect"].map(toOption)}
+                      onChange={(option) => {
+                        const optionValue = option as OptionWithValue<string>;
+
+                        const elementExists = (
+                          filters.get("relationship") || []
+                        ).some((f) => f.key === optionValue.value);
+                        let newElements: ToolbarChip[];
+                        if (elementExists) {
+                          newElements = (filters.get("relationship") || []).filter(
+                            (f) => f.key !== optionValue.value
+                          );
+                        } else {
+                          newElements = [
+                            ...(filters.get("relationship") || []),
+                            toToolbarChip(optionValue),
+                          ];
+                        }
+
+                        setFilter("relationship", newElements);
+                      }}
+                      hasInlineFilter
+                      onClear={() => setFilter("relationship", [])}
+                    />
+                  </ToolbarFilter>
+                </ToolbarGroup>
             </>
           }
         />
