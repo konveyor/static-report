@@ -4,7 +4,7 @@ import { HashRouter } from "react-router-dom";
 
 import { SimpleContextProvider } from "@app/context/simple-context";
 import { Theme } from "@app/layout/theme-constants";
-import { useAllApplications } from "@app/queries/ruleset";
+import { useAllApplications } from "@app/queries/report";
 
 import { ALL_APPLICATIONS_ID } from "./Constants";
 import { DefaultLayout } from "./layout";

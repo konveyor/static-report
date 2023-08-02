@@ -18,7 +18,7 @@ import {
   TextContent,
 } from "@patternfly/react-core";
 
-import { useAllApplications } from "@app/queries/ruleset";
+import { useAllApplications } from "@app/queries/report";
 
 export const ApplicationEdit: React.FC = () => {
   const navigate = useNavigate();

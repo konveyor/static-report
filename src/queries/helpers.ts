@@ -1,6 +1,4 @@
-import axios from "axios";
-import yaml from "js-yaml";
-import { UseQueryOptions, useQuery, useQueries } from "@tanstack/react-query";
+import { UseQueryOptions, useQuery } from "@tanstack/react-query";
 
 const defaultTimeout =
   process.env.REACT_APP_DATA_SOURCE_TIMEOUT !== undefined
@@ -30,37 +28,13 @@ export const useMockableQuery = <
 >(
   params: UseQueryOptions<TQueryFnData, TError, TData>,
   mockData: TQueryFnData,
+  offlineData: TQueryFnData,
 ) => {
   return useQuery<TQueryFnData, TError, TData>({
     ...params,
     queryFn:
       (process.env.REACT_APP_DATA_SOURCE === "mock")
-        ? () => {
-          return mockPromise(mockData);
-        }
-        : params.queryFn,
+        ? () => mockPromise(mockData)
+        : () => mockPromise(offlineData)
   });
 };
-
-export const useMockableQueries = (
-  params: UseQueryOptions[],
-  mockData: any[],
-) => {
-  const queries  = params.map((p, idx) => {
-    return {
-      ...p,
-      queryFn:       
-      (process.env.REACT_APP_DATA_SOURCE === "mock")
-        ? () => {
-          return mockPromise(mockData[idx]);
-        }
-        : p.queryFn,
-    }
-  });
-  return useQueries({queries});
-}
-
-export const fetchYaml = async<T=any> (url:string): Promise<T> => {
-  const response = await axios.get<string>(url)
-  return yaml.load(response.data) as T
-}

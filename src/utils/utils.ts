@@ -1,4 +1,4 @@
-import { LinkDto } from "@app/api/output";
+import { LinkDto } from "@app/api/report";
 
 export const getMarkdown = (body: string, links: LinkDto[]): string => {
   const formattedLinks = (links || [])

@@ -23,8 +23,8 @@ import {
 } from "@patternfly/react-core";
 import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
 
-import { IncidentDto, LinkDto } from "@app/api/output";
-import { useFileQuery } from "@app/queries/ruleset";
+import { IncidentDto, LinkDto } from "@app/api/report";
+import { useFileQuery } from "@app/queries/report";
 import { ConditionalRender, SimpleMarkdown } from "@app/shared/components";
 import { getMarkdown } from "@app/utils/utils";
 import { ViolationProcessed, FileProcessed } from "@app/models/api-enriched";
@@ -44,13 +44,13 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
   issue,
   props,
 }) => {
-  const useFileQueryResult = useFileQuery(file.name, file.isLocal);
+  const useFileQueryResult = useFileQuery(file.name, issue.appID, file.isLocal);
   let fileContent = file.codeSnip || "";
   let isLoading = false;
   let absoluteToRelativeLineNum = (lineNum: number) => lineNum;
   let relativeToAbsoluteLineNum = (lineNum: number) => lineNum;
   if (file.isLocal) {
-    fileContent = useFileQueryResult.data;
+    fileContent = useFileQueryResult.data || "";
     isLoading = useFileQueryResult.isLoading;
   } else {
     const codeSnipNumberedLines = fileContent.split("\n");

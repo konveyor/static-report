@@ -36,7 +36,7 @@ import {
 
 import { capitalizeFirstLetter } from "@app/utils/utils"
 import { ApplicationProcessed } from "@app/models/api-enriched";
-import { useAllApplications } from "@app/queries/ruleset";
+import { useAllApplications } from "@app/queries/report";
 import { 
   SimpleTableWithToolbar,
   SimpleSelect 

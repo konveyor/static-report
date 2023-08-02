@@ -32,9 +32,9 @@ import {
 import { useDebounce } from "usehooks-ts";
 
 
-import { DependencyDto } from "@app/api/output";
+import { DependencyDto } from "@app/api/report";
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
-import { useAllApplications } from "@app/queries/ruleset";
+import { useAllApplications } from "@app/queries/report";
 import { SimpleTableWithToolbar, SimpleSelect, OptionWithValue } from "@app/shared/components";
 import { useTable, useTableControls, useToolbar } from "@app/shared/hooks";
 
@@ -159,12 +159,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
   }, [allApplicationsQuery.data, applicationId]);
 
   const allLabels: string[] = useMemo(() => {
-    return Array.from(new Set(dependencies?.flatMap((d) => d.labels))).reduce((acc, label) => {
-      return [
-        ...acc,
-        label.replace("konveyor.io/source=", "")
-      ]
-    }, [] as string[])
+    return Array.from(new Set(dependencies?.flatMap((d) => d.labels)))
   }, [dependencies])
 
   // Rows
@@ -182,7 +177,6 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
     changeSortBy: onChangeSortBy,
   } = useTableControls();
 
-
   const filterItem = useCallback(
     (item: DependencyDto) => {
       let isFilterTextFilterCompliant = true;
@@ -196,7 +190,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
       const selectedLabels = debouncedFilters.get("labels") || [];
       if (selectedLabels.length > 0) {
         isLabelFilterCompliant = selectedLabels.some(
-          (f) => item.labels.flatMap((l) => l.replace("konveyor.io/source=", ""))?.includes(f.key)
+          (f) => item.labels?.includes(f.key)
         );
       }
 

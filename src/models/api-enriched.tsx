@@ -1,7 +1,8 @@
-import { ViolationDto, ApplicationDto, IncidentDto } from "@app/api/output";
+import { ViolationDto, ApplicationDto, IncidentDto, DependencyDto } from "@app/api/report";
 
 export interface ApplicationProcessed extends ApplicationDto {
   issues: ViolationProcessed[];
+  dependencies: DependencyProcessed[];
   tags: TagProcessed[];
   tagsFlat: string[];
 }
@@ -29,4 +30,11 @@ export interface FileProcessed {
   isLocal: boolean;
   codeSnip?: string;
   incidents: IncidentDto[];
+}
+
+export interface DependencyProcessed extends DependencyDto {
+  source: string;
+  language: string;
+  fileURI: string;
+  provider: string;
 }
