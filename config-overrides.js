@@ -16,5 +16,14 @@ module.exports = function override(config, env) {
       "@app": path.resolve(__dirname, "src/"),
     },
   };
+
+  const miniCssExtractPlugin = config.plugins.find(
+    (plugin) => plugin.constructor.name === 'MiniCssExtractPlugin'
+  );
+
+  if (miniCssExtractPlugin) {
+    // add ignoreOrder: true option
+    miniCssExtractPlugin.options.ignoreOrder = true;
+  }
   return config;
 };
