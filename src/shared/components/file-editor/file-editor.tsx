@@ -1,11 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 
 import {
-  CodeEditor,
-  CodeEditorProps,
-  Language,
-} from "@patternfly/react-code-editor";
-import {
   Card,
   CardActions,
   CardBody,
@@ -21,6 +16,13 @@ import {
   Text,
   TextContent,
 } from "@patternfly/react-core";
+
+import {
+  CodeEditor,
+  CodeEditorProps,
+  Language,
+} from "@patternfly/react-code-editor";
+
 import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
 
 import { IncidentDto, LinkDto } from "@app/api/report";
