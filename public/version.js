@@ -1,1 +1,1 @@
-window.windupVersion = "${project.version}";
+window.version = "${project.version}";
