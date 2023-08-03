@@ -1,1 +1,1 @@
-window["WINDUP_THEME"] = "windup";
+window["THEME"] = "konveyor";

@@ -8,12 +8,3 @@
   border-left: var(--pf-c-select__toggle--before--BorderLeftWidth) solid
     var(--pf-c-select__toggle--before--BorderLeftColor) !important;
 }
-
-.windupGlyphMargin {
-  /* background: url("./images/windup.png") no-repeat; */
-  display: block;
-  background-image: url("./images/windup.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  left: 19px;
-}

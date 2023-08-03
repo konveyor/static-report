@@ -1,0 +1,12 @@
+node_modules/
+build/
+.project
+.classpath
+.settings/
+bin/
+.idea
+*.ipr
+*.iml
+*.iws
+.vscode
+.factorypath

@@ -10,7 +10,6 @@ import {
   ListItem,
   TextContent,
 } from "@patternfly/react-core";
-import BookOpenIcon from "@patternfly/react-icons/dist/esm/icons/book-open-icon";
 import EnvelopeIcon from "@patternfly/react-icons/dist/esm/icons/envelope-icon";
 import GithubIcon from "@patternfly/react-icons/dist/esm/icons/github-icon";
 import GlobeIcon from "@patternfly/react-icons/dist/esm/icons/globe-icon";
@@ -18,7 +17,7 @@ import InfoAltIcon from "@patternfly/react-icons/dist/esm/icons/info-alt-icon";
 
 import { Theme } from "./theme-constants";
 
-const WINDUP_VERSION = (window as any)["windupVersion"];
+const VERSION = (window as any)["version"];
 
 interface IButtonAboutAppProps {
   isOpen: boolean;
@@ -54,7 +53,7 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
           <GridItem lg={7}>
             <span className="dt">Version</span>
           </GridItem>
-          <GridItem lg={5}>{WINDUP_VERSION}</GridItem>
+          <GridItem lg={5}>{VERSION}</GridItem>
         </Grid>
       </TextContent>
       <TextContent className="pf-u-py-xl">
@@ -84,7 +83,7 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
         <Flex>
           <FlexItem>
             <a
-              href="https://github.com/windup/windup"
+              href={Theme.sourceURL}
               rel="noopener noreferrer"
               target="_blank"
             >
@@ -96,19 +95,7 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
           </FlexItem>
           <FlexItem>
             <a
-              href="https://github.com/windup/windup/wiki"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <i>
-                <BookOpenIcon />
-              </i>{" "}
-              Wiki
-            </a>
-          </FlexItem>
-          <FlexItem>
-            <a
-              href="https://developer.jboss.org/en/windup?view=discussions"
+              href={Theme.discussionForumURL}
               rel="noopener noreferrer"
               target="_blank"
             >
@@ -120,7 +107,7 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
           </FlexItem>
           <FlexItem>
             <a
-              href="https://lists.jboss.org/mailman/listinfo/windup-dev"
+              href={Theme.mailingListURL}
               rel="noopener noreferrer"
               target="_blank"
             >
@@ -132,7 +119,7 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
           </FlexItem>
           <FlexItem>
             <a
-              href="https://issues.jboss.org/browse/WINDUP"
+              href={Theme.issueTrackingURL}
               rel="noopener noreferrer"
               target="_blank"
             >
