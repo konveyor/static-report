@@ -29,13 +29,13 @@ import {
   useTableControls
 } from "@app/shared/hooks"
 
-import { FileProcessed, ViolationProcessed } from "@app/models/api-enriched";
+import { FileProcessed, IssueProcessed } from "@app/models/api-enriched";
 import { SimpleMarkdown } from "@app/shared/components";
 import { getMarkdown } from "@app/utils/utils";
 
 interface IIssueOverviewProps {
-  issue: ViolationProcessed;
-  onShowFile: (file: FileProcessed, issue: ViolationProcessed) => void;
+  issue: IssueProcessed;
+  onShowFile: (file: FileProcessed, issue: IssueProcessed) => void;
 }
 
 const DataKey = "DataKey"

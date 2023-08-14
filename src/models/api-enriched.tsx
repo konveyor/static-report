@@ -1,7 +1,7 @@
 import { ViolationDto, ApplicationDto, IncidentDto, DependencyDto } from "@app/api/report";
 
 export interface ApplicationProcessed extends ApplicationDto {
-  issues: ViolationProcessed[];
+  issues: IssueProcessed[];
   dependencies: DependencyProcessed[];
   tags: TagProcessed[];
   tagsFlat: string[];
@@ -12,7 +12,7 @@ export interface TagProcessed {
   category: string;
 }
 
-export interface ViolationProcessed extends ViolationDto {
+export interface IssueProcessed extends ViolationDto {
   id: string;
   appID: string;
   name: string;

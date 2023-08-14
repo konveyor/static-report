@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { AxiosError } from "axios";
 
 import { ApplicationDto, IncidentDto, ViolationDto } from "@app/api/report";
-import { ApplicationProcessed, DependencyProcessed, FileProcessed, TagProcessed, ViolationProcessed } from "@app/models/api-enriched";
+import { ApplicationProcessed, DependencyProcessed, FileProcessed, TagProcessed, IssueProcessed } from "@app/models/api-enriched";
 
 import { useMockableQuery } from "./helpers";
 import { MOCK_APPS } from "./mocks/report.mock";
@@ -28,7 +28,7 @@ export const useAllApplications = () => {
   const transformApplications = useCallback(
     (data: ApplicationDto[]): ApplicationProcessed[] =>
       data.map((a) => {
-        const issues: ViolationProcessed[] = a?.rulesets?.flatMap((rs) => {
+        const issues: IssueProcessed[] = a?.rulesets?.flatMap((rs) => {
           const allViolations = rs.violations || {}
           return Object.keys(allViolations).map((ruleID) => {
             const violation: ViolationDto = rs.violations[ruleID];
@@ -78,7 +78,7 @@ export const useAllApplications = () => {
               return acc
             }, [] as FileProcessed[])
             
-            const violationProcessed: ViolationProcessed = {
+            const violationProcessed: IssueProcessed = {
               ...violation,
               id: a.id + rs.name + ruleID,
               rule: "",
