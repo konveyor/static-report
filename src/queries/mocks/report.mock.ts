@@ -35,7 +35,7 @@ if (
             effort: 1,
             incidents: [
                 {
-                    uri: "file://test-files/file1.java",
+                    uri: "konveyor-jdt://contents/home/pranav/.m2/repository/io/konveyor/demo/config-utils/1.0.0/config-utils-1.0.0.jar?packageName=io.konveyor.demo.config.ApplicationConfiguration.class\u0026source-range=true",
                     message: "Test message",
                     lineNumber: 13,
                     codeSnip: "",

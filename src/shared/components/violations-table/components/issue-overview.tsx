@@ -113,7 +113,7 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
             title: <>
               <FileLink
                 file={item.name}
-                defaultText={item.name}
+                defaultText={item.displayName}
                 onClick={() =>
                   onShowFile(
                     item,
