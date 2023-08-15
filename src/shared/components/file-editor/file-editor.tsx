@@ -46,12 +46,12 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
   issue,
   props,
 }) => {
-  const useFileQueryResult = useFileQuery(file.name, issue.appID, file.isLocal);
+  const useFileQueryResult = useFileQuery(file.name, issue.appID, file.isFound);
   let fileContent = file.codeSnip || "";
   let isLoading = false;
   let absoluteToRelativeLineNum = (lineNum: number) => lineNum;
   let relativeToAbsoluteLineNum = (lineNum: number) => lineNum;
-  if (file.isLocal) {
+  if (file.isFound) {
     fileContent = useFileQueryResult.data || "";
     isLoading = useFileQueryResult.isLoading;
   } else {

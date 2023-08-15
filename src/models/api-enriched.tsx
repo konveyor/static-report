@@ -1,6 +1,5 @@
 import { 
   IncidentDto,
-  DependencyDto,
   LinkDto
 } from "@app/api/report";
 
@@ -20,7 +19,6 @@ export interface TagProcessed {
 
 export interface IssueProcessed {
   id: string;
-  rule: string;
   appID: string;
   ruleID: string;
   name: string;
@@ -38,16 +36,21 @@ export interface IssueProcessed {
 export interface FileProcessed {
   displayName: string;
   name: string;
-  isLocal: boolean;
+  isFound: boolean;
   codeSnip?: string;
   incidents: IncidentDto[];
 }
 
-export interface DependencyProcessed extends DependencyDto {
+export interface DependencyProcessed {
   source: string;
   language: string;
-  fileURI: string;
   provider: string;
+  sha: string;
+  name: string;
+  version: string;
+  indirect: boolean;
+  labels: string[];
+  fileURIPrefix: string;
 }
 
 export const ISSUE_CATEGORIES = [
