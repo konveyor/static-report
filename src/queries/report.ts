@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { AxiosError } from "axios";
 
-import { ApplicationDto, IncidentDto, ViolationDto } from "@app/api/report";
+import { ReportDto, IncidentDto, ViolationDto } from "@app/api/report";
 import { ApplicationProcessed, DependencyProcessed, FileProcessed, TagProcessed, IssueProcessed, IssueCatType } from "@app/models/api-enriched";
 
 import { useMockableQuery } from "./helpers";
@@ -9,11 +9,11 @@ import { MOCK_APPS } from "./mocks/report.mock";
 
 
 export const useFileQuery = (uri: string, appId: string, enabled: boolean) => {
-  const getFile = useCallback((apps: ApplicationDto[]): string => 
+  const getFile = useCallback((apps: ReportDto[]): string => 
     apps.find((a) => a.id === appId)?.files[uri] || ""
    , [uri, appId]);
 
-  return useMockableQuery<ApplicationDto[], AxiosError, string>(
+  return useMockableQuery<ReportDto[], AxiosError, string>(
     {
       queryKey: ["apps", uri],
       select: getFile,
@@ -26,7 +26,7 @@ export const useFileQuery = (uri: string, appId: string, enabled: boolean) => {
 
 export const useAllApplications = () => {
   const transformApplications = useCallback(
-    (data: ApplicationDto[]): ApplicationProcessed[] =>
+    (data: ReportDto[]): ApplicationProcessed[] =>
       data.map((a) => {
         const issues: IssueProcessed[] = a?.rulesets?.flatMap((rs) => {
           const allViolations = rs.violations || {}
@@ -138,7 +138,7 @@ export const useAllApplications = () => {
         return appProcessed;
   }), []);
 
-  return useMockableQuery<ApplicationDto[], AxiosError, ApplicationProcessed[]>(
+  return useMockableQuery<ReportDto[], AxiosError, ApplicationProcessed[]>(
     {
       queryKey: ["apps"],
       select: transformApplications,

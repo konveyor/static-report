@@ -1,11 +1,12 @@
 import { 
-  ApplicationDto,
   IncidentDto,
   DependencyDto,
   LinkDto
 } from "@app/api/report";
 
-export interface ApplicationProcessed extends ApplicationDto {
+export interface ApplicationProcessed {
+  id: string;
+  name: string;
   issues: IssueProcessed[];
   dependencies: DependencyProcessed[];
   tags: TagProcessed[];

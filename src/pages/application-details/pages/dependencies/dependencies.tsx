@@ -3,11 +3,11 @@ import { useOutletContext } from "react-router-dom";
 
 import { PageSection } from "@patternfly/react-core";
 
-import { ApplicationDto } from "@app/api/report";
+import { ReportDto } from "@app/api/report";
 import { DependenciesTable } from "@app/shared/components";
 
 export const Dependencies: React.FC = () => {
-  const application = useOutletContext<ApplicationDto | null>();
+  const application = useOutletContext<ReportDto | null>();
 
   return (
     <PageSection>

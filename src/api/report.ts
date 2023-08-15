@@ -1,4 +1,4 @@
-export interface ApplicationDto {
+export interface ReportDto {
     id: string;
     name: string;
     rulesets: RulesetDto[];

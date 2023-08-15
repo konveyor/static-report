@@ -1,6 +1,6 @@
-import { RulesetDto, ApplicationDto, DependencyDto, DependencyItemDto, FileDto } from "@app/api/report";
+import { RulesetDto, ReportDto, DependencyDto, DependencyItemDto, FileDto } from "@app/api/report";
 import { ISSUE_CATEGORIES } from "@app/models/api-enriched";
-export let MOCK_APPS: ApplicationDto[];
+export let MOCK_APPS: ReportDto[];
 
 export let MOCK_RULESETS: RulesetDto[];
 
@@ -243,7 +243,7 @@ public T get() {
 }`,
 }
 
-  const app1: ApplicationDto = {
+  const app1: ReportDto = {
     id: "01",
     name: "app-01",
     rulesets: [rs1, rs2],
@@ -251,7 +251,7 @@ public T get() {
     files,
   }
 
-  const app2: ApplicationDto = {
+  const app2: ReportDto = {
     id: "02",
     name: "app-02",
     rulesets: [rs1, rs2],
