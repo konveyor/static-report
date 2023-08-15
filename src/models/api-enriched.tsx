@@ -26,6 +26,7 @@ export interface ViolationProcessed extends ViolationDto {
 }
 
 export interface FileProcessed {
+  displayName: string;
   name: string;
   isLocal: boolean;
   codeSnip?: string;

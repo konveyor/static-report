@@ -54,11 +54,19 @@ export const useAllApplications = () => {
             
             const files: FileProcessed[] = Object.entries(allFiles).reduce<FileProcessed[]>((acc, [name, incidents]) => {
               const isLocal: boolean = name.startsWith("file://")
+              const displayName: string = name.replace(/^.*[\\/]/, '')
               if (isLocal) {
-                acc = [...acc, { name, isLocal, incidents } ]
+                acc = [...acc, { displayName, name, isLocal, incidents } ]
               } else {
+                const packageNameRegex = /packageName=(.*)?&/;
+                const match = displayName.match(packageNameRegex);
+                let packageName = "";
+                if (match && match[1]) {
+                  packageName = match[1]
+                }
                 const depIncidents: FileProcessed[] = incidents.flatMap((i) => {
                   return {
+                    displayName: packageName || displayName,
                     name,
                     isLocal,
                     codeSnip: i.codeSnip,
