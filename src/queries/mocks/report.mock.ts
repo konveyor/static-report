@@ -1,5 +1,5 @@
-import { RulesetDto, ISSUE_CATEGORIES, ApplicationDto, DependencyDto, DependencyItemDto, FileDto } from "@app/api/report";
-
+import { RulesetDto, ApplicationDto, DependencyDto, DependencyItemDto, FileDto } from "@app/api/report";
+import { ISSUE_CATEGORIES } from "@app/models/api-enriched";
 export let MOCK_APPS: ApplicationDto[];
 
 export let MOCK_RULESETS: RulesetDto[];

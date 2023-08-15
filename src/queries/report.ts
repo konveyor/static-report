@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { AxiosError } from "axios";
 
 import { ApplicationDto, IncidentDto, ViolationDto } from "@app/api/report";
-import { ApplicationProcessed, DependencyProcessed, FileProcessed, TagProcessed, IssueProcessed } from "@app/models/api-enriched";
+import { ApplicationProcessed, DependencyProcessed, FileProcessed, TagProcessed, IssueProcessed, IssueCatType } from "@app/models/api-enriched";
 
 import { useMockableQuery } from "./helpers";
 import { MOCK_APPS } from "./mocks/report.mock";
@@ -80,6 +80,7 @@ export const useAllApplications = () => {
             
             const violationProcessed: IssueProcessed = {
               ...violation,
+              category: violation.category as IssueCatType,
               id: a.id + rs.name + ruleID,
               rule: "",
               appID: a.id,

@@ -17,7 +17,7 @@ export interface RulesetDto {
 
 export interface ViolationDto {
     description: string;
-    category: IssueCatType;
+    category: string;
     labels: string[];
     incidents: IncidentDto[];
     links: LinkDto[];
@@ -58,46 +58,3 @@ export interface FileDto {
   [filename: string]: string;
 }
 
-export const ISSUE_CATEGORIES = [
-    "mandatory",
-    "optional",
-    "potential", 
-] as const;
-
-export type IssueCatType = typeof ISSUE_CATEGORIES[number];
-
-const getCategoryPriority = (category: IssueCatType) => {
-    switch (category) {
-      case "mandatory":
-        return 1;
-      case "optional":
-        return 2;
-      case "potential":
-        return 3;
-      default:
-        return 0;
-    }
-};
-
-export function compareByCategoryFn<T>(
-    categoryExtractor: (elem: T) => IssueCatType
-) {
-    return (a: T, b: T) => {
-      return (
-        getCategoryPriority(categoryExtractor(a)) -
-        getCategoryPriority(categoryExtractor(b))
-      );
-    };
-}
-  
-export function compareByCategoryAndNameFn<T>(
-    categoryFn: (elem: T) => IssueCatType,
-    nameFn: (elem: T) => string
-) {
-    return (a: T, b: T) => {
-      return (
-        getCategoryPriority(categoryFn(a)) - getCategoryPriority(categoryFn(b)) ||
-        nameFn(a).localeCompare(nameFn(b))
-      );
-    };
-}

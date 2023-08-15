@@ -31,7 +31,7 @@ import {
 } from "@patternfly/react-table";
 import { useDebounce } from "usehooks-ts";
 
-import { compareByCategoryFn } from "@app/api/report";
+import { compareByCategoryFn } from "@app/models/api-enriched";
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
 import { FileProcessed, IssueProcessed } from "@app/models/api-enriched";
 import { useAllApplications } from "@app/queries/report";
