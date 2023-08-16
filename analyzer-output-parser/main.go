@@ -6,33 +6,30 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 	"text/template"
 
 	"github.com/konveyor/analyzer-lsp/output/v1/konveyor"
-	"github.com/konveyor/analyzer-lsp/provider"
 	"go.lsp.dev/uri"
 	"gopkg.in/yaml.v2"
 )
 
 type Application struct {
-	Id         string
-	Name       string
-	SourcePath string
-	Rulesets   []konveyor.RuleSet
-	DepItems   []konveyor.DepsFlatItem
-	Files      map[string]string
+	Id       string                  `yaml:"id" json:"id"`
+	Name     string                  `yaml:"name" json:"name"`
+	Rulesets []konveyor.RuleSet      `yaml:"rulesets" json:"rulesets"`
+	DepItems []konveyor.DepsFlatItem `yaml:"depItems" json:"depItems"`
+	Files    map[string]string       `yaml:"files" json:"files"`
 
-	analysisPath         string
-	depsPath             string
-	providerSettingsPath string
+	analysisPath string `yaml:"-" json:"-"`
+	depsPath     string `yaml:"-" json:"-"`
 }
 
 var (
-	analysisOutputPaths   = flag.String("analysis-output-list", "", "comma separated list of output files for multiple analyses")
-	depsOutputPaths       = flag.String("deps-output-list", "", "comma separated list of depedency output files for multiple dep analyses")
-	providerSettingsPaths = flag.String("provider-settings-list", "", "comma separated list of provider settings files used for multiple analyses")
+	analysisOutputPaths = flag.String("analysis-output-list", "", "comma separated list of output files for multiple analyses")
+	depsOutputPaths     = flag.String("deps-output-list", "", "comma separated list of depedency output files for multiple dep analyses")
+	outputPath          = flag.String("output-path", "output.js", "full path to output file to generate")
+	names               = flag.String("application-name-list", "", "comma separated list of names to display in the report")
 )
 
 var applications []*Application
@@ -42,52 +39,46 @@ func main() {
 
 	err := validateFlags()
 	if err != nil {
-		log.Fatal("failed to validate flags", err)
+		log.Fatalln("failed to validate flags", err)
 	}
 
 	err = loadApplications()
 	if err != nil {
-		log.Fatal("failed to load provider settings", err)
+		log.Fatalln("failed to load provider settings", err)
 	}
 
 	err = generateJSBundle(applications)
 	if err != nil {
-		log.Fatal("failed to generate output.js file from template", err)
+		log.Fatalln("failed to generate output.js file from template", err)
 	}
 }
 
 func validateFlags() error {
 	if analysisOutputPaths == nil || *analysisOutputPaths == "" {
-		return fmt.Errorf("analysis-output is required")
+		return fmt.Errorf("analysis-output-list is required")
 	}
-	if providerSettingsPaths == nil || *providerSettingsPaths == "" {
-		return fmt.Errorf("provider-settings is required")
+	if names == nil || *names == "" {
+		return fmt.Errorf("application-name-list is required")
 	}
 	if depsOutputPaths == nil || *depsOutputPaths == "" {
 		log.Println("dependency output path not provided, only parsing analysis output")
 	}
-
 	analysisPaths := strings.Split(*analysisOutputPaths, ",")
 	depPaths := strings.Split(*depsOutputPaths, ",")
-	settingsPaths := strings.Split(*providerSettingsPaths, ",")
-
-	if len(settingsPaths) != len(analysisPaths) {
-		return fmt.Errorf("exactly as much analysis output paths must be specified as there are provider settings")
-	}
-
-	for idx, settingsPath := range settingsPaths {
+	appNames := strings.Split(*names, ",")
+	for idx, analysisPath := range analysisPaths {
 		currApp := &Application{
-			Id:                   fmt.Sprintf("%04d", idx),
-			Rulesets:             make([]konveyor.RuleSet, 0),
-			DepItems:             make([]konveyor.DepsFlatItem, 0),
-			Files:                make(map[string]string),
-			providerSettingsPath: settingsPath,
-		}
-		if len(analysisPaths) >= idx {
-			currApp.analysisPath = analysisPaths[idx]
+			Id:           fmt.Sprintf("%04d", idx),
+			Rulesets:     make([]konveyor.RuleSet, 0),
+			DepItems:     make([]konveyor.DepsFlatItem, 0),
+			Files:        make(map[string]string),
+			analysisPath: strings.Trim(analysisPath, " "),
 		}
 		if len(depPaths) >= idx {
 			currApp.depsPath = depPaths[idx]
+		}
+		if len(appNames) >= idx {
+			currApp.Name = strings.Trim(appNames[idx], " ")
 		}
 		applications = append(applications, currApp)
 	}
@@ -98,75 +89,42 @@ func validateFlags() error {
 // loadApplications loads applications from provider config
 func loadApplications() error {
 	for _, app := range applications {
-		content, err := os.ReadFile(app.providerSettingsPath)
+		analysisReport, err := os.ReadFile(app.analysisPath)
 		if err != nil {
 			return err
 		}
-
-		configs := []provider.Config{}
-		err = yaml.Unmarshal(content, &configs)
+		err = yaml.Unmarshal(analysisReport, &app.Rulesets)
 		if err != nil {
 			return err
 		}
+		if app.depsPath != "" {
+			depsReport, err := os.ReadFile(app.depsPath)
+			if err != nil {
+				return err
+			}
 
-		sourcePaths := map[string]interface{}{}
-		for _, config := range configs {
-			for _, initConfig := range config.InitConfig {
-				if _, found := sourcePaths[initConfig.Location]; !found {
-					sourcePaths[initConfig.Location] = nil
-				}
+			err = yaml.Unmarshal(depsReport, &app.DepItems)
+			if err != nil {
+				return err
 			}
 		}
-
-		for path := range sourcePaths {
-			app.SourcePath = path
-			app.Name = filepath.Base(path)
-		}
-
-		loadOutputs(app)
-	}
-	return nil
-}
-
-func loadOutputs(app *Application) error {
-	analysisReport, err := os.ReadFile(app.analysisPath)
-	if err != nil {
-		return err
-	}
-
-	err = yaml.Unmarshal(analysisReport, &app.Rulesets)
-	if err != nil {
-		return err
-	}
-
-	if app.depsPath != "" {
-		depsReport, err := os.ReadFile(app.depsPath)
-		if err != nil {
-			return err
-		}
-
-		err = yaml.Unmarshal(depsReport, &app.DepItems)
-		if err != nil {
-			return err
-		}
-	}
-
-	for _, rs := range app.Rulesets {
-		for key, violation := range rs.Violations {
-			violation.Extras = []byte("null")
-			rs.Violations[key] = violation
-			for _, inc := range violation.Incidents {
-				if _, err := uri.Parse(string(inc.URI)); err == nil {
-					content, err := os.ReadFile(inc.URI.Filename())
-					if err != nil {
-						continue
+		for _, rs := range app.Rulesets {
+			for key, violation := range rs.Violations {
+				violation.Extras = []byte("null")
+				rs.Violations[key] = violation
+				for _, inc := range violation.Incidents {
+					if _, err := uri.Parse(string(inc.URI)); err == nil {
+						content, err := os.ReadFile(inc.URI.Filename())
+						if err != nil {
+							log.Println("failed reading file")
+							continue
+						}
+						app.Files[string(inc.URI)] = string(content)
 					}
-					app.Files[string(inc.URI)] = string(content)
 				}
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -179,9 +137,9 @@ func generateJSBundle(apps []*Application) error {
 	tmpl := template.Must(template.New("").Parse(`
 window["apps"] = {{.Apps}}
 `))
-	file, err := os.Create("output.js")
+	file, err := os.Create(*outputPath)
 	if err != nil {
-		log.Fatal("failed to create output.js file", err)
+		log.Fatal("failed to create JS output bundle", err)
 	}
 	defer file.Close()
 	err = tmpl.Execute(file, struct {
