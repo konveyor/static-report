@@ -74,7 +74,7 @@ func validateFlags() error {
 			Files:        make(map[string]string),
 			analysisPath: strings.Trim(analysisPath, " "),
 		}
-		if len(depPaths) >= idx {
+		if len(depPaths) > idx {
 			currApp.depsPath = depPaths[idx]
 		}
 		if len(appNames) >= idx {
