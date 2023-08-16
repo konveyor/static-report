@@ -1,9 +1,11 @@
-export interface ApplicationDto {
+export interface ReportDto {
     id: string;
     name: string;
-    rulesets: RulesetDto[];
     files: FileDto;
-    depItems: DependencyItemDto[];
+    rulesets?: RulesetDto[];
+    depItems?: DependencyItemDto[];
+    issues?: IssueDto[];
+    dependencies?: DependencyDto[];
 }
 
 export interface RulesetDto {
@@ -11,13 +13,16 @@ export interface RulesetDto {
     description: string;
     tags: string[];
     violations: {
-        [key: string]: ViolationDto;
+        [key: string]: IssueDto;
     }
 }
 
-export interface ViolationDto {
+export interface IssueDto {
+    ruleset?: string;
+    rule?: string;
+    name?: string;
     description: string;
-    category: IssueCatType;
+    category: string;
     labels: string[];
     incidents: IncidentDto[];
     links: LinkDto[];
@@ -25,7 +30,8 @@ export interface ViolationDto {
 }
 
 export interface IncidentDto {
-    uri: string;
+    uri?: string;
+    file?: string;
     message: string;
     codeSnip: string;
     lineNumber: number;
@@ -46,10 +52,12 @@ export interface DependencyItemDto {
 }
 
 export interface DependencyDto {
+  provider?: string;
+  resolvedIdentifier?: string;
+  sha?: string;
   name: string;
   version: string;
   indirect: boolean;
-  resolvedIdentifier: string;
   labels: string[];
   fileURIPrefix: string;
 }
@@ -58,46 +66,3 @@ export interface FileDto {
   [filename: string]: string;
 }
 
-export const ISSUE_CATEGORIES = [
-    "mandatory",
-    "optional",
-    "potential", 
-] as const;
-
-export type IssueCatType = typeof ISSUE_CATEGORIES[number];
-
-const getCategoryPriority = (category: IssueCatType) => {
-    switch (category) {
-      case "mandatory":
-        return 1;
-      case "optional":
-        return 2;
-      case "potential":
-        return 3;
-      default:
-        return 0;
-    }
-};
-
-export function compareByCategoryFn<T>(
-    categoryExtractor: (elem: T) => IssueCatType
-) {
-    return (a: T, b: T) => {
-      return (
-        getCategoryPriority(categoryExtractor(a)) -
-        getCategoryPriority(categoryExtractor(b))
-      );
-    };
-}
-  
-export function compareByCategoryAndNameFn<T>(
-    categoryFn: (elem: T) => IssueCatType,
-    nameFn: (elem: T) => string
-) {
-    return (a: T, b: T) => {
-      return (
-        getCategoryPriority(categoryFn(a)) - getCategoryPriority(categoryFn(b)) ||
-        nameFn(a).localeCompare(nameFn(b))
-      );
-    };
-}

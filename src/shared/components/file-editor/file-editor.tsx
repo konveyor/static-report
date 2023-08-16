@@ -29,13 +29,13 @@ import { IncidentDto, LinkDto } from "@app/api/report";
 import { useFileQuery } from "@app/queries/report";
 import { ConditionalRender, SimpleMarkdown } from "@app/shared/components";
 import { getMarkdown } from "@app/utils/utils";
-import { ViolationProcessed, FileProcessed } from "@app/models/api-enriched";
+import { IssueProcessed, FileProcessed } from "@app/models/api-enriched";
 
 const codeLineRegex = /^\s*([0-9]+)( {2})?(.*)$/;
 
 interface IFileEditorProps {
   file: FileProcessed;
-  issue: ViolationProcessed;
+  issue: IssueProcessed;
   props?: Partial<
     Omit<CodeEditorProps, "ref" | "code" | "options" | "onEditorDidMount">
   >;
@@ -46,12 +46,12 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
   issue,
   props,
 }) => {
-  const useFileQueryResult = useFileQuery(file.name, issue.appID, file.isLocal);
+  const useFileQueryResult = useFileQuery(file.name, issue.appID, file.isFound);
   let fileContent = file.codeSnip || "";
   let isLoading = false;
   let absoluteToRelativeLineNum = (lineNum: number) => lineNum;
   let relativeToAbsoluteLineNum = (lineNum: number) => lineNum;
-  if (file.isLocal) {
+  if (file.isFound) {
     fileContent = useFileQueryResult.data || "";
     isLoading = useFileQueryResult.isLoading;
   } else {

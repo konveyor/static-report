@@ -31,9 +31,9 @@ import {
 } from "@patternfly/react-table";
 import { useDebounce } from "usehooks-ts";
 
-import { compareByCategoryFn } from "@app/api/report";
+import { compareByCategoryFn } from "@app/models/api-enriched";
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
-import { FileProcessed, ViolationProcessed } from "@app/models/api-enriched";
+import { FileProcessed, IssueProcessed } from "@app/models/api-enriched";
 import { useAllApplications } from "@app/queries/report";
 import {
   SimpleTableWithToolbar,
@@ -50,7 +50,7 @@ import {
 
 import { IssueOverview } from "./components/issue-overview";
 
-export interface TableData extends ViolationProcessed {}
+export interface TableData extends IssueProcessed {}
 
 const areRowsEquals = (a: TableData, b: TableData) => {
   return a.id === b.id;
@@ -125,8 +125,8 @@ const columns: ICell[] = [
 ];
 
 export const compareByColumnIndex = (
-  a: ViolationProcessed,
-  b: ViolationProcessed,
+  a: IssueProcessed,
+  b: IssueProcessed,
   columnIndex?: number
 ) => {
   switch (columnIndex) {
@@ -147,7 +147,7 @@ const getRow = (rowData: IRowData): TableData => {
 
 interface SelectedFile {
   file: FileProcessed;
-  issue: ViolationProcessed;
+  issue: IssueProcessed;
 }
 
 export interface IViolationsTableProps {

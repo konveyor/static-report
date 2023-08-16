@@ -28,7 +28,7 @@ import {
   ISSUE_CATEGORIES,
   IssueCatType,
   compareByCategoryFn,
-} from "@app/api/report";
+} from "@app/models/api-enriched";
 import { ApplicationProcessed } from "@app/models/api-enriched";
 
 interface IncidentsData {
