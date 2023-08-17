@@ -28,6 +28,7 @@ import {
   cellWidth,
   sortable,
   truncate,
+  wrappable,
 } from "@patternfly/react-table";
 import { useDebounce } from "usehooks-ts";
 
@@ -104,10 +105,12 @@ const columns: ICell[] = [
   {
     title: "Source",
     transforms: [cellWidth(10)],
+    cellTransforms: [wrappable],
   },
   {
     title: "Target",
     transforms: [cellWidth(10)],
+    cellTransforms: [wrappable],
   },
   {
     title: "Effort",

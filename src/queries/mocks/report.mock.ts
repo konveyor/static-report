@@ -126,10 +126,13 @@ if (
             ],
         },
         "rule-002": {
-            description: "Test Rule 002\nTest description",
+            description: "An issue with a really long description that doesn't quite fit in the cell\nTest description",
             category: ISSUE_CATEGORIES[1],
             labels: [
-                "konveyor.io/target=tgt-1",
+                "konveyor.io/target=really-long-target-name",
+                "konveyor.io/target=really-long-target-name-2",
+                "konveyor.io/target=really-long-target-name-3",
+                "konveyor.io/target=really-long-target-name-4",
                 "konveyor.io/target=tgt-2",
                 "test-label1",
             ],
