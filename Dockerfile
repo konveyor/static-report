@@ -7,8 +7,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o js-bundle-generator ./main
 
 FROM registry.access.redhat.com/ubi9/nodejs-18:latest as builder
 WORKDIR /static-report
-USER 1001
-COPY --chown=1001 . .
 RUN npm clean-install && CI=true PUBLIC_URL=. npm run build
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal
