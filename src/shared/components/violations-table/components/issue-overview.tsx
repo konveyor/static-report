@@ -12,6 +12,10 @@ import {
   Truncate,
   ToolbarItem,
   SearchInput,
+  CardHeader,
+  CardTitle,
+  Text,
+  TextContent
 } from "@patternfly/react-core";
 
 import {
@@ -43,12 +47,12 @@ const DataKey = "DataKey"
 const columns: ICell[] = [
   {
     title: "File",
-    transforms: [cellWidth(90), sortable],
+    transforms: [cellWidth(80), sortable],
     cellTransforms: [],
   },
   {
     title: "Total incidents",
-    transforms: [cellWidth(10)],
+    transforms: [cellWidth(20)],
   },
 ]
 
@@ -167,6 +171,15 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
             </GridItem>
             <GridItem md={7}>
               <Card isCompact isFullHeight>
+                <CardHeader>
+                    <CardTitle>
+                    <TextContent>
+                      <>
+                        <Text component="h2">{issue.ruleID}</Text>
+                      </>
+                    </TextContent>
+                    </CardTitle>
+                </CardHeader>
                 <CardBody>
                   <SimpleMarkdown
                     children={getMarkdown(

@@ -22,3 +22,5 @@ LABEL name="konveyor/static-report" \
       license="Apache License 2.0" \
       summary="Static report for Konveyor analysis modules" \
       url="https://quay.io/konveyor/static-report"
+
+ENTRYPOINT ["js-bundle-generator"]

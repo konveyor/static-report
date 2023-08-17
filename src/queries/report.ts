@@ -39,9 +39,10 @@ export const useFileQuery = (uri: string, appId: string, enabled: boolean) => {
 }
 
 const filterLabelsWithPrefix = (labels: string[], prefix: string): string[] => {
-  return labels
-  .filter(s => s.startsWith(prefix))
-  .map(s => s.slice(s.indexOf("=")+1))
+  return Array.from(
+    new Set(labels
+      .filter(s => s.startsWith(prefix))
+      .map(s => s.slice(s.indexOf("=")+1))))
 }
 
 // converts violations from analyzer output to IssueProcessed[]
@@ -62,7 +63,7 @@ const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: Rules
         return acc
       }, {});
       const files: FileProcessed[] = Object.entries(allFiles).reduce<FileProcessed[]>((acc, [name, incidents]) => {
-        const isFound: boolean = files ? ( filesRaw[name] ? true : false) : false;
+        const isFound: boolean = filesRaw ? ( filesRaw[name] ? true : false) : false;
         const displayName: string = name.replace(/^.*[\\/]/, '')
         if (isFound) {
           acc = [...acc, { displayName, name, isFound, incidents } ]
