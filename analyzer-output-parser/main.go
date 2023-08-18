@@ -60,11 +60,13 @@ func validateFlags() error {
 	if names == nil || *names == "" {
 		return fmt.Errorf("application-name-list is required")
 	}
+	depPaths := []string{}
 	if depsOutputPaths == nil || *depsOutputPaths == "" {
 		log.Println("dependency output path not provided, only parsing analysis output")
+	} else {
+		depPaths = strings.Split(*depsOutputPaths, ",")
 	}
 	analysisPaths := strings.Split(*analysisOutputPaths, ",")
-	depPaths := strings.Split(*depsOutputPaths, ",")
 	appNames := strings.Split(*names, ",")
 	for idx, analysisPath := range analysisPaths {
 		currApp := &Application{
@@ -77,7 +79,7 @@ func validateFlags() error {
 		if len(depPaths) > idx {
 			currApp.depsPath = depPaths[idx]
 		}
-		if len(appNames) >= idx {
+		if len(appNames) > idx {
 			currApp.Name = strings.Trim(appNames[idx], " ")
 		}
 		applications = append(applications, currApp)
@@ -116,7 +118,6 @@ func loadApplications() error {
 					if _, err := uri.Parse(string(inc.URI)); err == nil {
 						content, err := os.ReadFile(inc.URI.Filename())
 						if err != nil {
-							log.Println("failed reading file")
 							continue
 						}
 						app.Files[string(inc.URI)] = string(content)
