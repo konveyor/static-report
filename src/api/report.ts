@@ -6,6 +6,7 @@ export interface ReportDto {
     depItems?: DependencyItemDto[];
     issues?: IssueDto[];
     dependencies?: DependencyDto[];
+    tags?: TagDto[];
 }
 
 export interface RulesetDto {
@@ -66,3 +67,7 @@ export interface FileDto {
   [filename: string]: string;
 }
 
+export interface TagDto {
+    tag: string;
+    category: string;
+}

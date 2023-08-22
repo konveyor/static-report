@@ -18,12 +18,14 @@ import InfoAltIcon from "@patternfly/react-icons/dist/esm/icons/info-alt-icon";
 import { TableComposable, Tbody, Td, Tr } from "@patternfly/react-table";
 
 
-import { ApplicationProcessed, TagProcessed } from "@app/models/api-enriched";
+import { ApplicationProcessed } from "@app/models/api-enriched";
+
+import { TagDto } from "@app/api/report";
 
 export const Technologies: React.FC = () => {
   const application = useOutletContext<ApplicationProcessed | null>();
 
-  const allTags: TagProcessed[] = useMemo(() => application?.tags || [], [application])
+  const allTags: TagDto[] = useMemo(() => application?.tags || [], [application])
 
   const tagsByCategory: {[key: string]: string[]} = allTags.reduce<{[key: string]: string[]}>((acc, tag) => {
     acc[tag.category] = acc[tag.category] ? [...acc[tag.category], tag.tag] : [tag.tag];

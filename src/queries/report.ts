@@ -7,13 +7,13 @@ import {
   IssueDto,
   RulesetDto,
   FileDto,
-  DependencyDto
+  DependencyDto,
+  TagDto
 } from "@app/api/report";
 import { 
   ApplicationProcessed,
   DependencyProcessed,
   FileProcessed,
-  TagProcessed,
   IssueProcessed,
   IssueCatType
 } from "@app/models/api-enriched";
@@ -108,7 +108,7 @@ const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: Rules
 // transforms issues from hub report into IssueProcessed[]
 const issuesFromIssuesDto = (appID: string, issues: IssueDto[]): IssueProcessed[] => {
   return issues?.flatMap((issue) => {
-    const totalIncidents: number = issue.incidents.length;
+    const totalIncidents: number = issue.incidents?.length;
     const totalEffort: number = issue.effort * totalIncidents;
     const name: string = issue.description?.split("\n")[0];
     const sourceTechnologies: string[] = filterLabelsWithPrefix(issue.labels, "konveyor.io/source=");
@@ -160,6 +160,21 @@ const dependenciesFromDependencyDto = (deps: DependencyDto[]): DependencyProcess
   }) || [] as DependencyProcessed[];
 }
 
+// transforms tags from analyzer into TagDto[]
+const tagsFromRulesetsDto = (rulesets: RulesetDto[]): TagDto[] => {
+  return (rulesets || []).flatMap((rs) =>
+    (rs.tags || []).flatMap((tagStr) => {
+      if (tagStr.includes("=")) {
+        const [category, values] = tagStr.split('=');
+        return !values ?
+          [] : values.split(',').map(value => ({tag: value, category}))
+      } else {
+        return (tagStr && tagStr !== "") ? [{ tag: tagStr, category: "Uncategorized"}] : []
+      }
+    })
+  );
+}
+
 export const useAllApplications = () => {
   const transformApplications = useCallback(
     (data: ReportDto[]): ApplicationProcessed[] =>
@@ -168,20 +183,12 @@ export const useAllApplications = () => {
           issuesFromRulesetsDto(a.id, a.files, a.rulesets) : 
           (a.issues ? issuesFromIssuesDto(a.id, a.issues) : [] as IssueProcessed[]);
 
+        const tags: TagDto[] = a.rulesets ?
+          tagsFromRulesetsDto(a.rulesets) :
+            (a.tags || [] as TagDto[]);
 
-        const tags: TagProcessed[] = (a.rulesets || []).flatMap((rs) =>
-          (rs.tags || []).flatMap((tagStr) => {
-            if (tagStr.includes("=")) {
-              const [category, values] = tagStr.split('=');
-              return !values ?
-                [] : values.split(',').map(value => ({tag: value, category}))
-            } else {
-              return (tagStr && tagStr !== "") ? [{ tag: tagStr, category: "Uncategorized"}] : []
-            }
-          })
-        );
-
-        const tagsFlat: string[] = Array.from(new Set(tags.flatMap((t) => t.tag))).sort((a, b) => a.localeCompare(b)) || [];
+        const tagsFlat: string[] = Array.from(
+          new Set(tags.flatMap((t) => t.tag))).sort((a, b) => a.localeCompare(b)) || [];
 
         const depsDto: DependencyDto[] = a.depItems ? 
           a.depItems.flatMap((item) => {

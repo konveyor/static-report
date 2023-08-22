@@ -1,6 +1,7 @@
 import { 
   IncidentDto,
-  LinkDto
+  LinkDto,
+  TagDto
 } from "@app/api/report";
 
 export interface ApplicationProcessed {
@@ -8,13 +9,8 @@ export interface ApplicationProcessed {
   name: string;
   issues: IssueProcessed[];
   dependencies: DependencyProcessed[];
-  tags: TagProcessed[];
+  tags: TagDto[];
   tagsFlat: string[];
-}
-
-export interface TagProcessed {
-  tag: string;
-  category: string;
 }
 
 export interface IssueProcessed {
