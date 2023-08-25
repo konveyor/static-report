@@ -602,12 +602,14 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                             <div className="pf-v5-u-m-sm">
                               <IssueOverview
                                 issue={item}
-                                onShowFile={(file, issue) =>
+                                onShowFile={(file, issue) => {
                                   openFileModal("showFile", {
                                     file,
                                     issue,
                                   })
+                                  setSelectedFile(file)
                                 }
+                              }
                               />
                             </div>
                           </Td>
