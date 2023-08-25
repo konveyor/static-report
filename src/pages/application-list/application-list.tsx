@@ -10,36 +10,41 @@ import {
   PageSection,
   PageSectionVariants,
   SearchInput,
-  SelectVariant,
   Split,
   SplitItem,
   Text,
   TextContent,
+  Toolbar,
   ToolbarChip,
   ToolbarChipGroup,
+  ToolbarContent,
   ToolbarFilter,
   ToolbarGroup,
   ToolbarItem,
+  ToolbarItemVariant,
+  ToolbarToggleGroup,
 } from "@patternfly/react-core";
 import FilterIcon from "@patternfly/react-icons/dist/esm/icons/filter-icon";
 import TagIcon from "@patternfly/react-icons/dist/esm/icons/tag-icon";
 import TaskIcon from "@patternfly/react-icons/dist/esm/icons/task-icon";
 import {
-  ICell,
   IExtraData,
-  IRow,
   IRowData,
-  cellWidth,
-  compoundExpand,
-  sortable,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
 } from "@patternfly/react-table";
 
-import { capitalizeFirstLetter } from "@app/utils/utils"
+import { capitalizeFirstLetter } from "@app/utils/utils";
 import { ApplicationProcessed } from "@app/models/api-enriched";
 import { useAllApplications } from "@app/queries/report";
-import { 
-  SimpleTableWithToolbar,
-  SimpleSelect 
+import {
+  SimpleSelect,
+  SimplePagination,
+  ConditionalTableBody,
 } from "@app/shared/components";
 import {
   useTable,
@@ -50,33 +55,11 @@ import {
 
 import "./application-list.css";
 
-const DataKey = "DataKey";
-
 enum ColumnKey {
   tags = "tags",
   incidents = "incidents",
 }
 const columnKeys: ColumnKey[] = Object.values(ColumnKey) as ColumnKey[];
-
-const columns: ICell[] = [
-  { title: "Name", transforms: [cellWidth(30), sortable] },
-  {
-    title: "Tags",
-    transforms: [cellWidth(10)],
-    cellTransforms: [compoundExpand],
-    data: ColumnKey.tags,
-  },
-  {
-    title: "Incidents",
-    transforms: [cellWidth(10)],
-    cellTransforms: [compoundExpand],
-    data: ColumnKey.incidents,
-  },
-  {
-    title: "Story points",
-    transforms: [cellWidth(10)],
-  },
-];
 
 export const compareByColumnIndex = (
   a: ApplicationProcessed,
@@ -89,14 +72,6 @@ export const compareByColumnIndex = (
     default:
       return 0;
   }
-};
-
-const getRow = (rowData: IRowData): ApplicationProcessed => {
-  return rowData[DataKey];
-};
-
-const getColumn = (colIndex: number): ColumnKey => {
-  return columns[colIndex].data;
 };
 
 export const ApplicationList: React.FC = () => {
@@ -113,17 +88,18 @@ export const ApplicationList: React.FC = () => {
     return Array.from(new Set(allTags)).sort((a, b) => a.localeCompare(b));
   }, [applications.data]);
 
-  const issueByCategory: { [id: string]: { [cat: string]: number } } = useMemo(() => {
-    return (applications?.data || []).reduce((result, app) => {
-      const issueData = app.issues.reduce((acc, issue) => {
-        acc[issue.category] = acc[issue.category] || 0;
-        acc[issue.category] += issue.totalIncidents;
-        return acc;
-      }, {} as { [issueKey: string]: number });
-      result[app.id] = issueData;
-      return result;
-    }, {} as { [appId: string]: { [issueKey: string]: number } });
-  }, [applications.data])
+  const issueByCategory: { [id: string]: { [cat: string]: number } } =
+    useMemo(() => {
+      return (applications?.data || []).reduce((result, app) => {
+        const issueData = app.issues.reduce((acc, issue) => {
+          acc[issue.category] = acc[issue.category] || 0;
+          acc[issue.category] += issue.totalIncidents;
+          return acc;
+        }, {} as { [issueKey: string]: number });
+        result[app.id] = issueData;
+        return result;
+      }, {} as { [appId: string]: { [issueKey: string]: number } });
+    }, [applications.data]);
 
   const {
     page: currentPage,
@@ -162,111 +138,6 @@ export const ApplicationList: React.FC = () => {
       columns: columnKeys,
     });
 
-  const itemsToRow = (items: ApplicationProcessed[]) => {
-    const rows: IRow[] = [];
-    items.forEach((item) => {
-      rows.push({
-        [DataKey]: item,
-        isOpen: isSomeCellSelected(item.id, columnKeys),
-        cells: [
-          {
-            title: (
-              <>
-                <Link to={`/applications/${item.id}`}>{item.name}</Link>
-              </>
-            ),
-          },
-          {
-            title: (
-              <>
-                <TagIcon key="tags" /> {item.tagsFlat.length}
-              </>
-            ),
-            props: {
-              isOpen: isCellSelected(item.id, ColumnKey.tags),
-            },
-          },
-          {
-            title: (
-              <>
-                <TaskIcon key="incidents" />{" "}
-                {item.issues.reduce((total, violation) => total + violation.totalIncidents, 0)}
-              </>
-            ),
-            props: {
-              isOpen: isCellSelected(item.id, ColumnKey.incidents),
-            },
-          },
-          {
-            title: item.issues.reduce((total, violation) => total + violation.totalEffort, 0),
-          },
-        ],
-      });
-
-      const parentIndex = rows.length - 1;
-
-      rows.push({
-        parent: parentIndex,
-        compoundParent: 1,
-        cells: [
-          {
-            title: (
-              <div className="pf-u-m-lg">
-                <Split hasGutter isWrappable>
-                  {item.tagsFlat
-                    .map((e, index) => (
-                      <SplitItem key={index}>
-                        <Label isCompact>{e}</Label>
-                      </SplitItem>
-                    ))}
-                </Split>
-              </div>
-            ),
-            props: { colSpan: 6, className: "pf-m-no-padding" },
-          },
-        ],
-      });
-
-      rows.push({
-        parent: parentIndex,
-        compoundParent: 2,
-        cells: [
-          {
-            title: (
-              <div className="pf-u-m-lg">
-                <DescriptionList
-                  isHorizontal
-                  isCompact
-                  horizontalTermWidthModifier={{
-                    default: "12ch",
-                    md: "20ch",
-                  }}
-                >
-                  {Object.entries(issueByCategory[item.id])
-                    .map(([cat, total], index) => (
-                      <DescriptionListGroup key={index}>
-                        <DescriptionListTerm>
-                          {capitalizeFirstLetter(cat)} issues
-                        </DescriptionListTerm>
-                        <DescriptionListDescription>
-                          {total}
-                        </DescriptionListDescription>
-                      </DescriptionListGroup>
-                    ))}
-                </DescriptionList>
-              </div>
-            ),
-            props: { colSpan: 6, className: "pf-m-no-padding" },
-          },
-        ],
-      });
-    });
-
-    return rows;
-  };
-
-  const rows: IRow[] = itemsToRow(pageItems);
-
   // Reset pagination when application change
   useEffect(() => {
     onPageChange({ page: 1, perPage: currentPage.perPage });
@@ -284,48 +155,17 @@ export const ApplicationList: React.FC = () => {
         </TextContent>
       </PageSection>
       <PageSection variant={PageSectionVariants.default}>
-        <SimpleTableWithToolbar
-          className="application-list-table"
-          hasTopPagination
-          hasBottomPagination
-          totalCount={filteredItems.length}
-          // Expand
-          onExpand={(
-            event: React.MouseEvent,
-            rowIndex: number,
-            colIndex: number,
-            isOpen: boolean,
-            rowData: IRowData,
-            extraData: IExtraData
-          ) => {
-            const row = getRow(rowData);
-            const columnKey = getColumn(colIndex);
-            toggleCellSelected(row.id, columnKey);
-          }}
-          // Sorting
-          sortBy={
-            currentSortBy || { index: undefined, defaultDirection: "asc" }
-          }
-          onSort={onChangeSortBy}
-          // Pagination
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-          // Table
-          rows={rows}
-          cells={columns}
-          // Fech data
-          isLoading={applications.isFetching}
-          loadingVariant="skeleton"
-          fetchError={applications.isError}
-          // Toolbar filters
-          toolbarClearAllFilters={clearAllFilters}
-          filtersApplied={filterText.trim().length > 0}
-          toolbarToggle={
-            <>
+        <Toolbar
+          className="pf-m-toggle-group-container"
+          collapseListedFiltersBreakpoint="xl"
+          clearAllFilters={clearAllFilters}
+        >
+          <ToolbarContent>
+            <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
               <ToolbarItem variant="search-filter">
                 <SearchInput
                   value={filterText}
-                  onChange={setFilterText}
+                  onChange={(_, value) => setFilterText(value)}
                   onClear={() => {
                     setFilterText("");
                   }}
@@ -345,7 +185,7 @@ export const ApplicationList: React.FC = () => {
                     width={250}
                     maxHeight={300}
                     toggleIcon={<FilterIcon />}
-                    variant={SelectVariant.checkbox}
+                    variant="checkbox"
                     aria-label="tag"
                     aria-labelledby="tag"
                     placeholderText="Tag"
@@ -376,8 +216,153 @@ export const ApplicationList: React.FC = () => {
                   />
                 </ToolbarFilter>
               </ToolbarGroup>
-            </>
-          }
+            </ToolbarToggleGroup>
+            <ToolbarItem
+              variant={ToolbarItemVariant.pagination}
+              align={{ default: "alignRight" }}
+            >
+              <SimplePagination
+                count={filteredItems.length}
+                params={currentPage}
+                onChange={onPageChange}
+                isTop={true}
+              />
+            </ToolbarItem>
+          </ToolbarContent>
+        </Toolbar>
+
+        <Table>
+          <Thead>
+            <Tr>
+              <Th
+                width={30}
+                sort={{
+                  columnIndex: 0,
+                  sortBy: { ...currentSortBy },
+                  onSort: onChangeSortBy,
+                }}
+              >
+                Name
+              </Th>
+              <Th width={10}>Tags</Th>
+              <Th width={10}>Incidents</Th>
+              <Th width={10}>Story points</Th>
+            </Tr>
+          </Thead>
+          <ConditionalTableBody
+            isNoData={filteredItems.length === 0}
+            numRenderedColumns={10}
+          >
+            {pageItems?.map((item, rowIndex) => {
+              const isRowExpanded = isSomeCellSelected(item.id, columnKeys);
+              return (
+                <Tbody key={rowIndex} isExpanded={isRowExpanded}>
+                  <Tr>
+                    <Td>
+                      <Link to={`/applications/${item.id}`}>{item.name}</Link>
+                    </Td>
+                    <Td
+                      compoundExpand={{
+                        isExpanded: isCellSelected(item.id, ColumnKey.tags),
+                        onToggle: (
+                          event: React.MouseEvent,
+                          rowIndex: number,
+                          colIndex: number,
+                          isOpen: boolean,
+                          rowData: IRowData,
+                          extraData: IExtraData
+                        ) => {
+                          toggleCellSelected(item.id, ColumnKey.tags);
+                        },
+                        rowIndex,
+                        columnIndex: 1,
+                      }}
+                    >
+                      <TagIcon key="tags" /> {item.tagsFlat.length}
+                    </Td>
+                    <Td
+                      compoundExpand={{
+                        isExpanded: isCellSelected(
+                          item.id,
+                          ColumnKey.incidents
+                        ),
+                        onToggle: (
+                          event: React.MouseEvent,
+                          rowIndex: number,
+                          colIndex: number,
+                          isOpen: boolean,
+                          rowData: IRowData,
+                          extraData: IExtraData
+                        ) => {
+                          toggleCellSelected(item.id, ColumnKey.incidents);
+                        },
+                        rowIndex,
+                        columnIndex: 2,
+                      }}
+                    >
+                      <TaskIcon key="incidents" />{" "}
+                      {item.issues.reduce(
+                        (total, violation) => total + violation.totalIncidents,
+                        0
+                      )}
+                    </Td>
+                    <Td>
+                      {item.issues.reduce(
+                        (total, violation) => total + violation.totalEffort,
+                        0
+                      )}
+                    </Td>
+                  </Tr>
+                  {isRowExpanded ? (
+                    <Tr isExpanded>
+                      <Td noPadding colSpan={6}>
+                        <div className="pf-v5-u-m-lg">
+                          {isCellSelected(item.id, ColumnKey.tags) && (
+                            <Split hasGutter isWrappable>
+                              {item.tagsFlat.map((e, index) => (
+                                <SplitItem key={index}>
+                                  <Label isCompact>{e}</Label>
+                                </SplitItem>
+                              ))}
+                            </Split>
+                          )}
+                          {isCellSelected(item.id, ColumnKey.incidents) && (
+                            <DescriptionList
+                              isHorizontal
+                              isCompact
+                              horizontalTermWidthModifier={{
+                                default: "12ch",
+                                md: "20ch",
+                              }}
+                            >
+                              {Object.entries(issueByCategory[item.id]).map(
+                                ([cat, total], index) => (
+                                  <DescriptionListGroup key={index}>
+                                    <DescriptionListTerm>
+                                      {capitalizeFirstLetter(cat)} issues
+                                    </DescriptionListTerm>
+                                    <DescriptionListDescription>
+                                      {total}
+                                    </DescriptionListDescription>
+                                  </DescriptionListGroup>
+                                )
+                              )}
+                            </DescriptionList>
+                          )}
+                        </div>
+                      </Td>
+                    </Tr>
+                  ) : null}
+                </Tbody>
+              );
+            })}
+          </ConditionalTableBody>
+        </Table>
+
+        <SimplePagination
+          count={filteredItems.length}
+          params={currentPage}
+          onChange={onPageChange}
         />
       </PageSection>
     </>

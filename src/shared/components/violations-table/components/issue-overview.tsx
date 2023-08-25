@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import { useDebounce } from "usehooks-ts";
 
 import {
@@ -15,26 +15,25 @@ import {
   CardHeader,
   CardTitle,
   Text,
-  TextContent
+  TextContent,
+  Toolbar,
+  ToolbarContent,
+  ToolbarToggleGroup,
+  ToolbarItemVariant,
 } from "@patternfly/react-core";
 
-import {
-  ICell,
-  IRow,
-  cellWidth,
-  sortable,
-} from "@patternfly/react-table";
+import { Table, Tbody, Td, Th, Thead, Tr } from "@patternfly/react-table";
 
-import {
-  SimpleTableWithToolbar
-} from "@app/shared/components/simple-table-with-toolbar"
-import {
-  useTable,
-  useTableControls
-} from "@app/shared/hooks"
+import FilterIcon from "@patternfly/react-icons/dist/esm/icons/filter-icon";
+
+import { useTable, useTableControls } from "@app/shared/hooks";
 
 import { IssueProcessed } from "@app/models/api-enriched";
-import { SimpleMarkdown } from "@app/shared/components";
+import {
+  ConditionalTableBody,
+  SimpleMarkdown,
+  SimplePagination,
+} from "@app/shared/components";
 import { getMarkdown } from "@app/utils/utils";
 import { DispersedFile } from "@app/models/file";
 import { useDispersedFiles } from "@app/queries/report";
@@ -43,20 +42,6 @@ interface IIssueOverviewProps {
   issue: IssueProcessed;
   onShowFile: (file: DispersedFile, issue: IssueProcessed) => void;
 }
-
-const DataKey = "DataKey"
-
-const columns: ICell[] = [
-  {
-    title: "File",
-    transforms: [cellWidth(80), sortable],
-    cellTransforms: [],
-  },
-  {
-    title: "Total",
-    transforms: [cellWidth(20), sortable],
-  },
-]
 
 interface TableData extends DispersedFile {}
 
@@ -95,8 +80,9 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
           item.name.toLowerCase().indexOf(debouncedFilterText.toLowerCase()) !==
           -1;
       }
-      return isFilterTextFilterCompliant
-    }, [debouncedFilterText]
+      return isFilterTextFilterCompliant;
+    },
+    [debouncedFilterText]
   );
 
   const {
@@ -114,91 +100,104 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
     compareToByColumn: compareByColumnIndex,
   });
 
-  const rows: IRow[] = useMemo(() => {
-    const rows: IRow[] = [];
-    pageItems.forEach((item) => {
-      rows.push({
-        [DataKey]: item,
-        cells: [
-          {
-            title: <>
-              <FileLink
-                file={item.name}
-                defaultText={item.displayName}
-                onClick={() =>
-                  onShowFile(
-                    item,
-                    issue
-                  )
-                }/>
-            </>,
-          },
-          {
-            title: item.totalIncidents,
-          }
-        ],
-      });
-    });
-
-    return rows;
-  }, [pageItems, issue, onShowFile]);
-
   return (
     <Stack hasGutter>
-        <StackItem>
-          <Grid hasGutter>
-            <GridItem md={5}>
-              <SimpleTableWithToolbar
-                hasTopPagination
-                hasBottomPagination
-                currentPage={currentPage}
-                onPageChange={onPageChange}
-                sortBy={
-                  currentSortBy || { index: undefined, defaultDirection: "asc" }
-                }
-                onSort={onChangeSortBy}
-                totalCount={filteredItems.length}
-                filtersApplied={filterText.trim().length > 0}
-                cells={columns}
-                rows={rows}
-                isLoading={dispersedFilesQuery.isFetching || dispersedFilesQuery.isLoading}
-                toolbarToggle={
-                  <>
-                    <ToolbarItem variant="search-filter">
-                      <SearchInput
-                        value={filterText}
-                        onChange={setFilterText}
-                        onClear={() => setFilterText("")}
-                      />
-                    </ToolbarItem>
-                    </>
-                }
-              >
-              </SimpleTableWithToolbar>
-            </GridItem>
-            <GridItem md={7}>
-              <Card isCompact isFullHeight>
-                <CardHeader>
-                    <CardTitle>
-                    <TextContent>
-                      <>
-                        <Text component="h2">{issue.ruleID}</Text>
-                      </>
-                    </TextContent>
-                    </CardTitle>
-                </CardHeader>
-                <CardBody>
-                  <SimpleMarkdown
-                    children={getMarkdown(
-                      issue.description || "",
-                      issue.links,
-                    )}
+      <StackItem>
+        <Grid hasGutter>
+          <GridItem md={5}>
+            <Toolbar
+              className="pf-m-toggle-group-container"
+              collapseListedFiltersBreakpoint="xl"
+            >
+              <ToolbarContent>
+                <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
+                  <ToolbarItem variant="search-filter">
+                    <SearchInput
+                      value={filterText}
+                      onChange={(_, value) => setFilterText(value)}
+                      onClear={() => setFilterText("")}
+                    />
+                  </ToolbarItem>
+                </ToolbarToggleGroup>
+                <ToolbarItem
+                  variant={ToolbarItemVariant.pagination}
+                  align={{ default: "alignRight" }}
+                >
+                  <SimplePagination
+                    count={filteredItems.length}
+                    params={currentPage}
+                    onChange={onPageChange}
+                    isTop={true}
                   />
-                </CardBody>
-              </Card>
-            </GridItem>
-          </Grid>
-        </StackItem>
+                </ToolbarItem>
+              </ToolbarContent>
+            </Toolbar>
+
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th
+                    width={80}
+                    sort={{
+                      columnIndex: 1,
+                      sortBy: { ...currentSortBy },
+                      onSort: onChangeSortBy,
+                    }}
+                  >
+                    File
+                  </Th>
+                  <Th width={20}>Total incidents</Th>
+                </Tr>
+              </Thead>
+              <ConditionalTableBody
+                isNoData={filteredItems.length === 0}
+                numRenderedColumns={10}
+              >
+                {pageItems?.map((item, rowIndex) => {
+                  return (
+                    <Tbody key={rowIndex}>
+                      <Tr>
+                        <Td>
+                          <FileLink
+                            file={item.name}
+                            defaultText={item.displayName}
+                            onClick={() => onShowFile(item, issue)}
+                          />
+                        </Td>
+                        <Td>{item.totalIncidents}</Td>
+                      </Tr>
+                    </Tbody>
+                  );
+                })}
+              </ConditionalTableBody>
+            </Table>
+
+            <SimplePagination
+              count={filteredItems.length}
+              params={currentPage}
+              onChange={onPageChange}
+            />
+          </GridItem>
+          <GridItem md={7}>
+            <Card isCompact isFullHeight>
+              <CardHeader>
+                <CardTitle>
+                  <TextContent>
+                    <>
+                      <Text component="h2">{issue.ruleID}</Text>
+                    </>
+                  </TextContent>
+                </CardTitle>
+              </CardHeader>
+              <CardBody>
+                <SimpleMarkdown
+                  children={getMarkdown(issue.description || "", issue.links)}
+                />
+              </CardBody>
+            </Card>
+          </GridItem>
+        </Grid>
+      </StackItem>
     </Stack>
   );
 };

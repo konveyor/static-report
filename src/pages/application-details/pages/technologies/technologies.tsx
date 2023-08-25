@@ -15,7 +15,7 @@ import {
   Title,
 } from "@patternfly/react-core";
 import InfoAltIcon from "@patternfly/react-icons/dist/esm/icons/info-alt-icon";
-import { TableComposable, Tbody, Td, Tr } from "@patternfly/react-table";
+import { Table, Tbody, Td, Tr } from "@patternfly/react-table";
 
 
 import { ApplicationProcessed } from "@app/models/api-enriched";
@@ -44,7 +44,7 @@ export const Technologies: React.FC = () => {
                 </CardTitle>
                 <Divider />
                 <CardBody>
-                  <TableComposable variant="compact" borders={false}>
+                  <Table variant="compact" borders={false}>
                     <Tbody>
                       {tags.length > 0 ? (
                         tags.map(
@@ -55,7 +55,7 @@ export const Technologies: React.FC = () => {
                           )
                         )
                       ) : (
-                        <EmptyState variant={EmptyStateVariant.small}>
+                        <EmptyState variant={EmptyStateVariant.sm}>
                           <EmptyStateIcon icon={InfoAltIcon} />
                           <Title headingLevel="h4" size="md">
                             No data to show
@@ -63,7 +63,7 @@ export const Technologies: React.FC = () => {
                         </EmptyState>
                       )}
                     </Tbody>
-                  </TableComposable>
+                  </Table>
                 </CardBody>
               </Card>
             </GalleryItem>

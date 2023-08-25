@@ -16,7 +16,7 @@ import {
   GridItem,
 } from "@patternfly/react-core";
 import {
-  TableComposable,
+  Table,
   Tbody,
   Td,
   Th,
@@ -113,7 +113,7 @@ export const IncidentsSection: React.FC<IIncidentsSectionProps> = ({
         <Card isFullHeight>
           <CardTitle>Incidents</CardTitle>
           <CardBody>
-            <TableComposable variant="compact">
+            <Table variant="compact">
               <Thead>
                 <Tr>
                   <Th width={40}>Category</Th>
@@ -130,7 +130,7 @@ export const IncidentsSection: React.FC<IIncidentsSectionProps> = ({
                   </Tr>
                 ))}
               </Tbody>
-            </TableComposable>
+            </Table>
           </CardBody>
         </Card>
       </GridItem>
