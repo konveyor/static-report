@@ -3,7 +3,6 @@ import { AxiosError } from "axios";
 
 import {
   ReportDto,
-  IncidentDto,
   IssueDto,
   RulesetDto,
   FileDto,
@@ -13,13 +12,13 @@ import {
 import { 
   ApplicationProcessed,
   DependencyProcessed,
-  FileProcessed,
   IssueProcessed,
   IssueCatType
 } from "@app/models/api-enriched";
 import { useMockableQuery } from "./helpers";
 import { MOCK_APPS } from "./mocks/report.mock";
-import { DispersedFile, addIncidentToDispersedFile } from "@app/models/file";
+import { DispersedFile, addIncidentToDispersedFile, getCodeSnip, organizeDispersedFile } from "@app/models/file";
+import { useQuery } from "@tanstack/react-query";
 
 
 export const useFileQuery = (uri: string, appId: string, enabled: boolean) => {
@@ -56,38 +55,6 @@ const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: Rules
       const name: string = violation.description?.split("\n")[0];
       const sourceTechnologies: string[] = filterLabelsWithPrefix(violation.labels, "konveyor.io/source=");
       const targetTechnologies: string[] = filterLabelsWithPrefix(violation.labels, "konveyor.io/target=");
-      const allFiles = violation.incidents.reduce<{ [key: string]: IncidentDto[] }>((acc, incident) => {
-        if (!incident.uri || incident.uri === "") {
-          return acc
-        }
-        acc[incident.uri] = acc[incident.uri] ? [...acc[incident.uri], incident] : [incident];
-        return acc
-      }, {});
-      const files: FileProcessed[] = Object.entries(allFiles).reduce<FileProcessed[]>((acc, [name, incidents]) => {
-        const isFound: boolean = filesRaw ? ( filesRaw[name] ? true : false) : false;
-        const displayName: string = name.replace(/^.*[\\/]/, '')
-        if (isFound) {
-          acc = [...acc, { displayName, name, isFound, incidents } ]
-        } else {
-          const packageNameRegex = /packageName=(.*)?&/;
-          const match = displayName.match(packageNameRegex);
-          let packageName = "";
-          if (match && match[1]) {
-            packageName = match[1]
-          }
-          const depIncidents: FileProcessed[] = incidents.flatMap((i) => {
-            return {
-              displayName: packageName || displayName,
-              name,
-              isFound,
-              codeSnip: i.codeSnip,
-              incidents: [i],
-            }
-          })
-          acc = [...acc, ...depIncidents]
-        }
-        return acc
-      }, [] as FileProcessed[]);
       const dispersedFiles: { [key: string]: DispersedFile } = violation.incidents.reduce<{ [key: string]: DispersedFile }>((acc, incident) => {
         if (!incident.uri || incident.uri === "") {
           return acc
@@ -96,23 +63,22 @@ const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: Rules
           const displayName: string = incident.uri.replace(/^.*[\\/]/, '')
           acc[incident.uri] = {
             displayName,
-            content: [],
-            incidents: [],
             name: incident.uri,
             ranges: [],
-            totalSnips: 0,
+            incidents: [],
             totalIncidents: 0,
+            codeSnips: [],
+            incidentsUnorganized: [],
           }
         }
         addIncidentToDispersedFile(acc[incident.uri], incident)
         return acc
       }, {})
-      console.log(dispersedFiles)
+
       const issueProcessed: IssueProcessed = {
         ...violation,
         name,
         appID,
-        files,
         ruleID,
         totalEffort,
         dispersedFiles,
@@ -136,19 +102,6 @@ const issuesFromIssuesDto = (appID: string, issues: IssueDto[]): IssueProcessed[
     const name: string = issue.description?.split("\n")[0];
     const sourceTechnologies: string[] = filterLabelsWithPrefix(issue.labels, "konveyor.io/source=");
     const targetTechnologies: string[] = filterLabelsWithPrefix(issue.labels, "konveyor.io/target=");
-    const files: FileProcessed[] = issue.incidents?.flatMap((inc) => {
-      if (!inc.file || inc.file === "") {
-        return [] as FileProcessed[];
-      }
-      const displayName: string = inc.file?.replace(/^.*[\\/]/, '')
-      return {
-        displayName,
-        name: inc.file,
-        isFound: false,
-        incidents: [inc],
-        codeSnip: inc.codeSnip,
-      } as FileProcessed;
-    }) || [] as FileProcessed[];
     const dispersedFiles: { [key: string]: DispersedFile } = issue.incidents.reduce<{ [key: string]: DispersedFile }>((acc, incident) => {
       if (!incident.file || incident.file === "") {
         return acc
@@ -156,23 +109,23 @@ const issuesFromIssuesDto = (appID: string, issues: IssueDto[]): IssueProcessed[
       if (!acc[incident.file]) {
         const displayName: string = incident.file.replace(/^.*[\\/]/, '')
         acc[incident.file] = {
-          content: [],
-          incidents: [],
+          displayName,
           name: incident.file,
           ranges: [],
-          totalSnips: 0,
-          displayName,
+          incidents: [],
           totalIncidents: 0,
+          codeSnips: [],
+          incidentsUnorganized: [],
         }
       }
       addIncidentToDispersedFile(acc[incident.file], incident)
       return acc
     }, {})
+
     const issueProcessed: IssueProcessed = {
       ...issue,
       name,
       appID,
-      files,
       totalEffort,
       totalIncidents,
       dispersedFiles,
@@ -260,8 +213,36 @@ export const useAllApplications = () => {
     {
       queryKey: ["apps"],
       select: transformApplications,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      cacheTime: Infinity, 
+      staleTime: Infinity,
     },
     MOCK_APPS,
     (window as any)["apps"],
   );
+}
+
+export const useDispersedFiles = (issue: IssueProcessed) => {
+  return useQuery<DispersedFile[], AxiosError, DispersedFile[]>({
+    queryKey: ["dispersedFiles", issue.id],
+    queryFn: async () => {
+      return new Promise((resolve, reject) => {
+          const files: DispersedFile[] = 
+            Object.values(issue.dispersedFiles).flatMap(df => organizeDispersedFile(df));
+          resolve(files);
+      });
+    }
+  });
+}
+
+export const useCodeSnip = (df: DispersedFile, idx: number) => {
+  return useQuery<string, AxiosError, string>({
+    enabled: df ? true : false,
+    queryKey: ["dispersedFiles", df.name, idx],
+    queryFn: async () => {
+      return new Promise((resolve, reject) => resolve(getCodeSnip(df, idx)))
+    },
+  });
 }

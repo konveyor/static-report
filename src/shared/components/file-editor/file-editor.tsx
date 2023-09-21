@@ -34,6 +34,7 @@ interface IFileEditorProps {
   name: string;
   displayName: string;
   codeSnip: string;
+  isLoading: boolean;
   incidents: IncidentCoordinates[];
   issue: IssueProcessed;
   props?: Partial<
@@ -45,11 +46,11 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
   name, 
   displayName,
   codeSnip,
+  isLoading,
   incidents,
   issue,
   props,
 }) => {
-  let isLoading = false;
   let absoluteToRelativeLineNum = (lineNum: number) => lineNum;
   let relativeToAbsoluteLineNum = (lineNum: number) => lineNum;
   const codeSnipNumberedLines = codeSnip.split("\n");

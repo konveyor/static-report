@@ -37,7 +37,7 @@ import { useDebounce } from "usehooks-ts";
 import { compareByCategoryFn } from "@app/models/api-enriched";
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
 import { IssueProcessed } from "@app/models/api-enriched";
-import { useAllApplications } from "@app/queries/report";
+import { useAllApplications, useCodeSnip } from "@app/queries/report";
 import {
   SimpleTableWithToolbar,
   SimpleSelect,
@@ -52,7 +52,7 @@ import {
 } from "@app/shared/hooks";
 
 import { IssueOverview } from "./components/issue-overview";
-import { DispersedFile, getCodeSnip } from "@app/models/file";
+import { DispersedFile } from "@app/models/file";
 
 export interface TableData extends IssueProcessed {}
 
@@ -163,6 +163,14 @@ export interface IViolationsTableProps {
 export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId }) => {
   const allApplications = useAllApplications();
 
+
+  const [fileEditorTabId, setFileEditorTabId] = useState<number>(0);
+  const [selectedFile, setSelectedFile] = useState<DispersedFile>({} as DispersedFile);
+
+  const codeSnipQuery = useCodeSnip(selectedFile, fileEditorTabId);
+
+  const codeSnip: string = useMemo(() => codeSnipQuery.data || "", [codeSnipQuery.data])
+
   // Filters
   const [filterText, setFilterText] = useState("");
   const { filters, setFilter, removeFilter, clearAllFilters } = useToolbar<
@@ -186,13 +194,6 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
     close: closeFileModal,
   } = useModal<"showFile", SelectedFile>();
 
-  const [fileEditorTabId, setFileEditorTabId] = useState<number>();
-
-  useEffect(() => {
-    if (!fileEditorTabId) {
-      setFileEditorTabId(0)
-    }
-  }, [fileEditorTabId])
 
   const issues: TableData[] = useMemo(() => {
     if (
@@ -379,11 +380,13 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
                 <div className="pf-u-m-sm">
                   <IssueOverview
                     issue={item}
-                    onShowFile={(file, issue) =>
+                    onShowFile={(file, issue) => {
                       openFileModal("showFile", {
                         file,
                         issue,
                       })
+                      setSelectedFile(file)
+                    }
                     }
                   />
                 </div>
@@ -467,7 +470,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
                     value={filterText}
                     onChange={setFilterText}
                     onClear={() => setFilterText("")}
-                  />    Dependencies
+                  />
                 </ToolbarItem>
                 <ToolbarGroup variant="filter-group">
                   <ToolbarFilter
@@ -659,7 +662,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
       </>
 
       <Modal
-        title={`File ${fileModalData?.file?.displayName || ""}`}
+        title={`File ${fileModalData?.file?.name || ""}`}
         isOpen={isFileModalOpen && fileModalAction === "showFile"}
         onClose={closeFileModal}
         variant="default"
@@ -671,14 +674,13 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
           </Button>,
         ]}
       >
-        <Tabs
-          activeKey={fileEditorTabId}
-          onSelect={(_event, tabKey) =>
-            setFileEditorTabId(tabKey as number)
-          }>
+        { Object.keys(fileModalData?.file?.incidents || {}).length > 1 ? (
+          <Tabs
+            activeKey={fileEditorTabId}
+            onSelect={(_event, tabKey) =>
+              setFileEditorTabId(tabKey as number)}>
           {
             Object.values(fileModalData?.file?.incidents || {}).flatMap((incidents, idx) => (
-    
               <Tab
                 key={idx}
                 eventKey={idx}
@@ -688,14 +690,24 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
                       <FileEditor
                         name={fileModalData?.file.name || ""}
                         displayName={fileModalData?.file.displayName || ""}
-                        codeSnip={getCodeSnip(fileModalData?.file || {} as DispersedFile, idx)}
+                        codeSnip={codeSnip}
+                        isLoading={codeSnipQuery.isLoading || codeSnipQuery.isFetching}
                         issue={fileModalData?.issue || {} as IssueProcessed}
                         incidents={incidents}
                       />
                 ): null} 
               </Tab>))
           }
-        </Tabs>
+          </Tabs>
+        ) : (
+          <FileEditor
+            name={fileModalData?.file.name || ""}
+            displayName={fileModalData?.file.displayName || ""}
+            codeSnip={codeSnip}
+            isLoading={codeSnipQuery.isLoading || codeSnipQuery.isFetching}
+            issue={fileModalData?.issue || {} as IssueProcessed}
+            incidents={fileModalData?.file?.incidents[0] || []}/>
+        )}
       </Modal>
     </>
   );

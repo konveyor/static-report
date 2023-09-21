@@ -37,6 +37,7 @@ import { IssueProcessed } from "@app/models/api-enriched";
 import { SimpleMarkdown } from "@app/shared/components";
 import { getMarkdown } from "@app/utils/utils";
 import { DispersedFile } from "@app/models/file";
+import { useDispersedFiles } from "@app/queries/report";
 
 interface IIssueOverviewProps {
   issue: IssueProcessed;
@@ -52,8 +53,8 @@ const columns: ICell[] = [
     cellTransforms: [],
   },
   {
-    title: "Total incidents",
-    transforms: [cellWidth(20)],
+    title: "Total",
+    transforms: [cellWidth(20), sortable],
   },
 ]
 
@@ -65,8 +66,10 @@ export const compareByColumnIndex = (
   columnIndex?: number
 ) => {
   switch (columnIndex) {
-    case 1: // name
+    case 0: // name
       return a.name.localeCompare(b.name);
+    case 1: // count
+      return a.totalIncidents - b.totalIncidents;
     default:
       return 0;
   }
@@ -78,9 +81,11 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
 }) => {
   const [filterText, setFilterText] = useState("");
   const debouncedFilterText = useDebounce<string>(filterText, 250);
+  const dispersedFilesQuery = useDispersedFiles(issue);
 
-  const items: TableData[] = Object.keys(issue.dispersedFiles)
-    .flatMap((f) => issue.dispersedFiles[f])
+  const items: TableData[] = useMemo(() => 
+    dispersedFilesQuery.data?.filter((f) => f.totalIncidents !== 0) || [], 
+  [dispersedFilesQuery.data])
 
   const filterItem = useCallback(
     (item: TableData) => {
@@ -156,7 +161,7 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
                 filtersApplied={filterText.trim().length > 0}
                 cells={columns}
                 rows={rows}
-                isLoading={false}
+                isLoading={dispersedFilesQuery.isFetching || dispersedFilesQuery.isLoading}
                 toolbarToggle={
                   <>
                     <ToolbarItem variant="search-filter">
