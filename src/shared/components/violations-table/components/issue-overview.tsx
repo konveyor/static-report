@@ -33,13 +33,14 @@ import {
   useTableControls
 } from "@app/shared/hooks"
 
-import { FileProcessed, IssueProcessed } from "@app/models/api-enriched";
+import { IssueProcessed } from "@app/models/api-enriched";
 import { SimpleMarkdown } from "@app/shared/components";
 import { getMarkdown } from "@app/utils/utils";
+import { DispersedFile } from "@app/models/file";
 
 interface IIssueOverviewProps {
   issue: IssueProcessed;
-  onShowFile: (file: FileProcessed, issue: IssueProcessed) => void;
+  onShowFile: (file: DispersedFile, issue: IssueProcessed) => void;
 }
 
 const DataKey = "DataKey"
@@ -56,7 +57,7 @@ const columns: ICell[] = [
   },
 ]
 
-interface TableData extends FileProcessed {}
+interface TableData extends DispersedFile {}
 
 export const compareByColumnIndex = (
   a: TableData,
@@ -78,7 +79,8 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
   const [filterText, setFilterText] = useState("");
   const debouncedFilterText = useDebounce<string>(filterText, 250);
 
-  const items: TableData[] = issue.files
+  const items: TableData[] = Object.keys(issue.dispersedFiles)
+    .flatMap((f) => issue.dispersedFiles[f])
 
   const filterItem = useCallback(
     (item: TableData) => {
@@ -127,7 +129,7 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
             </>,
           },
           {
-            title: item.incidents.length,
+            title: item.totalIncidents,
           }
         ],
       });

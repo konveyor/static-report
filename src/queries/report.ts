@@ -19,6 +19,7 @@ import {
 } from "@app/models/api-enriched";
 import { useMockableQuery } from "./helpers";
 import { MOCK_APPS } from "./mocks/report.mock";
+import { DispersedFile, addIncidentToDispersedFile } from "@app/models/file";
 
 
 export const useFileQuery = (uri: string, appId: string, enabled: boolean) => {
@@ -51,7 +52,7 @@ const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: Rules
     return Object.keys(rs.violations || {}).map((ruleID) => {
       const violation: IssueDto = rs.violations[ruleID];
       const totalIncidents: number = violation.incidents.length;
-      const totalEffort: number = violation.effort * totalIncidents;
+      const totalEffort: number = (violation.effort ? violation.effort : 0) * totalIncidents;
       const name: string = violation.description?.split("\n")[0];
       const sourceTechnologies: string[] = filterLabelsWithPrefix(violation.labels, "konveyor.io/source=");
       const targetTechnologies: string[] = filterLabelsWithPrefix(violation.labels, "konveyor.io/target=");
@@ -86,7 +87,27 @@ const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: Rules
           acc = [...acc, ...depIncidents]
         }
         return acc
-      }, [] as FileProcessed[])
+      }, [] as FileProcessed[]);
+      const dispersedFiles: { [key: string]: DispersedFile } = violation.incidents.reduce<{ [key: string]: DispersedFile }>((acc, incident) => {
+        if (!incident.uri || incident.uri === "") {
+          return acc
+        }
+        if (!acc[incident.uri]) {
+          const displayName: string = incident.uri.replace(/^.*[\\/]/, '')
+          acc[incident.uri] = {
+            displayName,
+            content: [],
+            incidents: [],
+            name: incident.uri,
+            ranges: [],
+            totalSnips: 0,
+            totalIncidents: 0,
+          }
+        }
+        addIncidentToDispersedFile(acc[incident.uri], incident)
+        return acc
+      }, {})
+      console.log(dispersedFiles)
       const issueProcessed: IssueProcessed = {
         ...violation,
         name,
@@ -94,11 +115,13 @@ const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: Rules
         files,
         ruleID,
         totalEffort,
+        dispersedFiles,
         totalIncidents,
         sourceTechnologies,
         targetTechnologies,
         id: appID + rs.name + ruleID,
         category: violation.category as IssueCatType,
+        effort: violation.effort ? violation.effort : 0,
       }
       return issueProcessed;
     })
@@ -109,7 +132,7 @@ const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: Rules
 const issuesFromIssuesDto = (appID: string, issues: IssueDto[]): IssueProcessed[] => {
   return issues?.flatMap((issue) => {
     const totalIncidents: number = issue.incidents?.length;
-    const totalEffort: number = issue.effort * totalIncidents;
+    const totalEffort: number = (issue.effort ? issue.effort : 0) * totalIncidents;
     const name: string = issue.description?.split("\n")[0];
     const sourceTechnologies: string[] = filterLabelsWithPrefix(issue.labels, "konveyor.io/source=");
     const targetTechnologies: string[] = filterLabelsWithPrefix(issue.labels, "konveyor.io/target=");
@@ -119,13 +142,32 @@ const issuesFromIssuesDto = (appID: string, issues: IssueDto[]): IssueProcessed[
       }
       const displayName: string = inc.file?.replace(/^.*[\\/]/, '')
       return {
-        name: inc.file,
         displayName,
+        name: inc.file,
         isFound: false,
         incidents: [inc],
         codeSnip: inc.codeSnip,
       } as FileProcessed;
     }) || [] as FileProcessed[];
+    const dispersedFiles: { [key: string]: DispersedFile } = issue.incidents.reduce<{ [key: string]: DispersedFile }>((acc, incident) => {
+      if (!incident.file || incident.file === "") {
+        return acc
+      }
+      if (!acc[incident.file]) {
+        const displayName: string = incident.file.replace(/^.*[\\/]/, '')
+        acc[incident.file] = {
+          content: [],
+          incidents: [],
+          name: incident.file,
+          ranges: [],
+          totalSnips: 0,
+          displayName,
+          totalIncidents: 0,
+        }
+      }
+      addIncidentToDispersedFile(acc[incident.file], incident)
+      return acc
+    }, {})
     const issueProcessed: IssueProcessed = {
       ...issue,
       name,
@@ -133,11 +175,13 @@ const issuesFromIssuesDto = (appID: string, issues: IssueDto[]): IssueProcessed[
       files,
       totalEffort,
       totalIncidents,
+      dispersedFiles,
       sourceTechnologies,
       targetTechnologies,
       ruleID: issue.rule || "",
       id: appID + (issue.ruleset || "") + (issue.rule || ""),
       category: issue.category as IssueCatType,
+      effort: issue.effort ? issue.effort : 0,
     }
     return issueProcessed
   }) || [] as IssueProcessed[];

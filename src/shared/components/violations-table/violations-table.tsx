@@ -13,6 +13,8 @@ import {
   SelectVariant,
   Split,
   SplitItem,
+  Tab,
+  Tabs,
   Title,
   ToolbarChip,
   ToolbarChipGroup,
@@ -34,7 +36,7 @@ import { useDebounce } from "usehooks-ts";
 
 import { compareByCategoryFn } from "@app/models/api-enriched";
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
-import { FileProcessed, IssueProcessed } from "@app/models/api-enriched";
+import { IssueProcessed } from "@app/models/api-enriched";
 import { useAllApplications } from "@app/queries/report";
 import {
   SimpleTableWithToolbar,
@@ -50,6 +52,7 @@ import {
 } from "@app/shared/hooks";
 
 import { IssueOverview } from "./components/issue-overview";
+import { DispersedFile, getCodeSnip } from "@app/models/file";
 
 export interface TableData extends IssueProcessed {}
 
@@ -149,7 +152,7 @@ const getRow = (rowData: IRowData): TableData => {
 };
 
 interface SelectedFile {
-  file: FileProcessed;
+  file: DispersedFile;
   issue: IssueProcessed;
 }
 
@@ -175,7 +178,6 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
     >
   >(filters, 100);
 
-
   const {
     data: fileModalData,
     isOpen: isFileModalOpen,
@@ -183,6 +185,14 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
     open: openFileModal,
     close: closeFileModal,
   } = useModal<"showFile", SelectedFile>();
+
+  const [fileEditorTabId, setFileEditorTabId] = useState<number>();
+
+  useEffect(() => {
+    if (!fileEditorTabId) {
+      setFileEditorTabId(0)
+    }
+  }, [fileEditorTabId])
 
   const issues: TableData[] = useMemo(() => {
     if (
@@ -457,7 +467,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
                     value={filterText}
                     onChange={setFilterText}
                     onClear={() => setFilterText("")}
-                  />
+                  />    Dependencies
                 </ToolbarItem>
                 <ToolbarGroup variant="filter-group">
                   <ToolbarFilter
@@ -649,7 +659,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
       </>
 
       <Modal
-        title={`File ${fileModalData?.file?.name || ""}`}
+        title={`File ${fileModalData?.file?.displayName || ""}`}
         isOpen={isFileModalOpen && fileModalAction === "showFile"}
         onClose={closeFileModal}
         variant="default"
@@ -661,12 +671,31 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({ applicationId
           </Button>,
         ]}
       >
-        {fileModalData?.file && (
-          <FileEditor
-            file={fileModalData.file}
-            issue={fileModalData.issue}
-          />
-        )}
+        <Tabs
+          activeKey={fileEditorTabId}
+          onSelect={(_event, tabKey) =>
+            setFileEditorTabId(tabKey as number)
+          }>
+          {
+            Object.values(fileModalData?.file?.incidents || {}).flatMap((incidents, idx) => (
+    
+              <Tab
+                key={idx}
+                eventKey={idx}
+                title={`Line #${fileModalData?.file.ranges[idx*2]} - #${fileModalData?.file.ranges[idx*2+1]}`} // TODO i18n
+              >
+                {fileEditorTabId === idx ? (
+                      <FileEditor
+                        name={fileModalData?.file.name || ""}
+                        displayName={fileModalData?.file.displayName || ""}
+                        codeSnip={getCodeSnip(fileModalData?.file || {} as DispersedFile, idx)}
+                        issue={fileModalData?.issue || {} as IssueProcessed}
+                        incidents={incidents}
+                      />
+                ): null} 
+              </Tab>))
+          }
+        </Tabs>
       </Modal>
     </>
   );

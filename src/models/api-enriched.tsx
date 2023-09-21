@@ -3,6 +3,7 @@ import {
   LinkDto,
   TagDto
 } from "@app/api/report";
+import { DispersedFile } from "./file";
 
 export interface ApplicationProcessed {
   id: string;
@@ -27,6 +28,9 @@ export interface IssueProcessed {
   sourceTechnologies: string[];
   targetTechnologies: string[];
   files: FileProcessed[];
+  dispersedFiles: {
+    [key: string]: DispersedFile;
+  }
 }
 
 export interface FileProcessed {

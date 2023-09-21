@@ -1,14 +1,11 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
   Card,
-  CardActions,
   CardBody,
   CardHeader,
   CardTitle,
   Drawer,
-  DrawerActions,
-  DrawerCloseButton,
   DrawerContent,
   DrawerContentBody,
   DrawerHead,
@@ -25,16 +22,19 @@ import {
 
 import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
 
-import { IncidentDto, LinkDto } from "@app/api/report";
-import { useFileQuery } from "@app/queries/report";
+import { LinkDto } from "@app/api/report";
 import { ConditionalRender, SimpleMarkdown } from "@app/shared/components";
 import { getMarkdown } from "@app/utils/utils";
-import { IssueProcessed, FileProcessed } from "@app/models/api-enriched";
+import { IssueProcessed } from "@app/models/api-enriched";
+import { IncidentCoordinates } from "@app/models/file";
 
 const codeLineRegex = /^\s*([0-9]+)( {2})?(.*)$/;
 
 interface IFileEditorProps {
-  file: FileProcessed;
+  name: string;
+  displayName: string;
+  codeSnip: string;
+  incidents: IncidentCoordinates[];
   issue: IssueProcessed;
   props?: Partial<
     Omit<CodeEditorProps, "ref" | "code" | "options" | "onEditorDidMount">
@@ -42,40 +42,31 @@ interface IFileEditorProps {
 }
 
 export const FileEditor: React.FC<IFileEditorProps> = ({
-  file,
+  name, 
+  displayName,
+  codeSnip,
+  incidents,
   issue,
   props,
 }) => {
-  const useFileQueryResult = useFileQuery(file.name, issue.appID, file.isFound);
-  let fileContent = file.codeSnip || "";
   let isLoading = false;
   let absoluteToRelativeLineNum = (lineNum: number) => lineNum;
   let relativeToAbsoluteLineNum = (lineNum: number) => lineNum;
-  if (file.isFound) {
-    fileContent = useFileQueryResult.data || "";
-    isLoading = useFileQueryResult.isLoading;
-  } else {
-    const codeSnipNumberedLines = fileContent.split("\n");
-    const codeSnipTrimmedLines: string[] = [];
-    let codeSnipStartLine = 1;
-    codeSnipNumberedLines.forEach((numberedLine, index) => {
-      const match = numberedLine.match(codeLineRegex);
-      if (match && !isNaN(Number(match[1]))) {
-        const lineNum = Number(match[1]);
-        if (index === 0) codeSnipStartLine = lineNum;
-        const lineCode = match[3] || "";
-        codeSnipTrimmedLines.push(lineCode);
-      }
-    });
-    fileContent = codeSnipTrimmedLines.join("\n");
-    absoluteToRelativeLineNum = (lineNum: number) => lineNum - (codeSnipStartLine - 1);
-    relativeToAbsoluteLineNum = (lineNum: number) => lineNum + (codeSnipStartLine - 1);
-  }
-
-  
-  const filteredIncidents = useMemo(() => {
-    return file.incidents.filter((i) => i.lineNumber && i.lineNumber !== 0)
-  }, [file.incidents])
+  const codeSnipNumberedLines = codeSnip.split("\n");
+  const codeSnipTrimmedLines: string[] = [];
+  let codeSnipStartLine = 1;
+  codeSnipNumberedLines.forEach((numberedLine, index) => {
+    const match = numberedLine.match(codeLineRegex);
+    if (match && !isNaN(Number(match[1]))) {
+      const lineNum = Number(match[1]);
+      if (index === 0) codeSnipStartLine = lineNum;
+      const lineCode = match[3] || "";
+      codeSnipTrimmedLines.push(lineCode);
+    }
+  });
+  codeSnip = codeSnipTrimmedLines.join("\n");
+  absoluteToRelativeLineNum = (lineNum: number) => lineNum - (codeSnipStartLine - 1);
+  relativeToAbsoluteLineNum = (lineNum: number) => lineNum + (codeSnipStartLine - 1);
 
   // Editor
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor>();
@@ -97,22 +88,22 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
     };
   }, [disposables]);
 
-  const drawerRef = React.useRef<any>();
-  const [isDrawerExpanded, setIsDrawerExpanded] = useState(
-    filteredIncidents ? true : false
-  );
-  const onDrawerExpand = () => {
-    drawerRef.current && drawerRef.current.focus();
-  };
+  // const drawerRef = React.useRef<any>();
+  // const [isDrawerExpanded, setIsDrawerExpanded] = useState(
+  //   incidents ? true : false
+  // );
+  // const onDrawerExpand = () => {
+  //   drawerRef.current && drawerRef.current.focus();
+  // };
 
-  const fileExtension = file?.name?.split('.')?.pop();
+  const fileExtension = name?.split('.')?.pop();
 
   /**
    * Adds a hover text to the hint line
    */
   const addHover = (
     monaco: typeof monacoEditor,
-    incidents: IncidentDto[],
+    incidents: IncidentCoordinates[],
     links: LinkDto[]
   ) => {
     return incidents.map((inc) => {
@@ -140,7 +131,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
    */
   const addMarkers = (
     monaco: typeof monacoEditor,
-    incidents: IncidentDto[]
+    incidents: IncidentCoordinates[]
   ) => {
     const markers = incidents
       .filter((inc) => inc.lineNumber && inc.lineNumber !== 0)
@@ -171,10 +162,10 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
     let newDisposables: monacoEditor.IDisposable[] = [];
 
     // Add markers
-    addMarkers(monaco, file.incidents);
+    addMarkers(monaco, incidents);
 
     // Add hovers
-    const hovers = addHover(monaco, file.incidents, issue.links);
+    const hovers = addHover(monaco, incidents, issue.links);
     newDisposables = newDisposables.concat(hovers);
 
     setDisposables(newDisposables);
@@ -184,27 +175,21 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
   };
 
   return (
-    <Drawer isExpanded={isDrawerExpanded} onExpand={onDrawerExpand} isInline>
+    <Drawer isExpanded={true} isInline>
       <DrawerContent
         panelContent={
           <DrawerPanelContent
             isResizable
-            defaultSize={"800px"}
-            minSize={"350px"}
           >
             <DrawerHead>
               <Card isLarge>
                 <CardHeader>
-                  <CardActions hasNoOffset>
-                    <DrawerActions>
-                      <DrawerCloseButton
-                        onClick={() => setIsDrawerExpanded(false)}
-                      />
-                    </DrawerActions>
-                  </CardActions>
                   <CardTitle>
                     <TextContent>
                       <Text component="h1">{issue.name}</Text>
+                    </TextContent>
+                    <TextContent>
+                      <Text component="small">{issue.ruleID}</Text>
                     </TextContent>
                   </CardTitle>
                 </CardHeader>
@@ -231,11 +216,12 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
             <CodeEditor
               isDarkTheme
               isLineNumbersVisible
-              isReadOnly
+              isReadOnly={true}
               isMinimapVisible
               isLanguageLabelVisible
               isDownloadEnabled={false}
-              code={fileContent ? fileContent: ""}
+              title={displayName}
+              code={codeSnip ? codeSnip : ""}
               language={Object.values(Language).find(
                 (l) => l === fileExtension?.toLowerCase()
               )}
