@@ -6,7 +6,7 @@
     "@migtools/lib-ui": "8.6.4",
     "@patternfly/patternfly": "4.224.2",
     "@patternfly/react-charts": "6.94.18",
-    "@patternfly/react-code-editor": "4.82.113",
+    "@patternfly/react-code-editor": "5.1.1",
     "@patternfly/react-core": "4.267.6",
     "@patternfly/react-table": "4.112.39",
     "@tanstack/react-query": "^4.3.4",
