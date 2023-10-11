@@ -10,7 +10,6 @@ import (
 	"text/template"
 
 	"github.com/konveyor/analyzer-lsp/output/v1/konveyor"
-	"go.lsp.dev/uri"
 	"gopkg.in/yaml.v2"
 )
 
@@ -19,7 +18,6 @@ type Application struct {
 	Name     string                  `yaml:"name" json:"name"`
 	Rulesets []konveyor.RuleSet      `yaml:"rulesets" json:"rulesets"`
 	DepItems []konveyor.DepsFlatItem `yaml:"depItems" json:"depItems"`
-	Files    map[string]string       `yaml:"files" json:"files"`
 
 	analysisPath string `yaml:"-" json:"-"`
 	depsPath     string `yaml:"-" json:"-"`
@@ -73,7 +71,6 @@ func validateFlags() error {
 			Id:           fmt.Sprintf("%04d", idx),
 			Rulesets:     make([]konveyor.RuleSet, 0),
 			DepItems:     make([]konveyor.DepsFlatItem, 0),
-			Files:        make(map[string]string),
 			analysisPath: strings.Trim(analysisPath, " "),
 		}
 		if len(depPaths) > idx {
@@ -108,21 +105,6 @@ func loadApplications() error {
 			err = yaml.Unmarshal(depsReport, &app.DepItems)
 			if err != nil {
 				return err
-			}
-		}
-		for _, rs := range app.Rulesets {
-			for key, violation := range rs.Violations {
-				violation.Extras = []byte("null")
-				rs.Violations[key] = violation
-				for _, inc := range violation.Incidents {
-					if _, err := uri.Parse(string(inc.URI)); err == nil {
-						content, err := os.ReadFile(inc.URI.Filename())
-						if err != nil {
-							continue
-						}
-						app.Files[string(inc.URI)] = string(content)
-					}
-				}
 			}
 		}
 	}

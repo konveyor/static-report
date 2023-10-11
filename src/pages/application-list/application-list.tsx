@@ -148,7 +148,7 @@ export const ApplicationList: React.FC = () => {
       const selectedTags = filters.get("tag") || [];
       if (selectedTags.length > 0) {
         isTagFilterCompliant = selectedTags.some((f) =>
-          item.tags.flatMap((t) => t.tag).some((t) => f === t)
+          item.tags.flatMap((t) => t.name).some((t) => f === t)
         );
       }
 

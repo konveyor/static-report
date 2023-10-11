@@ -1,8 +1,8 @@
 import { 
-  IncidentDto,
   LinkDto,
   TagDto
 } from "@app/api/report";
+import { DispersedFile } from "./file";
 
 export interface ApplicationProcessed {
   id: string;
@@ -26,15 +26,9 @@ export interface IssueProcessed {
   category: IssueCatType;
   sourceTechnologies: string[];
   targetTechnologies: string[];
-  files: FileProcessed[];
-}
-
-export interface FileProcessed {
-  displayName: string;
-  name: string;
-  isFound: boolean;
-  codeSnip?: string;
-  incidents: IncidentDto[];
+  dispersedFiles: {
+    [key: string]: DispersedFile;
+  }
 }
 
 export interface DependencyProcessed {

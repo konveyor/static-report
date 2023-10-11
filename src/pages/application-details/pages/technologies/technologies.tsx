@@ -28,7 +28,7 @@ export const Technologies: React.FC = () => {
   const allTags: TagDto[] = useMemo(() => application?.tags || [], [application])
 
   const tagsByCategory: {[key: string]: string[]} = allTags.reduce<{[key: string]: string[]}>((acc, tag) => {
-    acc[tag.category] = acc[tag.category] ? [...acc[tag.category], tag.tag] : [tag.tag];
+    acc[tag.category.name] = acc[tag.category.name] ? [...acc[tag.category.name], tag.name] : [tag.name];
     return acc
   }, {})
 
