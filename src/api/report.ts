@@ -35,7 +35,8 @@ export interface IncidentDto {
     file?: string;
     message: string;
     codeSnip: string;
-    lineNumber: number;
+    lineNumber?: number;
+    line?: number;
     variables: {
         [key: string]: Object;
     }
@@ -68,6 +69,11 @@ export interface FileDto {
 }
 
 export interface TagDto {
-    tag: string;
-    category: string;
+    name: string;
+    category: TagCategoryDto;
+}
+
+export interface TagCategoryDto {
+    id?: string;
+    name: string;
 }

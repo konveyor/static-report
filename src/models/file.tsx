@@ -107,7 +107,8 @@ export const addIncidentToDispersedFile = (df: DispersedFile, incident: Incident
         const right = df.ranges.slice(end, df.ranges.length)
         df.ranges = left.concat(toPush).concat(right)
         df.codeSnips.push(incident.codeSnip)
-        df.incidentsUnorganized.push({lineNumber: incident.lineNumber, message: incident.message})
+        const lineNumber: number = incident.lineNumber || incident.line || 0 
+        df.incidentsUnorganized.push({lineNumber, message: incident.message})
     }
 }
 

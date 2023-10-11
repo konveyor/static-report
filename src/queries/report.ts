@@ -164,9 +164,9 @@ const tagsFromRulesetsDto = (rulesets: RulesetDto[]): TagDto[] => {
       if (tagStr.includes("=")) {
         const [category, values] = tagStr.split('=');
         return !values ?
-          [] : values.split(',').map(value => ({tag: value, category}))
+          [] : values.split(',').map(value => ({name: value, category: { name: category }}))
       } else {
-        return (tagStr && tagStr !== "") ? [{ tag: tagStr, category: "Uncategorized"}] : []
+        return (tagStr && tagStr !== "") ? [{ name: tagStr, category: { name: "Uncategorized" }}] : []
       }
     })
   );
@@ -185,7 +185,7 @@ export const useAllApplications = () => {
             (a.tags || [] as TagDto[]);
 
         const tagsFlat: string[] = Array.from(
-          new Set(tags.flatMap((t) => t.tag))).sort((a, b) => a.localeCompare(b)) || [];
+          new Set(tags.flatMap((t) => t.name))).sort((a, b) => a.localeCompare(b)) || [];
 
         const depsDto: DependencyDto[] = a.depItems ? 
           a.depItems.flatMap((item) => {
@@ -201,6 +201,7 @@ export const useAllApplications = () => {
         
         const appProcessed: ApplicationProcessed = {
           ...a,
+          id: String(a.id),
           issues,
           tags,
           tagsFlat,
