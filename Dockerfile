@@ -8,6 +8,9 @@ RUN go build -o js-bundle-generator ./main.go
 FROM registry.access.redhat.com/ubi9/nodejs-18:latest as builder
 USER 1001
 COPY --chown=1001 . .
+# Update assets
+ARG VERSION=latest
+RUN sed -i "s/_VERSION_/${VERSION}/g" ./public/version.js
 RUN npm clean-install && CI=true PUBLIC_URL=. npm run build
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal

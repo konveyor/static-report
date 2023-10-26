@@ -20,6 +20,16 @@ jobs:
     strategy:
       fail-fast: false
     steps:
+    - name: Set up VERSION variable
+      id: set_version
+      run: |
+        BRANCH_NAME=${GITHUB_REF#refs/heads/}
+        if [ "$BRANCH_NAME" = "main" ]; then
+          echo "SR_VERSION=latest" >> "$GITHUB_ENV"
+        else
+          echo "SR_VERSION=$BRANCH_NAME" >> "$GITHUB_ENV"
+        fi
+
     - name: Checkout Push to Registry action
       uses: konveyor/release-tools/build-push-quay@main
       with:
@@ -31,3 +41,4 @@ jobs:
         quay_publish_robot: ${{ secrets.QUAY_PUBLISH_ROBOT }}
         quay_publish_token: ${{ secrets.QUAY_PUBLISH_TOKEN }}
         ref: ${{ github.ref }}
+        extra-args: "--build-arg VERSION=${SR_VERSION}"

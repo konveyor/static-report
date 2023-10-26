@@ -10,7 +10,6 @@ import {
   ListItem,
   TextContent,
 } from "@patternfly/react-core";
-import EnvelopeIcon from "@patternfly/react-icons/dist/esm/icons/envelope-icon";
 import GithubIcon from "@patternfly/react-icons/dist/esm/icons/github-icon";
 import GlobeIcon from "@patternfly/react-icons/dist/esm/icons/globe-icon";
 import InfoAltIcon from "@patternfly/react-icons/dist/esm/icons/info-alt-icon";
@@ -68,7 +67,7 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
               Website
             </a>
           </ListItem>
-          <ListItem>
+          {/* <ListItem>
             <a
               href={Theme.documentationURL}
               target="_blank"
@@ -76,7 +75,7 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
             >
               Documentation
             </a>
-          </ListItem>
+          </ListItem> */}
         </List>
       </TextContent>
       <div>
@@ -105,7 +104,7 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
               Discussion forum
             </a>
           </FlexItem>
-          <FlexItem>
+          {/* <FlexItem>
             <a
               href={Theme.mailingListURL}
               rel="noopener noreferrer"
@@ -116,7 +115,7 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
               </i>{" "}
               Mailing list
             </a>
-          </FlexItem>
+          </FlexItem> */}
           <FlexItem>
             <a
               href={Theme.issueTrackingURL}
