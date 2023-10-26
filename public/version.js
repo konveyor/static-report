@@ -1,1 +1,1 @@
-window.version = "${project.version}";
+window.version = "_VERSION_";
