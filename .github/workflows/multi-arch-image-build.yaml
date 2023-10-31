@@ -41,4 +41,4 @@ jobs:
         quay_publish_robot: ${{ secrets.QUAY_PUBLISH_ROBOT }}
         quay_publish_token: ${{ secrets.QUAY_PUBLISH_TOKEN }}
         ref: ${{ github.ref }}
-        extra-args: "--build-arg VERSION=${SR_VERSION}"
+        extra-args: "--build-arg VERSION=${{ env.SR_VERSION }}"
