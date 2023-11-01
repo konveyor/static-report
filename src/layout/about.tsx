@@ -47,7 +47,7 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
           migrate them to Red Hat Middleware, cloud and containers.
         </p>
       </TextContent>
-      <TextContent className="pf-u-py-xl">
+      <TextContent className="pf-v5-u-py-xl">
         <Grid hasGutter>
           <GridItem lg={7}>
             <span className="dt">Version</span>
@@ -55,7 +55,7 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
           <GridItem lg={5}>{VERSION}</GridItem>
         </Grid>
       </TextContent>
-      <TextContent className="pf-u-py-xl">
+      <TextContent className="pf-v5-u-py-xl">
         <h4>Links</h4>
         <List>
           <ListItem>

@@ -5,6 +5,9 @@ on:
     paths-ignore:
       - "README.md"
 
+env:
+  CI: false
+
 jobs:
   ui-tests:
     name: UI Tests

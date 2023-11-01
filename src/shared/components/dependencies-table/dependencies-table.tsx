@@ -1,7 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 
-
-import { useSelectionState } from "@migtools/lib-ui";
 import {
   Bullseye,
   EmptyState,
@@ -10,7 +8,6 @@ import {
   Label,
   Split,
   SplitItem,
-  SelectVariant,
   SearchInput,
   Title,
   ToolbarItem,
@@ -18,53 +15,26 @@ import {
   ToolbarChipGroup,
   ToolbarFilter,
   ToolbarGroup,
+  Toolbar,
+  ToolbarContent,
+  ToolbarToggleGroup,
+  ToolbarItemVariant,
 } from "@patternfly/react-core";
 import ArrowUpIcon from "@patternfly/react-icons/dist/esm/icons/arrow-up-icon";
-import {
-  IAction,
-  ICell,
-  IRow,
-  IRowData,
-  cellWidth,
-  sortable,
-  truncate,
-} from "@patternfly/react-table";
+import FilterIcon from "@patternfly/react-icons/dist/esm/icons/filter-icon";
+import { Table, Tbody, Td, Th, Thead, Tr } from "@patternfly/react-table";
 import { useDebounce } from "usehooks-ts";
-
 
 import { DependencyDto } from "@app/api/report";
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
 import { useAllApplications } from "@app/queries/report";
-import { SimpleTableWithToolbar, SimpleSelect, OptionWithValue } from "@app/shared/components";
+import {
+  SimpleSelect,
+  OptionWithValue,
+  SimplePagination,
+  ConditionalTableBody,
+} from "@app/shared/components";
 import { useTable, useTableControls, useToolbar } from "@app/shared/hooks";
-
-const areDependenciesEquals = (a: DependencyDto, b: DependencyDto) => {
-  return a.name === b.name && a.version === b.version && a.resolvedIdentifier === b.resolvedIdentifier;
-};
-
-const DataKey = "DataKey";
-
-const columns: ICell[] = [
-  {
-    title: "Name",
-    transforms: [cellWidth(50), sortable],
-    cellTransforms: [truncate],
-  },
-  {
-    title: "Labels",
-    transforms: [cellWidth(30)],
-  },
-  {
-    title: "Version",
-    transforms: [cellWidth(10)],
-    cellTransforms: [truncate],
-  },
-  {
-    title: "Relation",
-    transforms: [cellWidth(10), sortable],
-    cellTransforms: [truncate],
-  },
-];
 
 const compareToByColumn = (
   a: DependencyDto,
@@ -75,9 +45,9 @@ const compareToByColumn = (
     case 1: // name
       return a.name.localeCompare(b.name);
     case 3: // version
-      return a.version === b.version ? 0 : 1
+      return a.version === b.version ? 0 : 1;
     case 4: // indirect
-      return a.indirect === b.indirect ? 0 : 1
+      return a.indirect === b.indirect ? 0 : 1;
     default:
       return 0;
   }
@@ -116,10 +86,6 @@ const toToolbarChip = (option: OptionWithValue): ToolbarChip => {
   };
 };
 
-const getRow = (rowData: IRowData): DependencyDto => {
-  return rowData[DataKey];
-};
-
 export interface IDependenciesTableProps {
   applicationId?: string;
 }
@@ -138,37 +104,24 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
 
   const debouncedFilterText = useDebounce<string>(filterText, 250);
   const debouncedFilters = useDebounce<
-    Map<
-      "labels" | "relationship",
-      ToolbarChip[]
-    >
+    Map<"labels" | "relationship", ToolbarChip[]>
   >(filters, 100);
 
   const dependencies = useMemo(() => {
-    if (
-      !allApplicationsQuery.data ||
-      applicationId === undefined
-    ) {
+    if (!allApplicationsQuery.data || applicationId === undefined) {
       return [];
     }
-    return (
-      applicationId === ALL_APPLICATIONS_ID ? 
-      allApplicationsQuery.data?.flatMap((a) => a.dependencies || []) : 
-      allApplicationsQuery.data?.find((f) => f.id === applicationId)?.dependencies || []
-    );
+    return applicationId === ALL_APPLICATIONS_ID
+      ? allApplicationsQuery.data?.flatMap((a) => a.dependencies || [])
+      : allApplicationsQuery.data?.find((f) => f.id === applicationId)
+          ?.dependencies || [];
   }, [allApplicationsQuery.data, applicationId]);
 
   const allLabels: string[] = useMemo(() => {
-    return Array.from(new Set(dependencies?.flatMap((d) => d.labels)))
-  }, [dependencies])
+    return Array.from(new Set(dependencies?.flatMap((d) => d.labels)));
+  }, [dependencies]);
 
   // Rows
-  const {
-    toggleItemSelected: toggleRowExpanded,
-  } = useSelectionState<DependencyDto>({
-    items: dependencies,
-    isEqual: areDependenciesEquals,
-  });
 
   const {
     page: currentPage,
@@ -189,8 +142,8 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
       let isLabelFilterCompliant = true;
       const selectedLabels = debouncedFilters.get("labels") || [];
       if (selectedLabels.length > 0) {
-        isLabelFilterCompliant = selectedLabels.some(
-          (f) => item.labels?.includes(f.key)
+        isLabelFilterCompliant = selectedLabels.some((f) =>
+          item.labels?.includes(f.key)
         );
       }
 
@@ -198,7 +151,9 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
       const selectedRelation = debouncedFilters.get("relationship") || [];
       if (selectedRelation.length > 0) {
         isLabelFilterCompliant = selectedRelation.some(
-          (f) => (f.key === "Direct" && !item.indirect) || (f.key === "Indirect" && item.indirect)
+          (f) =>
+            (f.key === "Direct" && !item.indirect) ||
+            (f.key === "Indirect" && item.indirect)
         );
       }
 
@@ -218,46 +173,6 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
     compareToByColumn,
     filterItem,
   });
-
-  const itemsToRow = (items: DependencyDto[]) => {
-    const rows: IRow[] = [];
-    items.forEach((item) => {
-      rows.push({
-        [DataKey]: item,
-        cells: [
-          {
-            title: item.name,
-          },
-          {
-            title: (
-              <>
-                <Split hasGutter>
-                  {item.labels?.map((label, index) => (
-                    <SplitItem key={index}>
-                      <Label isCompact color="blue">
-                        {label.replace("konveyor.io/source=", "")}
-                      </Label>
-                    </SplitItem>
-                  ))}
-                </Split>
-              </>
-            ),
-          },
-          {
-            title: item.version,
-          },
-          {
-            title: item.indirect ? "Indirect" : "Direct",
-          },
-        ],
-      });
-    });
-
-    return rows;
-  };
-
-  const rows: IRow[] = itemsToRow(pageItems);
-  const actions: IAction[] = [];
 
   // Reset pagination when application change
   useEffect(() => {
@@ -279,44 +194,22 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
           </EmptyState>
         </Bullseye>
       ) : (
-        <SimpleTableWithToolbar
-          hasTopPagination
-          hasBottomPagination
-          totalCount={filteredItems.length}
-          // Expand
-          onCollapse={(_event, _rowIndex, _isOpen, rowData) => {
-            const issue = getRow(rowData);
-            toggleRowExpanded(issue);
-          }}
-          // Sorting
-          sortBy={
-            currentSortBy || { index: undefined, defaultDirection: "asc" }
-          }
-          onSort={onChangeSortBy}
-          // Pagination
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-          // Table
-          rows={rows}
-          cells={columns}
-          actions={actions}
-          // Fech data
-          isLoading={allApplicationsQuery.isFetching}
-          loadingVariant="skeleton"
-          fetchError={allApplicationsQuery.isError}
-          // Toolbar filters
-          filtersApplied={filterText.trim().length > 0}
-          toolbarClearAllFilters={clearAllFilters}
-          toolbarToggle={
-            <>
-              <ToolbarItem variant="search-filter">
-                <SearchInput
-                  value={filterText}
-                  onChange={setFilterText}
-                  onClear={() => setFilterText("")}
-                />
-              </ToolbarItem>
-              <ToolbarGroup variant="filter-group">
+        <>
+          <Toolbar
+            className="pf-m-toggle-group-container"
+            collapseListedFiltersBreakpoint="xl"
+            clearAllFilters={clearAllFilters}
+          >
+            <ToolbarContent>
+              <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
+                <ToolbarItem variant="search-filter">
+                  <SearchInput
+                    value={filterText}
+                    onChange={(_, value) => setFilterText(value)}
+                    onClear={() => setFilterText("")}
+                  />
+                </ToolbarItem>
+                <ToolbarGroup variant="filter-group">
                   <ToolbarFilter
                     chips={filters.get("labels")}
                     deleteChip={(
@@ -328,7 +221,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
                   >
                     <SimpleSelect
                       maxHeight={300}
-                      variant={SelectVariant.checkbox}
+                      variant="checkbox"
                       aria-label="labels"
                       aria-labelledby="labels"
                       placeholderText="Labels"
@@ -371,7 +264,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
                   >
                     <SimpleSelect
                       maxHeight={300}
-                      variant={SelectVariant.checkbox}
+                      variant="checkbox"
                       aria-label="relationship"
                       aria-labelledby="relationship"
                       placeholderText="Relation"
@@ -385,9 +278,9 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
                         ).some((f) => f.key === optionValue.value);
                         let newElements: ToolbarChip[];
                         if (elementExists) {
-                          newElements = (filters.get("relationship") || []).filter(
-                            (f) => f.key !== optionValue.value
-                          );
+                          newElements = (
+                            filters.get("relationship") || []
+                          ).filter((f) => f.key !== optionValue.value);
                         } else {
                           newElements = [
                             ...(filters.get("relationship") || []),
@@ -402,9 +295,87 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
                     />
                   </ToolbarFilter>
                 </ToolbarGroup>
-            </>
-          }
-        />
+              </ToolbarToggleGroup>
+              <ToolbarItem
+                variant={ToolbarItemVariant.pagination}
+                align={{ default: "alignRight" }}
+              >
+                <SimplePagination
+                  count={filteredItems.length}
+                  params={currentPage}
+                  onChange={onPageChange}
+                  isTop={true}
+                />
+              </ToolbarItem>
+            </ToolbarContent>
+          </Toolbar>
+
+          <Table>
+            <Thead>
+              <Tr>
+                <Th
+                  width={50}
+                  sort={{
+                    columnIndex: 1,
+                    sortBy: { ...currentSortBy },
+                    onSort: onChangeSortBy,
+                  }}
+                  modifier="truncate"
+                >
+                  Name
+                </Th>
+                <Th width={30}>Labels</Th>
+                <Th width={10} modifier="truncate">
+                  Version
+                </Th>
+                <Th
+                  width={10}
+                  sort={{
+                    columnIndex: 4,
+                    sortBy: { ...currentSortBy },
+                    onSort: onChangeSortBy,
+                  }}
+                  modifier="truncate"
+                >
+                  Relation
+                </Th>
+              </Tr>
+            </Thead>
+            <ConditionalTableBody
+              isNoData={filteredItems.length === 0}
+              numRenderedColumns={10}
+            >
+              {pageItems?.map((item, rowIndex) => {
+                return (
+                  <Tbody key={rowIndex}>
+                    <Tr>
+                      <Td>{item.name}</Td>
+                      <Td>
+                        <Split hasGutter>
+                          {item.labels?.map((label, index) => (
+                            <SplitItem key={index}>
+                              <Label isCompact color="blue">
+                                {label.replace("konveyor.io/source=", "")}
+                              </Label>
+                            </SplitItem>
+                          ))}
+                        </Split>
+                      </Td>
+                      <Td>{item.version}</Td>
+                      <Td>{item.indirect ? "Indirect" : "Direct"}</Td>
+                    </Tr>
+                  </Tbody>
+                );
+              })}
+            </ConditionalTableBody>
+          </Table>
+
+          <SimplePagination
+            count={filteredItems.length}
+            params={currentPage}
+            onChange={onPageChange}
+          />
+        </>
       )}
     </>
   );

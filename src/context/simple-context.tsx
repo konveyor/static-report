@@ -10,7 +10,7 @@ import {
   ContextSelector,
   ContextSelectorItem,
   ContextSelectorProps,
-} from "@patternfly/react-core";
+} from "@patternfly/react-core/deprecated";
 
 import "./simple-context.css";
 
@@ -104,7 +104,7 @@ export const SimpleContextSelector: React.FC<ISimpleContextSelectorProps> = ({
       toggleText={currentContext?.label}
       onToggle={toggleSelector}
       searchInputValue={filterText}
-      onSearchInputChange={setFilterText}
+      onSearchInputChange={(_, value) => setFilterText(value)}
       className="firstChildBordered"
       {...props}
     >

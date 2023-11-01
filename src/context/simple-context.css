@@ -1,4 +1,4 @@
 .firstChildBordered ul > li:first-child {
-  border-bottom: var(--pf-global--BorderWidth--sm) solid
-    var(--pf-global--BorderColor--100);
+  border-bottom: var(--pf-v5-global--BorderWidth--sm) solid
+    var(--pf-v5-global--BorderColor--100);
 }

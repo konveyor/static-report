@@ -18,7 +18,7 @@ export const SidebarApp: React.FC = () => {
           <NavLink
             to="/applications"
             className={({ isActive }) =>
-              css("pf-c-nav__link", isActive ? "pf-m-current" : "")
+              css("pf-v5-c-nav__link", isActive ? "pf-m-current" : "")
             }
           >
             Applications
@@ -32,7 +32,7 @@ export const SidebarApp: React.FC = () => {
                 : "/issues/applications/" + currentContext.key
             }
             className={({ isActive }) =>
-              css("pf-c-nav__link", isActive ? "pf-m-current" : "")
+              css("pf-v5-c-nav__link", isActive ? "pf-m-current" : "")
             }
           >
             Issues
@@ -46,7 +46,7 @@ export const SidebarApp: React.FC = () => {
                 : "/dependencies/applications/" + currentContext.key
             }
             className={({ isActive }) =>
-              css("pf-c-nav__link", isActive ? "pf-m-current" : "")
+              css("pf-v5-c-nav__link", isActive ? "pf-m-current" : "")
             }
           >
             Dependencies
@@ -56,5 +56,5 @@ export const SidebarApp: React.FC = () => {
     );
   };
 
-  return <PageSidebar nav={renderPageNav()} theme={LayoutTheme} />;
+  return <PageSidebar theme={LayoutTheme}>{renderPageNav()}</PageSidebar>;
 };
