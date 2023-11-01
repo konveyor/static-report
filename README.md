@@ -14,6 +14,8 @@ The contents of the YAML output need to be converted into the specific format ex
 
 ### Running in development mode
 
+> We have tested following steps with npm version 9.8.1 
+
 This is useful for iterative development.
 
 To run the project in development mode:
