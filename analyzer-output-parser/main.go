@@ -9,6 +9,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/icza/dyno"
 	"github.com/konveyor/analyzer-lsp/output/v1/konveyor"
 	"gopkg.in/yaml.v2"
 )
@@ -31,6 +32,25 @@ var (
 )
 
 var applications []*Application
+
+func (a Application) MarshalJSON() ([]byte, error) {
+	b, err := yaml.Marshal(a)
+	if err != nil {
+		return b, err
+	}
+
+	m := map[string]any{}
+	err = yaml.Unmarshal(b, &m)
+	if err != nil {
+		return nil, err
+	}
+
+	// See https://stackoverflow.com/questions/40737122/convert-yaml-to-json-without-struct
+	m2 := dyno.ConvertMapI2MapS(m)
+
+	marshal, err := json.Marshal(m2)
+	return marshal, err
+}
 
 func main() {
 	flag.Parse()

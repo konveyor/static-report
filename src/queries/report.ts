@@ -52,7 +52,8 @@ const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: Rules
       const violation: IssueDto = rs.violations[ruleID];
       const totalIncidents: number = violation.incidents.length;
       const totalEffort: number = (violation.effort ? violation.effort : 0) * totalIncidents;
-      const name: string = violation.description?.split("\n")[0];
+      const name: string = violation.description || "";
+      const message: string = violation.message || "";
       const sourceTechnologies: string[] = filterLabelsWithPrefix(violation.labels, "konveyor.io/source=");
       const targetTechnologies: string[] = filterLabelsWithPrefix(violation.labels, "konveyor.io/target=");
       const dispersedFiles: { [key: string]: DispersedFile } = violation.incidents.reduce<{ [key: string]: DispersedFile }>((acc, incident) => {
@@ -80,6 +81,7 @@ const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: Rules
         name,
         appID,
         ruleID,
+        message,
         totalEffort,
         dispersedFiles,
         totalIncidents,
@@ -99,7 +101,8 @@ const issuesFromIssuesDto = (appID: string, issues: IssueDto[]): IssueProcessed[
   return issues?.flatMap((issue) => {
     const totalIncidents: number = issue.incidents?.length;
     const totalEffort: number = (issue.effort ? issue.effort : 0) * totalIncidents;
-    const name: string = issue.description?.split("\n")[0];
+    const name: string = issue.description || "";
+    const message: string = issue.message || "";
     const sourceTechnologies: string[] = filterLabelsWithPrefix(issue.labels, "konveyor.io/source=");
     const targetTechnologies: string[] = filterLabelsWithPrefix(issue.labels, "konveyor.io/target=");
     const dispersedFiles: { [key: string]: DispersedFile } = issue.incidents.reduce<{ [key: string]: DispersedFile }>((acc, incident) => {
@@ -126,6 +129,7 @@ const issuesFromIssuesDto = (appID: string, issues: IssueDto[]): IssueProcessed[
       ...issue,
       name,
       appID,
+      message,
       totalEffort,
       totalIncidents,
       dispersedFiles,
