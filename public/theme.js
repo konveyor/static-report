@@ -1,1 +1,1 @@
-window["THEME"] = "konveyor";
+window["THEME"] = "default";

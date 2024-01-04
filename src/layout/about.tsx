@@ -2,17 +2,12 @@ import React from "react";
 
 import {
   AboutModal,
-  Flex,
-  FlexItem,
   Grid,
   GridItem,
   List,
   ListItem,
   TextContent,
 } from "@patternfly/react-core";
-import GithubIcon from "@patternfly/react-icons/dist/esm/icons/github-icon";
-import GlobeIcon from "@patternfly/react-icons/dist/esm/icons/globe-icon";
-import InfoAltIcon from "@patternfly/react-icons/dist/esm/icons/info-alt-icon";
 
 import { Theme } from "./theme-constants";
 
@@ -33,7 +28,6 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
       onClose={onClose}
       brandImageAlt="Brand Image"
       brandImageSrc={Theme.logoSrc}
-      productName={Theme.name}
       className="about-app__component"
     >
       <TextContent>
@@ -67,7 +61,7 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
               Website
             </a>
           </ListItem>
-          {/* <ListItem>
+          <ListItem>
             <a
               href={Theme.documentationURL}
               target="_blank"
@@ -75,61 +69,9 @@ export const AboutApp: React.FC<IButtonAboutAppProps> = ({
             >
               Documentation
             </a>
-          </ListItem> */}
+          </ListItem>
         </List>
       </TextContent>
-      <div>
-        <Flex>
-          <FlexItem>
-            <a
-              href={Theme.sourceURL}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <i>
-                <GithubIcon />
-              </i>{" "}
-              Source
-            </a>
-          </FlexItem>
-          <FlexItem>
-            <a
-              href={Theme.discussionForumURL}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <i>
-                <GlobeIcon />
-              </i>{" "}
-              Discussion forum
-            </a>
-          </FlexItem>
-          {/* <FlexItem>
-            <a
-              href={Theme.mailingListURL}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <i>
-                <EnvelopeIcon />
-              </i>{" "}
-              Mailing list
-            </a>
-          </FlexItem> */}
-          <FlexItem>
-            <a
-              href={Theme.issueTrackingURL}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <i>
-                <InfoAltIcon />
-              </i>{" "}
-              Issue tracking
-            </a>
-          </FlexItem>
-        </Flex>
-      </div>
     </AboutModal>
   );
 };
