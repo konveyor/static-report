@@ -45,7 +45,6 @@ export const HeaderApp: React.FC = () => {
         <MastheadMain>
           <MastheadBrand>
             <Brand
-              widths={{ default: "90px", md: "120px", "2xl": "120px" }}
               src={Theme.logoNavbarSrc}
               alt="Brand"
             >
