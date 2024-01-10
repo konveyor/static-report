@@ -14,14 +14,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  version:
-    name: Compute version
-    runs-on: ubuntu-20.04
-    steps:
-    - name: Set up VERSION variable
-      run: |
-        echo "SR_VERSION=${GITHUB_REF_NAME/main/latest}" >> "$GITHUB_ENV"
-
   image-build:
     uses: konveyor/release-tools/.github/workflows/build-push-images.yaml@main
     with:
@@ -29,7 +21,7 @@ jobs:
       image_name: "static-report"
       containerfile: "./Dockerfile"
       architectures: '[ "amd64", "arm64", "ppc64le", "s390x" ]'
-      extra-args: "--build-arg VERSION=${{ env.SR_VERSION }}"
+      extra-args: "--build-arg VERSION=${{ github.ref_name }}"
     secrets:
       registry_username: ${{ secrets.QUAY_PUBLISH_ROBOT }}
       registry_password: ${{ secrets.QUAY_PUBLISH_TOKEN }}
