@@ -14,31 +14,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  push-quay:
-    name: Build and Push Manifest
-    runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false
-    steps:
-    - name: Set up VERSION variable
-      id: set_version
-      run: |
-        BRANCH_NAME=${GITHUB_REF#refs/heads/}
-        if [ "$BRANCH_NAME" = "main" ]; then
-          echo "SR_VERSION=latest" >> "$GITHUB_ENV"
-        else
-          echo "SR_VERSION=$BRANCH_NAME" >> "$GITHUB_ENV"
-        fi
-
-    - name: Checkout Push to Registry action
-      uses: konveyor/release-tools/build-push-quay@main
-      with:
-        architectures: "amd64, arm64, ppc64le, s390x"
-        containerfile: "./Dockerfile"
-        image_name: "static-report"
-        image_namespace: "konveyor"
-        image_registry: "quay.io"
-        quay_publish_robot: ${{ secrets.QUAY_PUBLISH_ROBOT }}
-        quay_publish_token: ${{ secrets.QUAY_PUBLISH_TOKEN }}
-        ref: ${{ github.ref }}
-        extra-args: "--build-arg VERSION=${{ env.SR_VERSION }}"
+  image-build:
+    uses: konveyor/release-tools/.github/workflows/build-push-images.yaml@main
+    with:
+      registry: "quay.io/konveyor"
+      image_name: "static-report"
+      containerfile: "./Dockerfile"
+      architectures: '[ "amd64", "arm64", "ppc64le", "s390x" ]'
+      extra-args: "--build-arg VERSION=${{ github.ref_name }}"
+    secrets:
+      registry_username: ${{ secrets.QUAY_PUBLISH_ROBOT }}
+      registry_password: ${{ secrets.QUAY_PUBLISH_TOKEN }}
