@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@migtools/lib-ui": "9.0.3",
-    "@patternfly/patternfly": "5.0.2",
+    "@patternfly/patternfly": "5.2.0",
     "@patternfly/react-charts": "7.1.1",
     "@patternfly/react-code-editor": "5.1.1",
     "@patternfly/react-core": "5.1.1",
