@@ -20,7 +20,8 @@ if (
     ],
     violations: {
         "rule-001": {
-            description: "Test Rule 001\nTest description",
+            description: "Test Rule 001",
+            message: "Test description line 1\nTestDescription line 2",
             category: ISSUE_CATEGORIES[0],
             labels: [
                 "konveyor.io/source=src-1",
@@ -51,7 +52,8 @@ if (
             ],
         },
         "rule-002": {
-            description: "Test Rule 002\nTest description",
+            description: "Test Rule 002",
+            message: "Test description line 1\nTestDescription line 2",
             category: ISSUE_CATEGORIES[1],
             labels: [
                 "konveyor.io/target=tgt-1",
@@ -95,7 +97,8 @@ if (
     ],
     violations: {
         "rule-001": {
-            description: "Test Rule 001\nTest description",
+            description: "Test Rule 001",
+            message: "Test description line 1\nTestDescription line 2",
             category: ISSUE_CATEGORIES[0],
             labels: [
                 "konveyor.io/source=src-1",
@@ -140,7 +143,8 @@ if (
             ],
         },
         "rule-002": {
-            description: "An issue with a really long description that doesn't quite fit in the cell\nTest description",
+            description: "An issue with a really long description that doesn't quite fit in the cell",
+            message: "Test description line 1\nTestDescription line 2",
             category: ISSUE_CATEGORIES[1],
             labels: [
                 "konveyor.io/target=really-long-target-name",

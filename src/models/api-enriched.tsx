@@ -21,6 +21,7 @@ export interface IssueProcessed {
   effort: number;
   links: LinkDto[];
   description: string;
+  message: string;
   totalEffort: number;
   totalIncidents: number;
   category: IssueCatType;

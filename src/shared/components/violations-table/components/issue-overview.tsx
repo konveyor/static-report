@@ -191,7 +191,7 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
               </CardHeader>
               <CardBody>
                 <SimpleMarkdown
-                  children={getMarkdown(issue.description || "", issue.links)}
+                  children={getMarkdown(issue.message || "", issue.links)}
                 />
               </CardBody>
             </Card>

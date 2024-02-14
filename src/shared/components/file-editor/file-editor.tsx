@@ -142,7 +142,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
           endLineNumber: absoluteToRelativeLineNum(inc.lineNumber), 
           startColumn: 0,
           endColumn: 1000,
-          message: issue.description,
+          message: issue.message,
           severity: monaco.MarkerSeverity.Warning,
         }
         return marker
@@ -195,10 +195,10 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
                   </CardTitle>
                 </CardHeader>
                 <CardBody>
-                  {issue.description && (
+                  {issue.message && (
                     <SimpleMarkdown
                       children={getMarkdown(
-                        issue.description,
+                        issue.message,
                         issue.links,
                       )}
                     />

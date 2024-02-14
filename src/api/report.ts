@@ -22,6 +22,7 @@ export interface IssueDto {
     ruleset?: string;
     rule?: string;
     name?: string;
+    message?: string;
     description: string;
     category: string;
     labels: string[];
@@ -33,7 +34,7 @@ export interface IssueDto {
 export interface IncidentDto {
     uri?: string;
     file?: string;
-    message: string;
+    message?: string;
     codeSnip: string;
     lineNumber?: number;
     line?: number;
