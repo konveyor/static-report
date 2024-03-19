@@ -9,14 +9,15 @@ import {
   EmptyState,
   EmptyStateIcon,
   EmptyStateVariant,
+  Flex,
+  FlexItem,
   Gallery,
   GalleryItem,
+  Label,
   PageSection,
   Title,
 } from "@patternfly/react-core";
 import InfoAltIcon from "@patternfly/react-icons/dist/esm/icons/info-alt-icon";
-import { Table, Tbody, Td, Tr } from "@patternfly/react-table";
-
 
 import { ApplicationProcessed } from "@app/models/api-enriched";
 
@@ -32,11 +33,14 @@ export const Technologies: React.FC = () => {
     return acc
   }, {})
 
+  const sortedTagsByCategory = Object.entries(tagsByCategory).sort((a, b) => 
+    a[0] === "Uncategorized" ? 1 : (a[1] ? (b[1] ? a[1].length - b[1].length:0):0))
+
   return (
     <>
       <PageSection>
         <Gallery hasGutter minWidths={{ md: "400px" }}>
-          {Object.entries(tagsByCategory).map(([category, tags], index) => (
+          {sortedTagsByCategory.map(([category, tags], index) => (
             <GalleryItem key={index}>
               <Card isFullHeight>
                 <CardTitle>
@@ -44,26 +48,25 @@ export const Technologies: React.FC = () => {
                 </CardTitle>
                 <Divider />
                 <CardBody>
-                  <Table variant="compact" borders={false}>
-                    <Tbody>
-                      {tags.length > 0 ? (
+                  <Flex>
+                    {
+                      tags.length > 0 ? (
                         tags.map(
                           (value, tagIndex) => (
-                            <Tr key={tagIndex}>
-                              <Td>{value}</Td>
-                            </Tr>
+                            <FlexItem key={tagIndex}>
+                              <Label variant="outline">{value}</Label>
+                            </FlexItem>
                           )
+                        )) : (
+                          <EmptyState variant={EmptyStateVariant.sm}>
+                            <EmptyStateIcon icon={InfoAltIcon} />
+                            <Title headingLevel="h4" size="md">
+                              No data to show
+                            </Title>
+                          </EmptyState>
                         )
-                      ) : (
-                        <EmptyState variant={EmptyStateVariant.sm}>
-                          <EmptyStateIcon icon={InfoAltIcon} />
-                          <Title headingLevel="h4" size="md">
-                            No data to show
-                          </Title>
-                        </EmptyState>
-                      )}
-                    </Tbody>
-                  </Table>
+                    }
+                  </Flex>
                 </CardBody>
               </Card>
             </GalleryItem>
