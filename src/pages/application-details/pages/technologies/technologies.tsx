@@ -9,11 +9,10 @@ import {
   EmptyState,
   EmptyStateIcon,
   EmptyStateVariant,
-  Flex,
-  FlexItem,
   Gallery,
   GalleryItem,
   Label,
+  LabelGroup,
   PageSection,
   Title,
 } from "@patternfly/react-core";
@@ -48,25 +47,23 @@ export const Technologies: React.FC = () => {
                 </CardTitle>
                 <Divider />
                 <CardBody>
-                  <Flex>
-                    {
-                      tags.length > 0 ? (
-                        tags.map(
-                          (value, tagIndex) => (
-                            <FlexItem key={tagIndex}>
-                              <Label variant="outline">{value}</Label>
-                            </FlexItem>
-                          )
-                        )) : (
-                          <EmptyState variant={EmptyStateVariant.sm}>
-                            <EmptyStateIcon icon={InfoAltIcon} />
-                            <Title headingLevel="h4" size="md">
-                              No data to show
-                            </Title>
-                          </EmptyState>
-                        )
-                    }
-                  </Flex>
+                  {
+                    tags.length > 0 ? (
+                      <LabelGroup numLabels={5}>
+                        {
+                          tags.map((value, tagIndex) => 
+                            <Label variant="outline">{value}</Label>)
+                        }
+                      </LabelGroup>
+                    ) : (
+                      <EmptyState variant={EmptyStateVariant.sm}>
+                        <EmptyStateIcon icon={InfoAltIcon} />
+                        <Title headingLevel="h4" size="md">
+                          No data to show
+                        </Title>
+                      </EmptyState>
+                    )
+                  }
                 </CardBody>
               </Card>
             </GalleryItem>
