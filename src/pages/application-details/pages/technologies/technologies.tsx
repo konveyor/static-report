@@ -11,12 +11,12 @@ import {
   EmptyStateVariant,
   Gallery,
   GalleryItem,
+  Label,
+  LabelGroup,
   PageSection,
   Title,
 } from "@patternfly/react-core";
 import InfoAltIcon from "@patternfly/react-icons/dist/esm/icons/info-alt-icon";
-import { TableComposable, Tbody, Td, Tr } from "@patternfly/react-table";
-
 
 import { ApplicationProcessed } from "@app/models/api-enriched";
 
@@ -44,26 +44,23 @@ export const Technologies: React.FC = () => {
                 </CardTitle>
                 <Divider />
                 <CardBody>
-                  <TableComposable variant="compact" borders={false}>
-                    <Tbody>
-                      {tags.length > 0 ? (
-                        tags.map(
-                          (value, tagIndex) => (
-                            <Tr key={tagIndex}>
-                              <Td>{value}</Td>
-                            </Tr>
-                          )
-                        )
-                      ) : (
-                        <EmptyState variant={EmptyStateVariant.small}>
-                          <EmptyStateIcon icon={InfoAltIcon} />
-                          <Title headingLevel="h4" size="md">
-                            No data to show
-                          </Title>
-                        </EmptyState>
-                      )}
-                    </Tbody>
-                  </TableComposable>
+                  {
+                    tags.length > 0 ? (
+                      <LabelGroup numLabels={5}>
+                        {
+                          tags.map((value, tagIndex) => 
+                            <Label variant="outline">{value}</Label>)
+                        }
+                      </LabelGroup>
+                    ) : (
+                      <EmptyState variant={EmptyStateVariant.small}>
+                        <EmptyStateIcon icon={InfoAltIcon} />
+                        <Title headingLevel="h4" size="md">
+                          No data to show
+                        </Title>
+                      </EmptyState>
+                    )
+                  }
                 </CardBody>
               </Card>
             </GalleryItem>
