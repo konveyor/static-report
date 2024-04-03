@@ -21,7 +21,7 @@ jobs:
       image_name: "static-report"
       containerfile: "./Dockerfile"
       architectures: '[ "amd64", "arm64", "ppc64le", "s390x" ]'
-      extra-args: "--build-arg VERSION=${{ github.ref_name }}"
+      extra-args: "--build-arg VERSION=${{ github.ref_name }} --ulimit nofile=4096:4096"
     secrets:
       registry_username: ${{ secrets.QUAY_PUBLISH_ROBOT }}
       registry_password: ${{ secrets.QUAY_PUBLISH_TOKEN }}
