@@ -106,6 +106,20 @@ func loadApplications() error {
 			if err != nil {
 				return err
 			}
+			// extras on dependencies and incidents are known to
+			// confuse json marshaling, we don't use extras in the report
+			for idx := range app.DepItems {
+				depItem := &app.DepItems[idx]
+				for _, dep := range depItem.Dependencies {
+					dep.Extras = make(map[string]interface{})
+				}
+			}
+			for idx := range app.Rulesets {
+				rs := &app.Rulesets[idx]
+				for _, violation := range rs.Violations {
+					violation.Extras = nil
+				}
+			}
 		}
 	}
 	return nil
