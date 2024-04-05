@@ -53,8 +53,8 @@ const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: Rules
       const totalIncidents: number = violation.incidents.length;
       const totalEffort: number = (violation.effort ? violation.effort : 0) * totalIncidents;
       const name: string = violation.description?.split("\n")[0];
-      const sourceTechnologies: string[] = filterLabelsWithPrefix(violation.labels, "konveyor.io/source=");
-      const targetTechnologies: string[] = filterLabelsWithPrefix(violation.labels, "konveyor.io/target=");
+      const sourceTechnologies: string[] = filterLabelsWithPrefix(violation.labels || [], "konveyor.io/source=");
+      const targetTechnologies: string[] = filterLabelsWithPrefix(violation.labels || [], "konveyor.io/target=");
       const dispersedFiles: { [key: string]: DispersedFile } = violation.incidents.reduce<{ [key: string]: DispersedFile }>((acc, incident) => {
         if (!incident.uri || incident.uri === "") {
           return acc
