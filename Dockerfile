@@ -5,7 +5,17 @@ COPY ./analyzer-output-parser/go.sum go.sum
 COPY ./analyzer-output-parser/main.go main.go
 RUN go build -o js-bundle-generator ./main.go
 
-FROM registry.access.redhat.com/ubi9/nodejs-18:latest as builder
+# NOTE: Since the `:latest` tag can have npm version changes, we are using
+#       a specific version tag. Container build errors have come up locally
+#       and via github action workflow when `:latest` is updated.
+#
+# Image info: https://catalog.redhat.com/software/containers/ubi9/nodejs-18/62e8e7ed22d1d3c2dfe2ca01
+# Relevant PRs:
+#   - https://github.com/konveyor/tackle2-ui/pull/1746
+#   - https://github.com/konveyor/tackle2-ui/pull/1781
+
+# Builder image
+FROM registry.access.redhat.com/ubi9/nodejs-18:1-88 as builder
 USER 1001
 COPY --chown=1001 . .
 # Update assets
