@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 
 
-import { useSelectionState } from "@migtools/lib-ui";
+import { useSelectionState } from "@app/shared/hooks/useSelectionState";
 import {
   Bullseye,
   EmptyState,
