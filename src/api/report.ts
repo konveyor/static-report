@@ -34,7 +34,7 @@ export interface IncidentDto {
     uri?: string;
     file?: string;
     message: string;
-    codeSnip: string;
+    codeSnip?: string;
     lineNumber?: number;
     line?: number;
     variables: {
