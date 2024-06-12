@@ -46,9 +46,11 @@ const filterLabelsWithPrefix = (labels: string[], prefix: string): string[] => {
 }
 
 // converts violations from analyzer output to IssueProcessed[]
-const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: RulesetDto[]): IssueProcessed[] => {
+// when insightsMode is set, incidents will be generated from ruleset.insights 
+const issuesFromRulesetsDto = (appID: string, filesRaw: FileDto, rulesets: RulesetDto[], insightsMode: boolean): IssueProcessed[] => {
   return rulesets.flatMap((rs) => {
-    return Object.keys(rs.violations || {}).map((ruleID) => {
+    const keys = Object.keys((insightsMode ? rs.insights : rs.violations) || {})
+    return keys.map((ruleID) => {
       const violation: IssueDto = rs.violations[ruleID];
       const totalIncidents: number = violation.incidents.length;
       const totalEffort: number = (violation.effort ? violation.effort : 0) * totalIncidents;
@@ -177,8 +179,11 @@ export const useAllApplications = () => {
     (data: ReportDto[]): ApplicationProcessed[] =>
       data.map((a) => {
         const issues: IssueProcessed[] = a.rulesets ? 
-          issuesFromRulesetsDto(a.id, a.files, a.rulesets) : 
+          issuesFromRulesetsDto(a.id, a.files, a.rulesets, false) : 
           (a.issues ? issuesFromIssuesDto(a.id, a.issues) : [] as IssueProcessed[]);
+
+        const insights: IssueProcessed[] = a.rulesets ? 
+          issuesFromRulesetsDto(a.id, a.files, a.rulesets, true) : [] as IssueProcessed[];
 
         const tags: TagDto[] = a.rulesets ?
           tagsFromRulesetsDto(a.rulesets) :
@@ -203,6 +208,7 @@ export const useAllApplications = () => {
           ...a,
           id: String(a.id),
           issues,
+          insights,
           tags,
           tagsFlat,
           dependencies,

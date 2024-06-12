@@ -8,6 +8,7 @@ export interface ApplicationProcessed {
   id: string;
   name: string;
   issues: IssueProcessed[];
+  insights: IssueProcessed[];
   dependencies: DependencyProcessed[];
   tags: TagDto[];
   tagsFlat: string[];

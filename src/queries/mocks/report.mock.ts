@@ -18,6 +18,45 @@ if (
         "tag2",
         "Category1=tag3,tag4"
     ],
+    insights: {
+        "rule-002": {
+            description: "Test Rule 001\nTest description",
+            category: ISSUE_CATEGORIES[0],
+            labels: [
+                "konveyor.io/source=src-1",
+                "konveyor.io/target=tgt-1",
+            ],
+            links: [
+                {
+                    title: "Test Link 1",
+                    url: "https://konveyor.io",
+                },
+            ],
+            incidents: [
+                {
+                    uri: "konveyor-jdt://contents/home/pranav/.m2/repository/io/konveyor/demo/config-utils/1.0.0/config-utils-1.0.0.jar?packageName=io.konveyor.demo.config.ApplicationConfiguration.class\u0026source-range=true",
+                    message: "Test message",
+                    lineNumber: 1,
+                    codeSnip: "1 First Line\n2 Second Line\n",
+                    variables: {},
+                },
+                {
+                    uri: "file://test-files/file2.java",
+                    message: "Test message",
+                    lineNumber: 1,
+                    codeSnip: "1 First Line\n2 Second Line\n",
+                    variables: {},
+                },
+                {
+                    uri: "file://test-files/file3.java",
+                    message: "Test message",
+                    lineNumber: 1,
+                    variables: {},
+                    codeSnip: "1 First Line\n2 Second Line"
+                },
+            ],
+        }
+    },
     violations: {
         "rule-001": {
             description: "Test Rule 001\nTest description",

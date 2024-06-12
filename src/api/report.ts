@@ -16,6 +16,9 @@ export interface RulesetDto {
     violations: {
         [key: string]: IssueDto;
     }
+    insights?: {
+        [key: string]: IssueDto;
+    }
 }
 
 export interface IssueDto {
@@ -23,11 +26,11 @@ export interface IssueDto {
     rule?: string;
     name?: string;
     description: string;
-    category: string;
+    category?: string;
     labels: string[];
     incidents: IncidentDto[];
     links: LinkDto[];
-    effort: number;
+    effort?: number;
 }
 
 export interface IncidentDto {
