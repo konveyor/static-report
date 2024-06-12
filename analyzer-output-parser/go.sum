@@ -2,8 +2,8 @@ github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ3
 github.com/google/go-cmp v0.4.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
 github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
-github.com/konveyor/analyzer-lsp v0.3.0-rc.3.0.20240417133314-1e8c3cfb1112 h1:9/swccmunehLP99yWi6rGZBuuWp5fNoh8AOoW85XjWU=
-github.com/konveyor/analyzer-lsp v0.3.0-rc.3.0.20240417133314-1e8c3cfb1112/go.mod h1:Cxdhi1mAoz+rjUQmBiRjRyBy1oADavx4BbAZ9BkSwjk=
+github.com/konveyor/analyzer-lsp v0.4.0-alpha.1.0.20240612175452-e2284ce673fb h1:WuI2J9Ws03ri3xl45UklmShkIPSMPmgkScBikykS1gU=
+github.com/konveyor/analyzer-lsp v0.4.0-alpha.1.0.20240612175452-e2284ce673fb/go.mod h1:GXkSykQ84oE1SyMvFko9s9wRn/FMdl4efLLWSjMX2nU=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
