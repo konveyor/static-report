@@ -79,7 +79,7 @@ jobs:
 
     - name: Push retagged manifest to Quay
       uses: redhat-actions/push-to-registry@main
-      id: push
+      id: push-latest
       with:
         image: ${{ inputs.image_name }}
         tags: latest
