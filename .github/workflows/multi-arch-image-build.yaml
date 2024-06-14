@@ -64,6 +64,6 @@ jobs:
       with:
         image: konveyor/static-report
         tags: ${{ env.tag }}
-        username: ${{ secrets.registry_username }}
-        password: ${{ secrets.registry_password }}
+        username: ${{ secrets.QUAY_PUBLISH_ROBOT }}
+        password: ${{ secrets.QUAY_PUBLISH_TOKEN }}
         registry: quay.io
