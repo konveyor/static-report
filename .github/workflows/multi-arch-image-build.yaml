@@ -54,9 +54,9 @@ jobs:
       run: |
         TAG=${GITHUB_REF_NAME/main/latest}
         podman manifest create temp
-        podman manifest add temp --all quay.io/konveyor/static-report:${TAG}
-        podman manifest add temp --all quay.io/konveyor/static-report:ltsc2022-${TAG}
-        podman tag temp quay.io/konveyor/static-report:${TAG}
+        podman manifest add temp --all quay.io/konveyor/static-report:${tag}
+        podman manifest add temp --all quay.io/konveyor/static-report:ltsc2022-${tag}
+        podman tag temp quay.io/konveyor/static-report:${tag}
 
     - name: Push manifest to Quay
       uses: redhat-actions/push-to-registry@main
