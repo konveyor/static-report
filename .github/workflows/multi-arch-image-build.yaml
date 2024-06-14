@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  image-build:
+  linux-image-build:
     uses: konveyor/release-tools/.github/workflows/build-push-images.yaml@main
     with:
       registry: "quay.io/konveyor"
@@ -25,3 +25,41 @@ jobs:
     secrets:
       registry_username: ${{ secrets.QUAY_PUBLISH_ROBOT }}
       registry_password: ${{ secrets.QUAY_PUBLISH_TOKEN }}
+
+  windows-image-build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@main
+    - name: Build static-report
+      run: |
+        docker login -u $env:USER -p $env:TOKEN
+        docker build -f ./Dockerfile.windows -t quay.io/konveyor/static-report:ltsc2022-$env:TAG .
+        docker push quay.io/konveyor/static-report:ltsc2022-$env:TAG
+      env:
+        USER: ${{ secrets.QUAY_PUBLISH_ROBOT }}
+        TOKEN: ${{ secrets.QUAY_PUBLISH_TOKEN }}
+        TAG: ${{ github.ref_name }}
+
+    - name: Retag and push image
+      run: |
+        docker tag quay.io/konveyor/static-report:ltsc2022-main quay.io/konveyor/static-report:ltsc2022-latest
+        docker push quay.io/konveyor/static-report:ltsc2022-latest
+      if: ${{ github.ref == 'refs/heads/main' }}
+
+  update-manifest:
+    runs-on: ubuntu-latest
+    steps:
+    - name: update manifest
+      run: |
+        echo "${{ secrets.QUAY_PUBLISH_TOKEN }}" | podman login quay.io -u ${{ secrets.QUAY_PUBLISH_ROBOT }} --password-stdin
+        podman manifest create temp
+        podman manifest add temp --all quay.io/konveyor/static-report:${{ github.ref_name }}
+        podman manifest add temp --all quay.io/konveyor/static-report:ltsc2022-${{ github.ref_name }}
+        podman tag temp quay.io/konveyor/static-report:${{ github.ref_name }}
+        podman push quay.io/konveyor/static-report:${{ github.ref_name }}
+
+    - name: Retag and push manifest
+      run: |
+        podman tag quay.io/konveyor/static-report:main quay.io/konveyor/static-report:latest
+        podman push quay.io/konveyor/static-report:latest
+      if: ${{ github.ref == 'refs/heads/main' }}
