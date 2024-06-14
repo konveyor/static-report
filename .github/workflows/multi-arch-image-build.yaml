@@ -13,6 +13,9 @@ concurrency:
   group: march-build-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  tag: ${{ github.ref == 'refs/heads/main' && 'latest' || github.ref_name }}
+
 jobs:
   linux-image-build:
     uses: konveyor/release-tools/.github/workflows/build-push-images.yaml@main
@@ -38,16 +41,8 @@ jobs:
         password: ${{ secrets.QUAY_PUBLISH_TOKEN }}
     - name: Build static-report
       run: |
-        docker build -f ./Dockerfile.windows -t quay.io/konveyor/static-report:ltsc2022-$env:TAG .
-        docker push quay.io/konveyor/static-report:ltsc2022-$env:TAG
-      env:
-        TAG: ${{ github.ref_name }}
-
-    - name: Retag and push image
-      run: |
-        docker tag quay.io/konveyor/static-report:ltsc2022-main quay.io/konveyor/static-report:ltsc2022-latest
-        docker push quay.io/konveyor/static-report:ltsc2022-latest
-      if: ${{ github.ref == 'refs/heads/main' }}
+        docker build -f ./Dockerfile.windows -t quay.io/konveyor/static-report:ltsc2022-$env:tag .
+        docker push quay.io/konveyor/static-report:ltsc2022-$env:tag
 
   update-manifest:
     needs:
@@ -57,33 +52,18 @@ jobs:
     steps:
     - name: update manifest
       run: |
+        TAG=${GITHUB_REF_NAME/main/latest}
         podman manifest create temp
-        podman manifest add temp --all quay.io/konveyor/static-report:${{ github.ref_name }}
-        podman manifest add temp --all quay.io/konveyor/static-report:ltsc2022-${{ github.ref_name }}
-        podman tag temp quay.io/konveyor/static-report:${{ github.ref_name }}
+        podman manifest add temp --all quay.io/konveyor/static-report:${tag}
+        podman manifest add temp --all quay.io/konveyor/static-report:ltsc2022-${tag}
+        podman tag temp quay.io/konveyor/static-report:${tag}
 
     - name: Push manifest to Quay
       uses: redhat-actions/push-to-registry@main
       id: push
       with:
-        image: ${{ inputs.image_name }}
+        image: konveyor/static-report
         tags: ${{ env.tag }}
         username: ${{ secrets.registry_username }}
         password: ${{ secrets.registry_password }}
-        registry: ${{ inputs.registry }}
-
-    - name: Retag manifest
-      run: |
-        podman tag quay.io/konveyor/static-report:main quay.io/konveyor/static-report:latest
-      if: ${{ github.ref == 'refs/heads/main' }}
-
-    - name: Push retagged manifest to Quay
-      uses: redhat-actions/push-to-registry@main
-      id: push-latest
-      with:
-        image: ${{ inputs.image_name }}
-        tags: latest
-        username: ${{ secrets.registry_username }}
-        password: ${{ secrets.registry_password }}
-        registry: ${{ inputs.registry }}
-      if: ${{ github.ref == 'refs/heads/main' }}
+        registry: quay.io
