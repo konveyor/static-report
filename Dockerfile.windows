@@ -1,0 +1,79 @@
+FROM docker.io/golang:1.21-windowsservercore-ltsc2022 AS go-builder
+WORKDIR /output-parser
+COPY ./analyzer-output-parser/go.mod go.mod
+COPY ./analyzer-output-parser/go.sum go.sum
+COPY ./analyzer-output-parser/main.go main.go
+RUN go build -o js-bundle-generator ./main.go
+
+FROM mcr.microsoft.com/windows/servercore:ltsc2022 AS builder
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+# PATH isn't actually set in the Docker image, so we have to set it from within the container
+RUN $newPath = ('C:\nodejs;{0}\Yarn\bin;{1}' -f $env:LOCALAPPDATA, $env:PATH); \
+	Write-Host ('Updating PATH: {0}' -f $newPath); \
+	[Environment]::SetEnvironmentVariable('PATH', $newPath, [EnvironmentVariableTarget]::Machine)
+# doing this first to share cache across versions more aggressively
+
+ENV NODE_VERSION 18.9.1
+ENV NODE_SHA256 763e691ed8f51b8664da4dcc5a0f5d428dbd69d4162630a6fcf366e5e9e25e81
+
+RUN $url = ('https://nodejs.org/dist/v{0}/node-v{0}-win-x64.zip' -f $env:NODE_VERSION); \
+	Write-Host ('Downloading {0} ...' -f $url); \
+	Invoke-WebRequest -Uri $url -OutFile 'node.zip'; \
+	\
+	Write-Host ('Verifying sha256 ({0}) ...' -f $env:NODE_SHA256); \
+	if ((Get-FileHash node.zip -Algorithm sha256).Hash -ne $env:NODE_SHA256) { throw 'SHA256 mismatch' }; \
+	\
+	Write-Host 'Expanding ...'; \
+	Expand-Archive node.zip -DestinationPath C:\; \
+	\
+	Write-Host 'Renaming ...'; \
+	Rename-Item -Path ('C:\node-v{0}-win-x64' -f $env:NODE_VERSION) -NewName 'C:\nodejs'; \
+	\
+	Write-Host 'Removing ...'; \
+	Remove-Item node.zip -Force; \
+	\
+	Write-Host 'Verifying ("node --version") ...'; \
+	node --version; \
+	Write-Host 'Verifying ("npm --version") ...'; \
+	npm --version; \
+	\
+	Write-Host 'Complete.';
+
+ENV YARN_VERSION 1.22.17
+
+# "It is recommended to install Yarn through the npm package manager" (https://classic.yarnpkg.com/en/docs/install)
+RUN Write-Host 'Installing "yarn" ...'; \
+	npm install --global ('yarn@{0}' -f $env:YARN_VERSION); \
+	\
+	Write-Host 'Verifying ("yarn --version") ...'; \
+	yarn --version; \
+	\
+	Write-Host 'Complete.';
+
+ARG VERSION=main
+ENV VERSION=$VERSION
+COPY . /opt/app-root/src/build
+ENV CI=true
+ENV PUBLIC_URL=.
+RUN Write-Host 'Build static-report ...'; \
+  \
+  cd c:\opt\app-root\src\build; \
+  (Get-Content ./public/version.js) -replace \"_VERSION_\", $VERSION -replace \"main\", \"latest\" | Set-Content ./public/version.js; \
+  npm clean-install; \
+  npm run build; \
+  \
+  Write-Host 'Complete.';
+
+FROM mcr.microsoft.com/windows/servercore:ltsc2022
+COPY --from=go-builder /output-parser/js-bundle-generator /usr/bin/js-bundle-generator
+COPY --from=builder /opt/app-root/src/build /usr/local/static-report
+
+LABEL name="konveyor/static-report" \
+      description="Konveyor Analysis - Static Report" \
+      help="For more information visit https://konveyor.io" \
+      license="Apache License 2.0" \
+      summary="Static report for Konveyor analysis modules" \
+      url="https://quay.io/konveyor/static-report"
+
+ENTRYPOINT ["/usr/bin/js-bundle-generator"]
