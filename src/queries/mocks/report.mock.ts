@@ -48,6 +48,12 @@ if (
                     codeSnip: "1 First Line\n2 Second Line\n",
                     variables: {},
                 },
+                {
+                    uri: "file://test-files/file3.java",
+                    message: "Test message",
+                    lineNumber: 1,
+                    variables: {},
+                },
             ],
         },
         "rule-002": {

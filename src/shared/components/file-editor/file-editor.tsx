@@ -10,7 +10,11 @@ import {
   DrawerContentBody,
   DrawerHead,
   DrawerPanelContent,
+  EmptyState,
+  EmptyStateIcon,
+  EmptyStateVariant,
   Text,
+  Title,
   TextContent,
 } from "@patternfly/react-core";
 
@@ -19,6 +23,8 @@ import {
   CodeEditorProps,
   Language,
 } from "@patternfly/react-code-editor";
+
+import InfoAltIcon from "@patternfly/react-icons/dist/esm/icons/info-alt-icon";
 
 import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
 
@@ -43,7 +49,7 @@ interface IFileEditorProps {
 }
 
 export const FileEditor: React.FC<IFileEditorProps> = ({
-  name, 
+  name,
   displayName,
   codeSnip,
   isLoading,
@@ -139,7 +145,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
       ?.map((inc) => {
         const marker: monacoEditor.editor.IMarkerData = {
           startLineNumber: absoluteToRelativeLineNum(inc.lineNumber),
-          endLineNumber: absoluteToRelativeLineNum(inc.lineNumber), 
+          endLineNumber: absoluteToRelativeLineNum(inc.lineNumber),
           startColumn: 0,
           endColumn: 1000,
           message: issue.description,
@@ -214,34 +220,42 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
             when={isLoading}
             then={<span>Loading...</span>}
           >
-            <CodeEditor
-              isDarkTheme
-              isLineNumbersVisible
-              isReadOnly={true}
-              isMinimapVisible
-              isLanguageLabelVisible
-              isDownloadEnabled={false}
-              title={displayName}
-              code={codeSnip ? codeSnip : ""}
-              language={Object.values(Language).find(
-                (l) => l === fileExtension?.toLowerCase()
-              )}
-              options={{
-                glyphMargin: true,
-                "semanticHighlighting.enabled": true,
-                renderValidationDecorations: "on",
-                lineNumbers: (lineNum: number) => 
-                  String(relativeToAbsoluteLineNum(lineNum))
-              }}
-              onEditorDidMount={(
-                editor: monacoEditor.editor.IStandaloneCodeEditor,
-                monaco: typeof monacoEditor
-              ) => {
-                onEditorDidMount(editor, monaco);
-              }}
-              height={`${window.innerHeight - 300}px`}
-              {...props}
-            />
+            {
+              codeSnip === "" ? (<EmptyState variant={EmptyStateVariant.lg}>
+                <EmptyStateIcon icon={InfoAltIcon} />
+                <Title headingLevel="h4" size="md">
+                  Code snippet unavailable
+                </Title>
+              </EmptyState>) : (<CodeEditor
+                isDarkTheme
+                isLineNumbersVisible
+                isReadOnly={true}
+                isMinimapVisible
+                isLanguageLabelVisible
+                isDownloadEnabled={false}
+                title={displayName}
+                code={codeSnip ? codeSnip : ""}
+                language={Object.values(Language).find(
+                  (l) => l === fileExtension?.toLowerCase()
+                )}
+                options={{
+                  glyphMargin: true,
+                  "semanticHighlighting.enabled": true,
+                  renderValidationDecorations: "on",
+                  lineNumbers: (lineNum: number) =>
+                    String(relativeToAbsoluteLineNum(lineNum))
+                }}
+                onEditorDidMount={(
+                  editor: monacoEditor.editor.IStandaloneCodeEditor,
+                  monaco: typeof monacoEditor
+                ) => {
+                  onEditorDidMount(editor, monaco);
+                }}
+                height={`${window.innerHeight - 300}px`}
+                {...props}
+              />)
+
+            }
           </ConditionalRender>
         </DrawerContentBody>
       </DrawerContent>
