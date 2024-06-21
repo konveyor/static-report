@@ -51,7 +51,7 @@ import {
 import { IssueOverview } from "./components/issue-overview";
 import { DispersedFile } from "@app/models/file";
 
-export interface TableData extends IssueProcessed {}
+export interface TableData extends IssueProcessed { }
 
 const areRowsEquals = (a: TableData, b: TableData) => {
   return a.id === b.id;
@@ -107,6 +107,23 @@ export const compareByColumnIndex = (
   }
 };
 
+export const compareByColumnIndexInsightsMode = (
+  a: IssueProcessed,
+  b: IssueProcessed,
+  columnIndex?: number
+) => {
+  switch (columnIndex) {
+    case 1: // name
+      return a.id.localeCompare(b.id);
+    case 4: // Total incidents
+      return a.totalIncidents - b.totalIncidents;
+    case 5: // Total storypoints
+      return a.totalEffort - b.totalEffort;
+    default:
+      return 0;
+  }
+};
+
 interface SelectedFile {
   file: DispersedFile;
   issue: IssueProcessed;
@@ -114,10 +131,12 @@ interface SelectedFile {
 
 export interface IViolationsTableProps {
   applicationId?: string;
+  insightsMode?: boolean;
 }
 
 export const ViolationsTable: React.FC<IViolationsTableProps> = ({
   applicationId,
+  insightsMode,
 }) => {
   const allApplications = useAllApplications();
 
@@ -159,9 +178,11 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
     }
 
     return applicationId === ALL_APPLICATIONS_ID
-      ? allApplications.data?.flatMap((a) => a.issues)
-      : allApplications.data?.find((f) => f.id === applicationId)?.issues || [];
-  }, [allApplications.data, applicationId]);
+      ? (insightsMode ? allApplications.data?.flatMap((a) => a.insights) : 
+        allApplications.data?.flatMap((a) => a.issues))
+      : (insightsMode ? (allApplications.data?.find((f) => f.id === applicationId)?.insights || []) : 
+        allApplications.data?.find((f) => f.id === applicationId)?.issues || []);
+  }, [allApplications.data, insightsMode, applicationId]);
 
   const technologies = useMemo(() => {
     const sources = new Set<string>();
@@ -258,7 +279,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
     items: issues,
     currentPage: currentPage,
     currentSortBy: currentSortBy,
-    compareToByColumn: compareByColumnIndex,
+    compareToByColumn: insightsMode ? compareByColumnIndexInsightsMode : compareByColumnIndex,
     filterItem: filterItem,
   });
 
@@ -303,95 +324,103 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                       onClear={() => setFilterText("")}
                     />
                   </ToolbarItem>
-                  <ToolbarGroup variant="filter-group">
-                    <ToolbarFilter
-                      chips={filters.get("category")}
-                      deleteChip={(
-                        category: string | ToolbarChipGroup,
-                        chip: ToolbarChip | string
-                      ) => removeFilter("category", chip)}
-                      deleteChipGroup={() => setFilter("category", [])}
-                      categoryName={{ key: "category", name: "Category" }}
-                    >
-                      <SimpleSelect
-                        maxHeight={300}
-                        variant="checkbox"
-                        aria-label="category"
-                        aria-labelledby="category"
-                        placeholderText="Category"
-                        value={filters.get("category")?.map(toOption)}
-                        options={categories.map(toOption)}
-                        onChange={(option) => {
-                          const optionValue = option as OptionWithValue<string>;
+                  {
+                    insightsMode ? (<></>) : (
+                      <ToolbarGroup variant="filter-group">
+                        <ToolbarFilter
+                          chips={filters.get("category")}
+                          deleteChip={(
+                            category: string | ToolbarChipGroup,
+                            chip: ToolbarChip | string
+                          ) => removeFilter("category", chip)}
+                          deleteChipGroup={() => setFilter("category", [])}
+                          categoryName={{ key: "category", name: "Category" }}
+                        >
+                          <SimpleSelect
+                            maxHeight={300}
+                            variant="checkbox"
+                            aria-label="category"
+                            aria-labelledby="category"
+                            placeholderText="Category"
+                            value={filters.get("category")?.map(toOption)}
+                            options={categories.map(toOption)}
+                            onChange={(option) => {
+                              const optionValue = option as OptionWithValue<string>;
 
-                          const elementExists = (
-                            filters.get("category") || []
-                          ).some((f) => f.key === optionValue.value);
-                          let newElements: ToolbarChip[];
-                          if (elementExists) {
-                            newElements = (
-                              filters.get("category") || []
-                            ).filter((f) => f.key !== optionValue.value);
-                          } else {
-                            newElements = [
-                              ...(filters.get("category") || []),
-                              toToolbarChip(optionValue),
-                            ];
-                          }
+                              const elementExists = (
+                                filters.get("category") || []
+                              ).some((f) => f.key === optionValue.value);
+                              let newElements: ToolbarChip[];
+                              if (elementExists) {
+                                newElements = (
+                                  filters.get("category") || []
+                                ).filter((f) => f.key !== optionValue.value);
+                              } else {
+                                newElements = [
+                                  ...(filters.get("category") || []),
+                                  toToolbarChip(optionValue),
+                                ];
+                              }
 
-                          setFilter("category", newElements);
-                        }}
-                        hasInlineFilter
-                        onClear={() => setFilter("category", [])}
-                      />
-                    </ToolbarFilter>
-                  </ToolbarGroup>
-                  <ToolbarGroup variant="filter-group">
-                    <ToolbarFilter
-                      chips={filters.get("effort")}
-                      deleteChip={(
-                        category: string | ToolbarChipGroup,
-                        chip: ToolbarChip | string
-                      ) => removeFilter("effort", chip)}
-                      deleteChipGroup={() => setFilter("effort", [])}
-                      categoryName={{
-                        key: "effort",
-                        name: "Effort",
-                      }}
-                    >
-                      <SimpleSelect
-                        maxHeight={300}
-                        variant="checkbox"
-                        aria-label="effort"
-                        aria-labelledby="effort"
-                        placeholderText="Effort"
-                        value={filters.get("effort")?.map(toOption)}
-                        options={efforts.map(toOption)}
-                        onChange={(option) => {
-                          const optionValue = option as OptionWithValue<string>;
+                              setFilter("category", newElements);
+                            }}
+                            hasInlineFilter
+                            onClear={() => setFilter("category", [])}
+                          />
+                        </ToolbarFilter>
+                      </ToolbarGroup>
+                    )
+                  }
+                  {
+                    insightsMode ? (<></>) : (
+                      <ToolbarGroup variant="filter-group">
+                        <ToolbarFilter
+                          chips={filters.get("effort")}
+                          deleteChip={(
+                            category: string | ToolbarChipGroup,
+                            chip: ToolbarChip | string
+                          ) => removeFilter("effort", chip)}
+                          deleteChipGroup={() => setFilter("effort", [])}
+                          categoryName={{
+                            key: "effort",
+                            name: "Effort",
+                          }}
+                        >
+                          <SimpleSelect
+                            maxHeight={300}
+                            variant="checkbox"
+                            aria-label="effort"
+                            aria-labelledby="effort"
+                            placeholderText="Effort"
+                            value={filters.get("effort")?.map(toOption)}
+                            options={efforts.map(toOption)}
+                            onChange={(option) => {
+                              const optionValue = option as OptionWithValue<string>;
 
-                          const elementExists = (
-                            filters.get("effort") || []
-                          ).some((f) => f.key === optionValue.value);
-                          let newElements: ToolbarChip[];
-                          if (elementExists) {
-                            newElements = (filters.get("effort") || []).filter(
-                              (f) => f.key !== optionValue.value
-                            );
-                          } else {
-                            newElements = [
-                              ...(filters.get("effort") || []),
-                              toToolbarChip(optionValue),
-                            ];
-                          }
+                              const elementExists = (
+                                filters.get("effort") || []
+                              ).some((f) => f.key === optionValue.value);
+                              let newElements: ToolbarChip[];
+                              if (elementExists) {
+                                newElements = (filters.get("effort") || []).filter(
+                                  (f) => f.key !== optionValue.value
+                                );
+                              } else {
+                                newElements = [
+                                  ...(filters.get("effort") || []),
+                                  toToolbarChip(optionValue),
+                                ];
+                              }
 
-                          setFilter("effort", newElements);
-                        }}
-                        hasInlineFilter
-                        onClear={() => setFilter("effort", [])}
-                      />
-                    </ToolbarFilter>
-                  </ToolbarGroup>
+                              setFilter("effort", newElements);
+                            }}
+                            hasInlineFilter
+                            onClear={() => setFilter("effort", [])}
+                          />
+                        </ToolbarFilter>
+                      </ToolbarGroup>
+                    )
+                  }
                   <ToolbarGroup variant="filter-group">
                     {technologies.source.length > 0 && (
                       <ToolbarFilter
@@ -521,16 +550,21 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                   >
                     Issue
                   </Th>
-                  <Th width={10}>Category</Th>
+                  {
+                    insightsMode ? (<></>) : (<Th width={10}>Category</Th>)
+                  }
                   <Th width={10} modifier="wrap">
                     Source
                   </Th>
                   <Th width={10} modifier="wrap">
                     Target
                   </Th>
-                  <Th width={15} modifier="truncate">
-                    Effort
-                  </Th>
+                  {
+                    insightsMode ? (<></>) : (<>
+                      <Th width={15} modifier="truncate">
+                        Effort
+                      </Th></>)
+                  }
                   <Th
                     width={10}
                     sort={{
@@ -541,16 +575,22 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                   >
                     Total incidents
                   </Th>
-                  <Th
-                    width={10}
-                    sort={{
-                      columnIndex: 7,
-                      sortBy: { ...currentSortBy },
-                      onSort: onChangeSortBy,
-                    }}
-                  >
-                    Total effort
-                  </Th>
+
+                  {
+                    insightsMode ? (<></>) : (
+                      <Th
+                        width={10}
+                        sort={{
+                          columnIndex: 7,
+                          sortBy: { ...currentSortBy },
+                          onSort: onChangeSortBy,
+                        }}
+                      >
+                        Total effort
+                      </Th>
+                    )
+                  }
+
                 </Tr>
               </Thead>
               <ConditionalTableBody
@@ -569,7 +609,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                           }}
                         />
                         <Td>{item.name}</Td>
-                        <Td>{item.category}</Td>
+                        {insightsMode ? (<></>) : (<Td>{item.category}</Td>)}
                         <Td>
                           <Split hasGutter>
                             {item.sourceTechnologies?.map((technology) => (
@@ -592,9 +632,9 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                             ))}
                           </Split>
                         </Td>
-                        <Td>{item.effort.toString()}</Td>
+                        {insightsMode ? (<></>) : (<Td>{item.effort.toString()}</Td>)}
                         <Td>{item.totalIncidents}</Td>
-                        <Td>{item.totalEffort}</Td>
+                        {insightsMode ? (<></>) : (<Td>{item.totalEffort}</Td>)}
                       </Tr>
                       {isRowExpanded(item) ? (
                         <Tr isExpanded>
@@ -609,7 +649,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                                   })
                                   setSelectedFile(file)
                                 }
-                              }
+                                }
                               />
                             </div>
                           </Td>
@@ -643,30 +683,30 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
           </Button>,
         ]}
       >
-        { Object.keys(fileModalData?.file?.incidents || {}).length > 1 ? (
+        {Object.keys(fileModalData?.file?.incidents || {}).length > 1 ? (
           <Tabs
             activeKey={fileEditorTabId}
             onSelect={(_event, tabKey) =>
               setFileEditorTabId(tabKey as number)}>
-          {
-            Object.values(fileModalData?.file?.incidents || {}).flatMap((incidents, idx) => (
-              <Tab
-                key={idx}
-                eventKey={idx}
-                title={`Line #${fileModalData?.file.ranges[idx*2]} - #${fileModalData?.file.ranges[idx*2+1]}`} // TODO i18n
-              >
-                {fileEditorTabId === idx ? (
-                      <FileEditor
-                        name={fileModalData?.file.name || ""}
-                        displayName={fileModalData?.file.displayName || ""}
-                        codeSnip={codeSnip}
-                        isLoading={codeSnipQuery.isLoading || codeSnipQuery.isFetching}
-                        issue={fileModalData?.issue || {} as IssueProcessed}
-                        incidents={incidents}
-                      />
-                ): null} 
-              </Tab>))
-          }
+            {
+              Object.values(fileModalData?.file?.incidents || {}).flatMap((incidents, idx) => (
+                <Tab
+                  key={idx}
+                  eventKey={idx}
+                  title={`Line #${fileModalData?.file.ranges[idx * 2]} - #${fileModalData?.file.ranges[idx * 2 + 1]}`} // TODO i18n
+                >
+                  {fileEditorTabId === idx ? (
+                    <FileEditor
+                      name={fileModalData?.file.name || ""}
+                      displayName={fileModalData?.file.displayName || ""}
+                      codeSnip={codeSnip}
+                      isLoading={codeSnipQuery.isLoading || codeSnipQuery.isFetching}
+                      issue={fileModalData?.issue || {} as IssueProcessed}
+                      incidents={incidents}
+                    />
+                  ) : null}
+                </Tab>))
+            }
           </Tabs>
         ) : (
           <FileEditor
@@ -675,7 +715,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
             codeSnip={codeSnip}
             isLoading={codeSnipQuery.isLoading || codeSnipQuery.isFetching}
             issue={fileModalData?.issue || {} as IssueProcessed}
-            incidents={fileModalData?.file?.incidents[0] || []}/>
+            incidents={fileModalData?.file?.incidents[0] || []} />
         )}
       </Modal>
     </>
