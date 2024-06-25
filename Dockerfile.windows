@@ -53,12 +53,12 @@ RUN Write-Host 'Installing "yarn" ...'; \
 
 ARG VERSION=main
 ENV VERSION=$VERSION
-COPY . /opt/app-root/src/build
+COPY . /opt/app-root/src
 ENV CI=true
 ENV PUBLIC_URL=.
 RUN Write-Host 'Build static-report ...'; \
   \
-  cd c:\opt\app-root\src\build; \
+  cd c:\opt\app-root\src; \
   (Get-Content ./public/version.js) -replace \"_VERSION_\", $VERSION -replace \"main\", \"latest\" | Set-Content ./public/version.js; \
   npm clean-install; \
   npm run build; \
