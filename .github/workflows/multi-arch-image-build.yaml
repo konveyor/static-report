@@ -41,8 +41,8 @@ jobs:
         password: ${{ secrets.QUAY_PUBLISH_TOKEN }}
     - name: Build static-report
       run: |
-        docker build -f ./Dockerfile.windows -t quay.io/konveyor/static-report:ltsc2022-$env:tag .
-        docker push quay.io/konveyor/static-report:ltsc2022-$env:tag
+        docker build -f ./Dockerfile.windows -t quay.io/konveyor/static-report:$env:tag-windowsservercore-ltsc2022 .
+        docker push quay.io/konveyor/static-report:$env:tag-windowsservercore-ltsc2022
 
   update-manifest:
     needs:
@@ -55,7 +55,7 @@ jobs:
         TAG=${GITHUB_REF_NAME/main/latest}
         podman manifest create temp
         podman manifest add temp --all quay.io/konveyor/static-report:${tag}
-        podman manifest add temp --all quay.io/konveyor/static-report:ltsc2022-${tag}
+        podman manifest add temp --all quay.io/konveyor/static-report:${tag}-windowsservercore-ltsc2022
         podman tag temp quay.io/konveyor/static-report:${tag}
 
     - name: Push manifest to Quay
