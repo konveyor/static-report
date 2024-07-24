@@ -565,17 +565,30 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                         Effort
                       </Th></>)
                   }
-                  <Th
-                    width={10}
-                    sort={{
-                      columnIndex: 6,
-                      sortBy: { ...currentSortBy },
-                      onSort: onChangeSortBy,
-                    }}
-                  >
-                    Total incidents
-                  </Th>
-
+                  {
+                    insightsMode ? (                      
+                    <Th
+                      width={10}
+                      sort={{
+                        columnIndex: 6,
+                        sortBy: { ...currentSortBy },
+                        onSort: onChangeSortBy,
+                      }}
+                    >
+                      Total occurrences
+                    </Th>) : (
+                      <Th
+                        width={10}
+                        sort={{
+                          columnIndex: 6,
+                          sortBy: { ...currentSortBy },
+                          onSort: onChangeSortBy,
+                        }}
+                      >
+                        Total incidents
+                      </Th>
+                    )
+                  }
                   {
                     insightsMode ? (<></>) : (
                       <Th
