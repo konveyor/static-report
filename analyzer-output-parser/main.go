@@ -42,7 +42,7 @@ func main() {
 
 	err = loadApplications()
 	if err != nil {
-		log.Fatalln("failed to load provider settings", err)
+		log.Fatalln("failed to load report data from analysis output", err)
 	}
 
 	err = generateJSBundle(applications)
