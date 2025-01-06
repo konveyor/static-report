@@ -3,7 +3,7 @@ module github.com/konveyor/static-report
 go 1.20
 
 require (
-	github.com/konveyor/analyzer-lsp v0.4.0-alpha.1.0.20240612175452-e2284ce673fb
+	github.com/konveyor/analyzer-lsp v0.5.3
 	gopkg.in/yaml.v2 v2.4.0
 )
 
