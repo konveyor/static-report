@@ -6,6 +6,7 @@ import { Bullseye, Spinner } from "@patternfly/react-core";
 // At least one page should not have lazy() for not having "[mini-css-extract-plugin] Conflicting order." error
 const ApplicationList = lazy(() => import("./pages/application-list"));
 const IssuesList = lazy(() => import("./pages/issues-list"));
+const InsightsList = lazy(() => import("./pages/insights-list"));
 const DependenciesList = lazy(() => import("./pages/dependencies-list"));
 const AppEdit = lazy(() => import("./pages/application-details"));
 const AppEditDashboard = lazy(
@@ -49,6 +50,22 @@ export const AppRoutes = () => {
     {
       Component: IssuesList,
       path: "/issues/applications/:applicationId",
+      hasDescendant: false,
+    },
+    // Insights
+    {
+      Component: InsightsList,
+      path: "/insights",
+      hasDescendant: false,
+    },
+    {
+      Component: InsightsList,
+      path: "/insights/applications",
+      hasDescendant: false,
+    },
+    {
+      Component: InsightsList,
+      path: "/insights/applications/:applicationId",
       hasDescendant: false,
     },
     // Dependencies

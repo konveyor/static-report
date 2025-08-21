@@ -45,6 +45,10 @@ export const ApplicationEdit: React.FC = () => {
         path: `/applications/${application?.id}/issues`,
       },
       {
+        title: "Insights",
+        path: `/applications/${application?.id}/insights`,
+      },
+      {
         title: "Dependencies",
         path: `/applications/${application?.id}/dependencies`,
       },
@@ -53,12 +57,6 @@ export const ApplicationEdit: React.FC = () => {
         path: `/applications/${application?.id}/technologies`,
       },
     ];
-    if (application?.insights && application?.insights?.length > 0) {
-      result.push({
-        title: "Insights",
-        path: `/applications/${application?.id}/insights`,
-      })
-    }
     return result;
   }, [
     application,

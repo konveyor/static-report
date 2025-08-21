@@ -1,0 +1,1 @@
+export { InsightsList as default } from "./insights-list";
