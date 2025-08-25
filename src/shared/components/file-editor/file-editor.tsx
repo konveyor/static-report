@@ -116,7 +116,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
     return incidents.map((inc) => {
       return monaco.languages.registerHoverProvider("*", {
         provideHover: (model, position) => {
-          if (position.lineNumber !== inc.lineNumber) {
+          if (position.lineNumber !== absoluteToRelativeLineNum(inc.lineNumber)) {
             return undefined;
           }
 
