@@ -5,6 +5,7 @@ export interface ReportDto {
     rulesets?: RulesetDto[];
     depItems?: DependencyItemDto[];
     issues?: IssueDto[];
+    insights?: IssueDto[];
     dependencies?: DependencyDto[];
     tags?: TagDto[];
 }

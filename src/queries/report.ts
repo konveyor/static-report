@@ -183,7 +183,8 @@ export const useAllApplications = () => {
           (a.issues ? issuesFromIssuesDto(a.id, a.issues) : [] as IssueProcessed[]);
 
         const insights: IssueProcessed[] = a.rulesets ? 
-          issuesFromRulesetsDto(a.id, a.files, a.rulesets, true) : [] as IssueProcessed[];
+          issuesFromRulesetsDto(a.id, a.files, a.rulesets, true).filter(insight => insight.effort === 0) : 
+          (a.insights ? issuesFromIssuesDto(a.id, a.insights) : [] as IssueProcessed[]);
 
         const tags: TagDto[] = a.rulesets ?
           tagsFromRulesetsDto(a.rulesets) :
