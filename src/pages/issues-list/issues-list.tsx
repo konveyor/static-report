@@ -5,8 +5,7 @@ import {
   Divider,
   PageSection,
   PageSectionVariants,
-  Text,
-  TextContent,
+  Content,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -37,7 +36,7 @@ export const IssuesList: React.FC = () => {
 
   return (
     <>
-      <PageSection padding={{ default: "noPadding" }}>
+      <PageSection hasBodyWrapper={false} padding={{ default: "noPadding" }}>
         <Toolbar>
           <ToolbarContent>
             <ToolbarItem>Application:</ToolbarItem>
@@ -51,15 +50,15 @@ export const IssuesList: React.FC = () => {
         </Toolbar>
       </PageSection>
       <Divider />
-      <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <Text component="h1">Issues</Text>
-          <Text component="small">
+      <PageSection hasBodyWrapper={false} >
+        <Content>
+          <Content component="h1">Issues</Content>
+          <Content component="small">
             This report provides a concise summary of all issues identified.
-          </Text>
-        </TextContent>
+          </Content>
+        </Content>
       </PageSection>
-      <PageSection variant={PageSectionVariants.default}>
+      <PageSection hasBodyWrapper={false} variant={PageSectionVariants.default}>
         <ViolationsTable applicationId={applicationId} />
       </PageSection>
     </>

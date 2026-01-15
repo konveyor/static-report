@@ -4,15 +4,14 @@ import {
   Bullseye,
   EmptyState,
   EmptyStateBody,
-  EmptyStateIcon,
   Label,
   Split,
   SplitItem,
   SearchInput,
   Title,
   ToolbarItem,
-  ToolbarChip,
-  ToolbarChipGroup,
+  ToolbarLabel,
+  ToolbarLabelGroup,
   ToolbarFilter,
   ToolbarGroup,
   Toolbar,
@@ -53,7 +52,7 @@ const compareToByColumn = (
   }
 };
 
-const toOption = (option: string | ToolbarChip): OptionWithValue => {
+const toOption = (option: string | ToolbarLabel): OptionWithValue => {
   if (typeof option === "string") {
     const toStringFn = () => option;
     return {
@@ -79,7 +78,7 @@ const toOption = (option: string | ToolbarChip): OptionWithValue => {
   }
 };
 
-const toToolbarChip = (option: OptionWithValue): ToolbarChip => {
+const toToolbarChip = (option: OptionWithValue): ToolbarLabel => {
   return {
     key: option.value,
     node: option.toString(),
@@ -99,12 +98,12 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
   const [filterText, setFilterText] = useState("");
   const { filters, setFilter, removeFilter, clearAllFilters } = useToolbar<
     "labels" | "relationship",
-    ToolbarChip
+    ToolbarLabel
   >();
 
   const debouncedFilterText = useDebounce<string>(filterText, 250);
   const debouncedFilters = useDebounce<
-    Map<"labels" | "relationship", ToolbarChip[]>
+    Map<"labels" | "relationship", ToolbarLabel[]>
   >(filters, 100);
 
   const dependencies = useMemo(() => {
@@ -183,11 +182,9 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
     <>
       {applicationId === undefined ? (
         <Bullseye>
-          <EmptyState>
-            <EmptyStateIcon icon={ArrowUpIcon} />
-            <Title headingLevel="h4" size="lg">
+          <EmptyState titleText={<Title headingLevel="h4" size="lg">
               Select an application
-            </Title>
+            </Title>} icon={ArrowUpIcon}>
             <EmptyStateBody>
               Select an application whose data you want to get access to.
             </EmptyStateBody>
@@ -202,7 +199,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
           >
             <ToolbarContent>
               <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
-                <ToolbarItem variant="search-filter">
+                <ToolbarItem >
                   <SearchInput
                     value={filterText}
                     onChange={(_, value) => setFilterText(value)}
@@ -211,12 +208,12 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
                 </ToolbarItem>
                 <ToolbarGroup variant="filter-group">
                   <ToolbarFilter
-                    chips={filters.get("labels")}
-                    deleteChip={(
-                      category: string | ToolbarChipGroup,
-                      chip: ToolbarChip | string
+                    labels={filters.get("labels")}
+                    deleteLabel={(
+                      category: string | ToolbarLabelGroup,
+                      chip: ToolbarLabel | string
                     ) => removeFilter("labels", chip)}
-                    deleteChipGroup={() => setFilter("labels", [])}
+                    deleteLabelGroup={() => setFilter("labels", [])}
                     categoryName={{ key: "labels", name: "Labels" }}
                   >
                     <SimpleSelect
@@ -233,7 +230,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
                         const elementExists = (
                           filters.get("labels") || []
                         ).some((f) => f.key === optionValue.value);
-                        let newElements: ToolbarChip[];
+                        let newElements: ToolbarLabel[];
                         if (elementExists) {
                           newElements = (filters.get("labels") || []).filter(
                             (f) => f.key !== optionValue.value
@@ -254,12 +251,12 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
                 </ToolbarGroup>
                 <ToolbarGroup variant="filter-group">
                   <ToolbarFilter
-                    chips={filters.get("relationship")}
-                    deleteChip={(
-                      category: string | ToolbarChipGroup,
-                      chip: ToolbarChip | string
+                    labels={filters.get("relationship")}
+                    deleteLabel={(
+                      category: string | ToolbarLabelGroup,
+                      chip: ToolbarLabel | string
                     ) => removeFilter("relationship", chip)}
-                    deleteChipGroup={() => setFilter("relationship", [])}
+                    deleteLabelGroup={() => setFilter("relationship", [])}
                     categoryName={{ key: "relationship", name: "Relation" }}
                   >
                     <SimpleSelect
@@ -276,7 +273,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
                         const elementExists = (
                           filters.get("relationship") || []
                         ).some((f) => f.key === optionValue.value);
-                        let newElements: ToolbarChip[];
+                        let newElements: ToolbarLabel[];
                         if (elementExists) {
                           newElements = (
                             filters.get("relationship") || []
@@ -298,7 +295,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
               </ToolbarToggleGroup>
               <ToolbarItem
                 variant={ToolbarItemVariant.pagination}
-                align={{ default: "alignRight" }}
+                align={{ default: "alignEnd" }}
               >
                 <SimplePagination
                   count={filteredItems.length}

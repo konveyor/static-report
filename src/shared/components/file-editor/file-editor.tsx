@@ -11,12 +11,10 @@ import {
   DrawerHead,
   DrawerPanelContent,
   EmptyState,
-  EmptyStateIcon,
   EmptyStateVariant,
-  Text,
+  Content,
   Title,
-  TextContent,
-} from "@patternfly/react-core";
+  } from "@patternfly/react-core";
 
 import {
   CodeEditor,
@@ -192,12 +190,12 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
               <Card isLarge>
                 <CardHeader>
                   <CardTitle>
-                    <TextContent>
-                      <Text component="h1">{issue.name}</Text>
-                    </TextContent>
-                    <TextContent>
-                      <Text component="small">{issue.ruleID}</Text>
-                    </TextContent>
+                    <Content>
+                      <Content component="h1">{issue.name}</Content>
+                    </Content>
+                    <Content>
+                      <Content component="small">{issue.ruleID}</Content>
+                    </Content>
                   </CardTitle>
                 </CardHeader>
                 <CardBody>
@@ -221,12 +219,10 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
             then={<span>Loading...</span>}
           >
             {
-              codeSnip === "" ? (<EmptyState variant={EmptyStateVariant.lg}>
-                <EmptyStateIcon icon={InfoAltIcon} />
-                <Title headingLevel="h4" size="md">
+              codeSnip === "" ? (<EmptyState titleText={<Title headingLevel="h4" size="md">
                   Code snippet unavailable
-                </Title>
-              </EmptyState>) : (<CodeEditor
+                </Title>} icon={InfoAltIcon} variant={EmptyStateVariant.lg}>
+                </EmptyState>) : (<CodeEditor
                 isDarkTheme
                 isLineNumbersVisible
                 isReadOnly={true}

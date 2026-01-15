@@ -8,7 +8,7 @@ import {
   DropdownItem,
   DropdownList,
   Masthead,
-  MastheadBrand,
+  MastheadLogo,
   MastheadContent,
   MastheadMain,
   MastheadToggle,
@@ -21,7 +21,7 @@ import {
   ToolbarItem,
 } from "@patternfly/react-core";
 import HelpIcon from "@patternfly/react-icons/dist/esm/icons/help-icon";
-import BarsIcon from "@patternfly/react-icons/dist/js/icons/bars-icon";
+
 import EllipsisVIcon from "@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon";
 
 // import avatarImage from "@app/images/avatar.svg";
@@ -37,32 +37,32 @@ export const HeaderApp: React.FC = () => {
     <>
       <AboutApp isOpen={isAboutOpen} onClose={toggleIsAboutOpen} />
       <Masthead>
-        <MastheadToggle>
-          <PageToggleButton variant="plain" aria-label="Global navigation">
-            <BarsIcon />
+        
+        <MastheadMain><MastheadToggle>
+          <PageToggleButton isHamburgerButton variant="plain" aria-label="Global navigation">
+            
           </PageToggleButton>
         </MastheadToggle>
-        <MastheadMain>
-          <MastheadBrand>
+          <MastheadLogo>
             <Brand
               src={Theme.logoNavbarSrc}
               alt="Brand"
             >
-              <source media="(min-width: 768px)" srcSet={Theme.logoNavbarSrc} />
+              <source media="(min-width: 48rem)" srcSet={Theme.logoNavbarSrc} />
               <source srcSet={Theme.logoNavbarSrc} />
             </Brand>
-          </MastheadBrand>
+          </MastheadLogo>
         </MastheadMain>
         <MastheadContent>
           <Toolbar isFullHeight isStatic>
             <ToolbarContent>
               <ToolbarGroup
-                variant="icon-button-group"
-                align={{ default: "alignRight" }}
-                spacer={{ default: "spacerNone", md: "spacerMd" }}
+                variant="action-group-plain"
+                align={{ default: "alignEnd" }}
+                gap={{ default: "gapNone", md: "gapMd" }}
               >
                 <ToolbarGroup
-                  variant="icon-button-group"
+                  variant="action-group-plain"
                   visibility={{ default: "hidden", lg: "visible" }}
                 >
                   <ToolbarItem>

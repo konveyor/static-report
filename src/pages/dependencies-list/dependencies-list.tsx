@@ -5,8 +5,7 @@ import {
   Divider,
   PageSection,
   PageSectionVariants,
-  Text,
-  TextContent,
+  Content,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -37,7 +36,7 @@ export const DependenciesList: React.FC = () => {
 
   return (
     <>
-      <PageSection padding={{ default: "noPadding" }}>
+      <PageSection hasBodyWrapper={false} padding={{ default: "noPadding" }}>
         <Toolbar>
           <ToolbarContent>
             <ToolbarItem>Application:</ToolbarItem>
@@ -51,16 +50,16 @@ export const DependenciesList: React.FC = () => {
         </Toolbar>
       </PageSection>
       <Divider />
-      <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <Text component="h1">Dependencies</Text>
-          <Text component="small">
+      <PageSection hasBodyWrapper={false} >
+        <Content>
+          <Content component="h1">Dependencies</Content>
+          <Content component="small">
             This report lists all found Java libraries embedded within the
             analyzed application.
-          </Text>
-        </TextContent>
+          </Content>
+        </Content>
       </PageSection>
-      <PageSection variant={PageSectionVariants.default}>
+      <PageSection hasBodyWrapper={false} variant={PageSectionVariants.default}>
         <DependenciesTable applicationId={applicationId} />
       </PageSection>
     </>
