@@ -1,14 +1,17 @@
 import { useState } from 'react';
 
-import { ToolbarChip } from '@patternfly/react-core';
+export interface ToolbarLabel {
+  key: string;
+  node: React.ReactNode;
+}
 
-const getToolbarChipKey = (value: string | ToolbarChip) => {
+const getToolbarLabelKey = (value: string | ToolbarLabel) => {
   return typeof value === 'string' ? value : value.key;
 };
 
 // Hook
 
-type FilterType = string | ToolbarChip;
+type FilterType = string | ToolbarLabel;
 
 interface HookState<K, T> {
   filters: Map<K, T[]>;
@@ -49,9 +52,9 @@ export const useToolbar = <K, T extends FilterType>(
       }
 
       const newValue = (current.get(key) || []).filter((f) => {
-        const fkey = getToolbarChipKey(f);
+        const fkey = getToolbarLabelKey(f);
         return !elementsToBeRemoved.some((r) => {
-          const rKey = getToolbarChipKey(r);
+          const rKey = getToolbarLabelKey(r);
           return fkey === rKey;
         });
       });

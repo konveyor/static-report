@@ -1,4 +1,6 @@
 import { useCallback } from "react";
+
+import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import {
@@ -15,10 +17,10 @@ import {
   IssueProcessed,
   IssueCatType
 } from "@app/models/api-enriched";
+import { DispersedFile, addIncidentToDispersedFile, getCodeSnip, organizeDispersedFile } from "@app/models/file";
+
 import { useMockableQuery } from "./helpers";
 import { MOCK_APPS } from "./mocks/report.mock";
-import { DispersedFile, addIncidentToDispersedFile, getCodeSnip, organizeDispersedFile } from "@app/models/file";
-import { useQuery } from "@tanstack/react-query";
 
 
 export const useFileQuery = (uri: string, appId: string, enabled: boolean) => {
