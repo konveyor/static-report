@@ -10,7 +10,7 @@ export const Issues: React.FC = () => {
   const application = useOutletContext<ApplicationProcessed | null>();
 
   return (
-    <PageSection>
+    <PageSection hasBodyWrapper={false}>
       <ViolationsTable applicationId={application?.id} />
     </PageSection>
   );

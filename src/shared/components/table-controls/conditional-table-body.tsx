@@ -3,7 +3,6 @@ import {
   Bullseye,
   EmptyState,
   EmptyStateBody,
-  EmptyStateIcon,
   EmptyStateVariant,
   Spinner,
   Title,
@@ -11,7 +10,7 @@ import {
 import CubesIcon from '@patternfly/react-icons/dist/esm/icons/cubes-icon';
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/esm/icons/exclamation-circle-icon';
 import { Tbody, Td, Tr } from '@patternfly/react-table';
-import { global_danger_color_200 as globalDangerColor200 } from '@patternfly/react-tokens';
+
 
 export interface IConditionalTableBodyProps {
   numRenderedColumns: number;
@@ -33,11 +32,9 @@ export const ConditionalTableBody: React.FC<IConditionalTableBodyProps> = ({
   children,
 }) => {
   const error = (
-    <EmptyState variant={EmptyStateVariant.sm}>
-      <EmptyStateIcon icon={ExclamationCircleIcon} color={globalDangerColor200.value} />
-      <Title headingLevel="h2" size="lg">
+    <EmptyState titleText={<Title headingLevel="h2" size="lg">
         Unable to connect
-      </Title>
+      </Title>} icon={ExclamationCircleIcon} variant={EmptyStateVariant.sm}>
       <EmptyStateBody>
         There was an error retrieving data. Check your connection and try again.
       </EmptyStateBody>
@@ -45,11 +42,9 @@ export const ConditionalTableBody: React.FC<IConditionalTableBodyProps> = ({
   );
 
   const noData = (
-    <EmptyState variant={EmptyStateVariant.sm}>
-      <EmptyStateIcon icon={CubesIcon} />
-      <Title headingLevel="h2" size="lg">
+    <EmptyState titleText={<Title headingLevel="h2" size="lg">
         No data available
-      </Title>
+      </Title>} icon={CubesIcon} variant={EmptyStateVariant.sm}>
       <EmptyStateBody>No data available to be shown here.</EmptyStateBody>
     </EmptyState>
   );

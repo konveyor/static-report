@@ -2,29 +2,30 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useSelectionState } from "@app/shared/hooks/useSelectionState";
 import {
-  Bullseye,
-  Button,
-  EmptyState,
-  EmptyStateBody,
-  EmptyStateIcon,
-  Label,
-  Modal,
-  SearchInput,
-  Split,
-  SplitItem,
-  Tab,
-  Tabs,
-  Title,
-  Toolbar,
-  ToolbarChip,
-  ToolbarChipGroup,
-  ToolbarContent,
-  ToolbarFilter,
-  ToolbarGroup,
-  ToolbarItem,
-  ToolbarItemVariant,
-  ToolbarToggleGroup,
-} from "@patternfly/react-core";
+	Bullseye,
+	Button,
+	EmptyState,
+	EmptyStateBody,
+	Label,
+	SearchInput,
+	Split,
+	SplitItem,
+	Tab,
+	Tabs,
+	Title,
+	Toolbar,
+	ToolbarLabel,
+	ToolbarLabelGroup,
+	ToolbarContent,
+	ToolbarFilter,
+	ToolbarGroup,
+	ToolbarItem,
+	ToolbarItemVariant,
+	ToolbarToggleGroup
+} from '@patternfly/react-core';
+import {
+	Modal
+} from '@patternfly/react-core/deprecated';
 import ArrowUpIcon from "@patternfly/react-icons/dist/esm/icons/arrow-up-icon";
 import FilterIcon from "@patternfly/react-icons/dist/esm/icons/filter-icon";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@patternfly/react-table";
@@ -57,7 +58,7 @@ const areRowsEquals = (a: TableData, b: TableData) => {
   return a.id === b.id;
 };
 
-const toOption = (option: string | ToolbarChip): OptionWithValue => {
+const toOption = (option: string | ToolbarLabel): OptionWithValue => {
   if (typeof option === "string") {
     const toStringFn = () => option;
     return {
@@ -83,7 +84,7 @@ const toOption = (option: string | ToolbarChip): OptionWithValue => {
   }
 };
 
-const toToolbarChip = (option: OptionWithValue): ToolbarChip => {
+const toToolbarChip = (option: OptionWithValue): ToolbarLabel => {
   return {
     key: option.value,
     node: option.toString(),
@@ -152,14 +153,14 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
   const [filterText, setFilterText] = useState("");
   const { filters, setFilter, removeFilter, clearAllFilters } = useToolbar<
     "category" | "effort" | "sourceTechnology" | "targetTechnology",
-    ToolbarChip
+    ToolbarLabel
   >();
 
   const debouncedFilterText = useDebounce<string>(filterText, 250);
   const debouncedFilters = useDebounce<
     Map<
       "category" | "effort" | "sourceTechnology" | "targetTechnology",
-      ToolbarChip[]
+      ToolbarLabel[]
     >
   >(filters, 100);
 
@@ -298,11 +299,9 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
       <>
         {applicationId === undefined ? (
           <Bullseye>
-            <EmptyState>
-              <EmptyStateIcon icon={ArrowUpIcon} />
-              <Title headingLevel="h4" size="lg">
+            <EmptyState titleText={<Title headingLevel="h4" size="lg">
                 Select an application
-              </Title>
+              </Title>} icon={ArrowUpIcon}>
               <EmptyStateBody>
                 Select an application whose data you want to get access to.
               </EmptyStateBody>
@@ -317,7 +316,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
             >
               <ToolbarContent>
                 <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
-                  <ToolbarItem variant="search-filter">
+                  <ToolbarItem >
                     <SearchInput
                       value={filterText}
                       onChange={(_, value) => setFilterText(value)}
@@ -328,12 +327,12 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                     insightsMode ? (<></>) : (
                       <ToolbarGroup variant="filter-group">
                         <ToolbarFilter
-                          chips={filters.get("category")}
-                          deleteChip={(
-                            category: string | ToolbarChipGroup,
-                            chip: ToolbarChip | string
+                          labels={filters.get("category")}
+                          deleteLabel={(
+                            category: string | ToolbarLabelGroup,
+                            chip: ToolbarLabel | string
                           ) => removeFilter("category", chip)}
-                          deleteChipGroup={() => setFilter("category", [])}
+                          deleteLabelGroup={() => setFilter("category", [])}
                           categoryName={{ key: "category", name: "Category" }}
                         >
                           <SimpleSelect
@@ -350,7 +349,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                               const elementExists = (
                                 filters.get("category") || []
                               ).some((f) => f.key === optionValue.value);
-                              let newElements: ToolbarChip[];
+                              let newElements: ToolbarLabel[];
                               if (elementExists) {
                                 newElements = (
                                   filters.get("category") || []
@@ -375,12 +374,12 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                     insightsMode ? (<></>) : (
                       <ToolbarGroup variant="filter-group">
                         <ToolbarFilter
-                          chips={filters.get("effort")}
-                          deleteChip={(
-                            category: string | ToolbarChipGroup,
-                            chip: ToolbarChip | string
+                          labels={filters.get("effort")}
+                          deleteLabel={(
+                            category: string | ToolbarLabelGroup,
+                            chip: ToolbarLabel | string
                           ) => removeFilter("effort", chip)}
-                          deleteChipGroup={() => setFilter("effort", [])}
+                          deleteLabelGroup={() => setFilter("effort", [])}
                           categoryName={{
                             key: "effort",
                             name: "Effort",
@@ -400,7 +399,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                               const elementExists = (
                                 filters.get("effort") || []
                               ).some((f) => f.key === optionValue.value);
-                              let newElements: ToolbarChip[];
+                              let newElements: ToolbarLabel[];
                               if (elementExists) {
                                 newElements = (filters.get("effort") || []).filter(
                                   (f) => f.key !== optionValue.value
@@ -424,12 +423,12 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                   <ToolbarGroup variant="filter-group">
                     {technologies.source.length > 0 && (
                       <ToolbarFilter
-                        chips={filters.get("sourceTechnology")}
-                        deleteChip={(
-                          category: string | ToolbarChipGroup,
-                          chip: ToolbarChip | string
+                        labels={filters.get("sourceTechnology")}
+                        deleteLabel={(
+                          category: string | ToolbarLabelGroup,
+                          chip: ToolbarLabel | string
                         ) => removeFilter("sourceTechnology", chip)}
-                        deleteChipGroup={() =>
+                        deleteLabelGroup={() =>
                           setFilter("sourceTechnology", [])
                         }
                         categoryName={{
@@ -452,7 +451,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                             const elementExists = (
                               filters.get("sourceTechnology") || []
                             ).some((f) => f.key === optionValue.value);
-                            let newElements: ToolbarChip[];
+                            let newElements: ToolbarLabel[];
                             if (elementExists) {
                               newElements = (
                                 filters.get("sourceTechnology") || []
@@ -473,12 +472,12 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                     )}
                     {technologies.target.length > 0 && (
                       <ToolbarFilter
-                        chips={filters.get("targetTechnology")}
-                        deleteChip={(
-                          category: string | ToolbarChipGroup,
-                          chip: ToolbarChip | string
+                        labels={filters.get("targetTechnology")}
+                        deleteLabel={(
+                          category: string | ToolbarLabelGroup,
+                          chip: ToolbarLabel | string
                         ) => removeFilter("targetTechnology", chip)}
-                        deleteChipGroup={() =>
+                        deleteLabelGroup={() =>
                           setFilter("targetTechnology", [])
                         }
                         categoryName={{
@@ -501,7 +500,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                             const elementExists = (
                               filters.get("targetTechnology") || []
                             ).some((f) => f.key === optionValue.value);
-                            let newElements: ToolbarChip[];
+                            let newElements: ToolbarLabel[];
                             if (elementExists) {
                               newElements = (
                                 filters.get("targetTechnology") || []
@@ -524,7 +523,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                 </ToolbarToggleGroup>
                 <ToolbarItem
                   variant={ToolbarItemVariant.pagination}
-                  align={{ default: "alignRight" }}
+                  align={{ default: "alignEnd" }}
                 >
                   <SimplePagination
                     count={filteredItems.length}
@@ -652,7 +651,7 @@ export const ViolationsTable: React.FC<IViolationsTableProps> = ({
                       {isRowExpanded(item) ? (
                         <Tr isExpanded>
                           <Td colSpan={9}>
-                            <div className="pf-v5-u-m-sm">
+                            <div className="pf-v6-u-m-sm">
                               <IssueOverview
                                 issue={item}
                                 onShowFile={(file, issue) => {

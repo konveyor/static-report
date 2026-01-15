@@ -6,19 +6,17 @@ import { css } from "@patternfly/react-styles";
 
 import { useSimpleContext } from "@app/context/simple-context";
 
-import { LayoutTheme } from "./layout-constants";
-
 export const SidebarApp: React.FC = () => {
   const { currentContext } = useSimpleContext();
 
   const renderPageNav = () => {
     return (
-      <Nav id="nav-sidebar" aria-label="Nav" theme={LayoutTheme}>
+      <Nav id="nav-sidebar" aria-label="Nav" >
         <NavList>
           <NavLink
             to="/applications"
             className={({ isActive }) =>
-              css("pf-v5-c-nav__link", isActive ? "pf-m-current" : "")
+              css("pf-v6-c-nav__link", isActive ? "pf-m-current" : "")
             }
           >
             Applications
@@ -32,7 +30,7 @@ export const SidebarApp: React.FC = () => {
                 : "/issues/applications/" + currentContext.key
             }
             className={({ isActive }) =>
-              css("pf-v5-c-nav__link", isActive ? "pf-m-current" : "")
+              css("pf-v6-c-nav__link", isActive ? "pf-m-current" : "")
             }
           >
             Issues
@@ -46,7 +44,7 @@ export const SidebarApp: React.FC = () => {
                 : "/insights/applications/" + currentContext.key
             }
             className={({ isActive }) =>
-              css("pf-v5-c-nav__link", isActive ? "pf-m-current" : "")
+              css("pf-v6-c-nav__link", isActive ? "pf-m-current" : "")
             }
           >
             Insights
@@ -60,7 +58,7 @@ export const SidebarApp: React.FC = () => {
                 : "/dependencies/applications/" + currentContext.key
             }
             className={({ isActive }) =>
-              css("pf-v5-c-nav__link", isActive ? "pf-m-current" : "")
+              css("pf-v6-c-nav__link", isActive ? "pf-m-current" : "")
             }
           >
             Dependencies
@@ -70,5 +68,5 @@ export const SidebarApp: React.FC = () => {
     );
   };
 
-  return <PageSidebar theme={LayoutTheme}>{renderPageNav()}</PageSidebar>;
+  return <PageSidebar >{renderPageNav()}</PageSidebar>;
 };

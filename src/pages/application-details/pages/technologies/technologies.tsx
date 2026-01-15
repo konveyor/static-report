@@ -7,7 +7,6 @@ import {
   CardTitle,
   Divider,
   EmptyState,
-  EmptyStateIcon,
   EmptyStateVariant,
   Gallery,
   GalleryItem,
@@ -37,7 +36,7 @@ export const Technologies: React.FC = () => {
 
   return (
     <>
-      <PageSection>
+      <PageSection hasBodyWrapper={false}>
         <Gallery hasGutter minWidths={{ md: "400px" }}>
           {sortedTagsByCategory.map(([category, tags], index) => (
             <GalleryItem key={index}>
@@ -56,12 +55,10 @@ export const Technologies: React.FC = () => {
                         }
                       </LabelGroup>
                     ) : (
-                      <EmptyState variant={EmptyStateVariant.sm}>
-                        <EmptyStateIcon icon={InfoAltIcon} />
-                        <Title headingLevel="h4" size="md">
+                      <EmptyState titleText={<Title headingLevel="h4" size="md">
                           No data to show
-                        </Title>
-                      </EmptyState>
+                        </Title>} icon={InfoAltIcon} variant={EmptyStateVariant.sm}>
+                        </EmptyState>
                     )
                   }
                 </CardBody>

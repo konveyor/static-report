@@ -1,13 +1,13 @@
 import React, { useMemo } from "react";
 
 import {
-  Chart,
-  ChartAxis,
-  ChartBar,
-  ChartGroup,
-  ChartThemeColor,
-  ChartTooltip,
-} from "@patternfly/react-charts";
+	Chart,
+	ChartAxis,
+	ChartBar,
+	ChartGroup,
+	ChartThemeColor,
+	ChartTooltip
+} from '@patternfly/react-charts/victory';
 import {
   Card,
   CardBody,

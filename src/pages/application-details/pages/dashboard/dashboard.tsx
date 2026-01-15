@@ -12,7 +12,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <>
-      <PageSection>
+      <PageSection hasBodyWrapper={false}>
         <Stack hasGutter>
           <StackItem>
             {application && <IncidentsSection application={application} />}

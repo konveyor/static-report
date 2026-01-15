@@ -14,8 +14,7 @@ import {
   SearchInput,
   CardHeader,
   CardTitle,
-  Text,
-  TextContent,
+  Content,
   Toolbar,
   ToolbarContent,
   ToolbarToggleGroup,
@@ -111,7 +110,7 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
             >
               <ToolbarContent>
                 <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
-                  <ToolbarItem variant="search-filter">
+                  <ToolbarItem >
                     <SearchInput
                       value={filterText}
                       onChange={(_, value) => setFilterText(value)}
@@ -121,7 +120,7 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
                 </ToolbarToggleGroup>
                 <ToolbarItem
                   variant={ToolbarItemVariant.pagination}
-                  align={{ default: "alignRight" }}
+                  align={{ default: "alignEnd" }}
                 >
                   <SimplePagination
                     count={filteredItems.length}
@@ -182,11 +181,11 @@ export const IssueOverview: React.FC<IIssueOverviewProps> = ({
             <Card isCompact isFullHeight>
               <CardHeader>
                 <CardTitle>
-                  <TextContent>
+                  <Content>
                     <>
-                      <Text component="h2">{issue.ruleID}</Text>
+                      <Content component="h2">{issue.ruleID}</Content>
                     </>
-                  </TextContent>
+                  </Content>
                 </CardTitle>
               </CardHeader>
               <CardBody>

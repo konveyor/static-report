@@ -1,14 +1,14 @@
 import { useState } from 'react';
 
-import { ToolbarChip } from '@patternfly/react-core';
+import { ToolbarLabel } from '@patternfly/react-core';
 
-const getToolbarChipKey = (value: string | ToolbarChip) => {
+const getToolbarChipKey = (value: string | ToolbarLabel) => {
   return typeof value === 'string' ? value : value.key;
 };
 
 // Hook
 
-type FilterType = string | ToolbarChip;
+type FilterType = string | ToolbarLabel;
 
 interface HookState<K, T> {
   filters: Map<K, T[]>;

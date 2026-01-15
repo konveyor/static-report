@@ -10,7 +10,7 @@ export const Dependencies: React.FC = () => {
   const application = useOutletContext<ReportDto | null>();
 
   return (
-    <PageSection>
+    <PageSection hasBodyWrapper={false}>
       <DependenciesTable applicationId={application?.id} />
     </PageSection>
   );

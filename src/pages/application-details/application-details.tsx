@@ -14,9 +14,8 @@ import {
   Tab,
   TabTitleText,
   Tabs,
-  Text,
-  TextContent,
-} from "@patternfly/react-core";
+  Content,
+  } from "@patternfly/react-core";
 
 import { useAllApplications } from "@app/queries/report";
 
@@ -64,7 +63,7 @@ export const ApplicationEdit: React.FC = () => {
 
   return (
     <>
-      <PageSection type="breadcrumb">
+      <PageSection hasBodyWrapper={false} type="breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem>
             <Link to="/applications">Applications</Link>
@@ -72,12 +71,12 @@ export const ApplicationEdit: React.FC = () => {
           <BreadcrumbItem isActive>{application?.name}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
-      <PageSection type="default" variant="light">
-        <TextContent>
-          <Text component="h1">{application?.name}</Text>
-        </TextContent>
+      <PageSection hasBodyWrapper={false} type="default" >
+        <Content>
+          <Content component="h1">{application?.name}</Content>
+        </Content>
       </PageSection>
-      <PageSection type="tabs" variant="light">
+      <PageSection hasBodyWrapper={false} type="tabs" >
         <Tabs
           role="region"
           activeKey={tabItems.find((e) => e.path === location.pathname)?.path}

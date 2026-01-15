@@ -2,15 +2,18 @@ import React, {
   createContext,
   useContext,
   useEffect,
-  useReducer,
   useState,
 } from "react";
 
 import {
-  ContextSelector,
-  ContextSelectorItem,
-  ContextSelectorProps,
-} from "@patternfly/react-core/deprecated";
+  Menu,
+  MenuContent,
+  MenuList,
+  MenuItem,
+  MenuToggle,
+  Popper,
+  SearchInput,
+} from "@patternfly/react-core";
 
 import "./simple-context.css";
 
@@ -60,20 +63,11 @@ export const useSimpleContext = (): ISimpleContext => useContext(SimpleContext);
 
 export interface ISimpleContextSelectorProps {
   contextKeyFromURL?: string;
-  props?: Omit<
-    ContextSelectorProps,
-    | "isOpen"
-    | "toggleText"
-    | "onToggle"
-    | "searchInputValue"
-    | "onSearchInputChange"
-  >;
   onChange: (context: Context) => void;
 }
 
 export const SimpleContextSelector: React.FC<ISimpleContextSelectorProps> = ({
   contextKeyFromURL,
-  props,
   onChange,
 }) => {
   const { allContexts, currentContext, selectContext } = useSimpleContext();
@@ -87,38 +81,73 @@ export const SimpleContextSelector: React.FC<ISimpleContextSelectorProps> = ({
   }, [contextKeyFromURL, currentContext, selectContext]);
 
   const [filterText, setFilterText] = useState("");
-  const [isSelectorOpen, toggleSelector] = useReducer(
-    (isVisible) => !isVisible,
-    false
-  );
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+  const toggleRef = React.useRef<HTMLButtonElement>(null);
+  const menuRef = React.useRef<HTMLDivElement>(null);
 
   const onSelect = (value: Context) => {
-    toggleSelector();
+    setIsSelectorOpen(false);
     selectContext(value.key);
     onChange(value);
   };
 
-  return (
-    <ContextSelector
-      isOpen={isSelectorOpen}
-      toggleText={currentContext?.label}
-      onToggle={toggleSelector}
-      searchInputValue={filterText}
-      onSearchInputChange={(_, value) => setFilterText(value)}
+  const onToggle = () => {
+    setIsSelectorOpen(!isSelectorOpen);
+  };
+
+  const filteredContexts = allContexts.filter(
+    (f) => f.label.toLowerCase().indexOf(filterText.toLowerCase()) !== -1
+  );
+
+  const toggle = (
+    <MenuToggle
+      ref={toggleRef}
+      onClick={onToggle}
+      isExpanded={isSelectorOpen}
       className="firstChildBordered"
-      {...props}
     >
-      {allContexts
-        .filter(
-          (f) => f.label.toLowerCase().indexOf(filterText.toLowerCase()) !== -1
-        )
-        .map((item, index) => {
-          return (
-            <ContextSelectorItem key={index} onClick={() => onSelect(item)}>
+      {currentContext?.label || "Select context"}
+    </MenuToggle>
+  );
+
+  const menu = (
+    <Menu ref={menuRef} onSelect={(_ev, itemId) => {
+      const selected = allContexts.find(c => c.key === itemId);
+      if (selected) onSelect(selected);
+    }}>
+      <MenuContent>
+        <SearchInput
+          value={filterText}
+          onChange={(_event, value) => setFilterText(value)}
+          onClear={() => setFilterText("")}
+        />
+        <MenuList>
+          {filteredContexts.map((item) => (
+            <MenuItem key={item.key} itemId={item.key}>
               {item.label}
-            </ContextSelectorItem>
-          );
-        })}
-    </ContextSelector>
+            </MenuItem>
+          ))}
+        </MenuList>
+      </MenuContent>
+    </Menu>
+  );
+
+  return (
+    <Popper
+      trigger={toggle}
+      popper={menu}
+      isVisible={isSelectorOpen}
+      onDocumentClick={(event) => {
+        if (
+          event &&
+          toggleRef.current &&
+          menuRef.current &&
+          !toggleRef.current.contains(event.target as Node) &&
+          !menuRef.current.contains(event.target as Node)
+        ) {
+          setIsSelectorOpen(false);
+        }
+      }}
+    />
   );
 };
