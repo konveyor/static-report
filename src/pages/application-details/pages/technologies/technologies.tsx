@@ -7,20 +7,18 @@ import {
   CardTitle,
   Divider,
   EmptyState,
-  EmptyStateIcon,
   EmptyStateVariant,
   Gallery,
   GalleryItem,
   Label,
   LabelGroup,
   PageSection,
-  Title,
 } from "@patternfly/react-core";
 import InfoAltIcon from "@patternfly/react-icons/dist/esm/icons/info-alt-icon";
 
+import { TagDto } from "@app/api/report";
 import { ApplicationProcessed } from "@app/models/api-enriched";
 
-import { TagDto } from "@app/api/report";
 
 export const Technologies: React.FC = () => {
   const application = useOutletContext<ApplicationProcessed | null>();
@@ -56,12 +54,7 @@ export const Technologies: React.FC = () => {
                         }
                       </LabelGroup>
                     ) : (
-                      <EmptyState variant={EmptyStateVariant.sm}>
-                        <EmptyStateIcon icon={InfoAltIcon} />
-                        <Title headingLevel="h4" size="md">
-                          No data to show
-                        </Title>
-                      </EmptyState>
+                      <EmptyState variant={EmptyStateVariant.sm} titleText="No data to show" icon={InfoAltIcon} headingLevel="h4" />
                     )
                   }
                 </CardBody>

@@ -7,10 +7,12 @@ import React, {
 } from "react";
 
 import {
-  ContextSelector,
-  ContextSelectorItem,
-  ContextSelectorProps,
-} from "@patternfly/react-core/deprecated";
+  Dropdown,
+  DropdownList,
+  DropdownItem,
+  MenuToggle,
+  SearchInput,
+} from "@patternfly/react-core";
 
 import "./simple-context.css";
 
@@ -60,20 +62,11 @@ export const useSimpleContext = (): ISimpleContext => useContext(SimpleContext);
 
 export interface ISimpleContextSelectorProps {
   contextKeyFromURL?: string;
-  props?: Omit<
-    ContextSelectorProps,
-    | "isOpen"
-    | "toggleText"
-    | "onToggle"
-    | "searchInputValue"
-    | "onSearchInputChange"
-  >;
   onChange: (context: Context) => void;
 }
 
 export const SimpleContextSelector: React.FC<ISimpleContextSelectorProps> = ({
   contextKeyFromURL,
-  props,
   onChange,
 }) => {
   const { allContexts, currentContext, selectContext } = useSimpleContext();
@@ -98,27 +91,39 @@ export const SimpleContextSelector: React.FC<ISimpleContextSelectorProps> = ({
     onChange(value);
   };
 
+  const filteredContexts = allContexts.filter(
+    (f) => f.label.toLowerCase().indexOf(filterText.toLowerCase()) !== -1
+  );
+
   return (
-    <ContextSelector
+    <Dropdown
       isOpen={isSelectorOpen}
-      toggleText={currentContext?.label}
-      onToggle={toggleSelector}
-      searchInputValue={filterText}
-      onSearchInputChange={(_, value) => setFilterText(value)}
-      className="firstChildBordered"
-      {...props}
+      onOpenChange={(isOpen) => !isOpen && toggleSelector()}
+      toggle={(toggleRef) => (
+        <MenuToggle
+          ref={toggleRef}
+          onClick={toggleSelector}
+          isExpanded={isSelectorOpen}
+          className="firstChildBordered"
+        >
+          {currentContext?.label || "Select context"}
+        </MenuToggle>
+      )}
     >
-      {allContexts
-        .filter(
-          (f) => f.label.toLowerCase().indexOf(filterText.toLowerCase()) !== -1
-        )
-        .map((item, index) => {
-          return (
-            <ContextSelectorItem key={index} onClick={() => onSelect(item)}>
-              {item.label}
-            </ContextSelectorItem>
-          );
-        })}
-    </ContextSelector>
+      <DropdownList>
+        <div style={{ padding: "8px" }}>
+          <SearchInput
+            value={filterText}
+            onChange={(_, value) => setFilterText(value)}
+            onClear={() => setFilterText("")}
+          />
+        </div>
+        {filteredContexts.map((item, index) => (
+          <DropdownItem key={index} onClick={() => onSelect(item)}>
+            {item.label}
+          </DropdownItem>
+        ))}
+      </DropdownList>
+    </Dropdown>
   );
 };

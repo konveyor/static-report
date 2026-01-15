@@ -12,11 +12,7 @@ import {
   SearchInput,
   Split,
   SplitItem,
-  Text,
-  TextContent,
   Toolbar,
-  ToolbarChip,
-  ToolbarChipGroup,
   ToolbarContent,
   ToolbarFilter,
   ToolbarGroup,
@@ -38,7 +34,6 @@ import {
   Tr,
 } from "@patternfly/react-table";
 
-import { capitalizeFirstLetter } from "@app/utils/utils";
 import { ApplicationProcessed } from "@app/models/api-enriched";
 import { useAllApplications } from "@app/queries/report";
 import {
@@ -52,6 +47,8 @@ import {
   useToolbar,
   useCellSelectionState,
 } from "@app/shared/hooks";
+import type { ToolbarLabel } from "@app/shared/hooks/useToolbar";
+import { capitalizeFirstLetter } from "@app/utils/utils";
 
 import "./application-list.css";
 
@@ -78,8 +75,11 @@ export const ApplicationList: React.FC = () => {
   const [filterText, setFilterText] = useState("");
   const { filters, setFilter, removeFilter, clearAllFilters } = useToolbar<
     "tag",
-    string
+    string | ToolbarLabel
   >();
+
+  // ToolbarLabelGroup type for v6
+  type ToolbarLabelGroup = { key: string; name: string };
 
   const applications = useAllApplications();
 
@@ -145,14 +145,12 @@ export const ApplicationList: React.FC = () => {
 
   return (
     <>
-      <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <Text component="h1">Applications</Text>
-          <Text component="small">
-            This report lists all analyzed applications. Select an individual
-            application to show more details.
-          </Text>
-        </TextContent>
+      <PageSection>
+        <h1>Applications</h1>
+        <small>
+          This report lists all analyzed applications. Select an individual
+          application to show more details.
+        </small>
       </PageSection>
       <PageSection variant={PageSectionVariants.default}>
         <Toolbar
@@ -162,7 +160,7 @@ export const ApplicationList: React.FC = () => {
         >
           <ToolbarContent>
             <ToolbarToggleGroup toggleIcon={<FilterIcon />} breakpoint="xl">
-              <ToolbarItem variant="search-filter">
+              <ToolbarItem>
                 <SearchInput
                   value={filterText}
                   onChange={(_, value) => setFilterText(value)}
@@ -173,12 +171,12 @@ export const ApplicationList: React.FC = () => {
               </ToolbarItem>
               <ToolbarGroup variant="filter-group">
                 <ToolbarFilter
-                  chips={filters.get("tag")}
-                  deleteChip={(
-                    category: string | ToolbarChipGroup,
-                    chip: ToolbarChip | string
-                  ) => removeFilter("tag", chip)}
-                  deleteChipGroup={() => setFilter("tag", [])}
+                  labels={filters.get("tag")}
+                  deleteLabel={(
+                    category: string | ToolbarLabelGroup,
+                    label: string | ToolbarLabel
+                  ) => removeFilter("tag", label)}
+                  deleteLabelGroup={() => setFilter("tag", [])}
                   categoryName={{ key: "tag", name: "Tag" }}
                 >
                   <SimpleSelect
@@ -189,22 +187,22 @@ export const ApplicationList: React.FC = () => {
                     aria-label="tag"
                     aria-labelledby="tag"
                     placeholderText="Tag"
-                    value={filters.get("tag")}
+                    value={filters.get("tag") as string[]}
                     options={allTags}
                     onChange={(option) => {
                       const optionValue = option as string;
 
-                      const elementExists = (filters.get("tag") || []).some(
+                      const currentTags = (filters.get("tag") as string[] | undefined) || [];
+                      const elementExists = currentTags.some(
                         (f) => f === optionValue
                       );
                       let newElements: string[];
                       if (elementExists) {
-                        newElements = (filters.get("tag") || [])
-                          .filter((f) => f !== optionValue)
-                          .map((f) => f);
+                        newElements = currentTags
+                          .filter((f) => f !== optionValue);
                       } else {
                         newElements = [
-                          ...(filters.get("tag") || []),
+                          ...currentTags,
                           optionValue,
                         ];
                       }
@@ -219,7 +217,7 @@ export const ApplicationList: React.FC = () => {
             </ToolbarToggleGroup>
             <ToolbarItem
               variant={ToolbarItemVariant.pagination}
-              align={{ default: "alignRight" }}
+              align={{ default: "alignEnd" }}
             >
               <SimplePagination
                 count={filteredItems.length}
@@ -316,7 +314,7 @@ export const ApplicationList: React.FC = () => {
                   {isRowExpanded ? (
                     <Tr isExpanded>
                       <Td noPadding colSpan={6}>
-                        <div className="pf-v5-u-m-lg">
+                        <div className="pf-v6-u-m-lg">
                           {isCellSelected(item.id, ColumnKey.tags) && (
                             <Split hasGutter isWrappable>
                               {item.tagsFlat.map((e, index) => (

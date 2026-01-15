@@ -20,9 +20,9 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from "@patternfly/react-core";
+import EllipsisVIcon from "@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon";
 import HelpIcon from "@patternfly/react-icons/dist/esm/icons/help-icon";
 import BarsIcon from "@patternfly/react-icons/dist/js/icons/bars-icon";
-import EllipsisVIcon from "@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon";
 
 // import avatarImage from "@app/images/avatar.svg";
 
@@ -57,12 +57,9 @@ export const HeaderApp: React.FC = () => {
           <Toolbar isFullHeight isStatic>
             <ToolbarContent>
               <ToolbarGroup
-                variant="icon-button-group"
-                align={{ default: "alignRight" }}
-                spacer={{ default: "spacerNone", md: "spacerMd" }}
+                align={{ default: "alignEnd" }}
               >
                 <ToolbarGroup
-                  variant="icon-button-group"
                   visibility={{ default: "hidden", lg: "visible" }}
                 >
                   <ToolbarItem>

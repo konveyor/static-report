@@ -2,6 +2,7 @@ import {
   LinkDto,
   TagDto
 } from "@app/api/report";
+
 import { DispersedFile } from "./file";
 
 export interface ApplicationProcessed {

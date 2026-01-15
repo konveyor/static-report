@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import {
+  CodeEditor,
+  CodeEditorProps,
+  Language,
+} from "@patternfly/react-code-editor";
+import {
   Card,
   CardBody,
   CardHeader,
@@ -11,28 +16,16 @@ import {
   DrawerHead,
   DrawerPanelContent,
   EmptyState,
-  EmptyStateIcon,
   EmptyStateVariant,
-  Text,
-  Title,
-  TextContent,
 } from "@patternfly/react-core";
-
-import {
-  CodeEditor,
-  CodeEditorProps,
-  Language,
-} from "@patternfly/react-code-editor";
-
 import InfoAltIcon from "@patternfly/react-icons/dist/esm/icons/info-alt-icon";
-
 import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
 
 import { LinkDto } from "@app/api/report";
-import { ConditionalRender, SimpleMarkdown } from "@app/shared/components";
-import { getMarkdown } from "@app/utils/utils";
 import { IssueProcessed } from "@app/models/api-enriched";
 import { IncidentCoordinates } from "@app/models/file";
+import { ConditionalRender, SimpleMarkdown } from "@app/shared/components";
+import { getMarkdown } from "@app/utils/utils";
 
 const codeLineRegex = /^\s*([0-9]+)( {2})?(.*)$/;
 
@@ -192,12 +185,8 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
               <Card isLarge>
                 <CardHeader>
                   <CardTitle>
-                    <TextContent>
-                      <Text component="h1">{issue.name}</Text>
-                    </TextContent>
-                    <TextContent>
-                      <Text component="small">{issue.ruleID}</Text>
-                    </TextContent>
+                    <h1>{issue.name}</h1>
+                    <small>{issue.ruleID}</small>
                   </CardTitle>
                 </CardHeader>
                 <CardBody>
@@ -221,12 +210,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
             then={<span>Loading...</span>}
           >
             {
-              codeSnip === "" ? (<EmptyState variant={EmptyStateVariant.lg}>
-                <EmptyStateIcon icon={InfoAltIcon} />
-                <Title headingLevel="h4" size="md">
-                  Code snippet unavailable
-                </Title>
-              </EmptyState>) : (<CodeEditor
+              codeSnip === "" ? (<EmptyState variant={EmptyStateVariant.lg} titleText="Code snippet unavailable" icon={InfoAltIcon} headingLevel="h4" />) : (<CodeEditor
                 isDarkTheme
                 isLineNumbersVisible
                 isReadOnly={true}

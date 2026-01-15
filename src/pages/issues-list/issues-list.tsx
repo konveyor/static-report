@@ -5,8 +5,6 @@ import {
   Divider,
   PageSection,
   PageSectionVariants,
-  Text,
-  TextContent,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -51,13 +49,11 @@ export const IssuesList: React.FC = () => {
         </Toolbar>
       </PageSection>
       <Divider />
-      <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <Text component="h1">Issues</Text>
-          <Text component="small">
-            This report provides a concise summary of all issues identified.
-          </Text>
-        </TextContent>
+      <PageSection>
+        <h1>Issues</h1>
+        <small>
+          This report provides a concise summary of all issues identified.
+        </small>
       </PageSection>
       <PageSection variant={PageSectionVariants.default}>
         <ViolationsTable applicationId={applicationId} />
