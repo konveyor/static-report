@@ -9,13 +9,13 @@ RUN go build -o js-bundle-generator ./main.go
 #       a specific version tag. Container build errors have come up locally
 #       and via github action workflow when `:latest` is updated.
 #
-# Image info: https://catalog.redhat.com/software/containers/ubi9/nodejs-18/62e8e7ed22d1d3c2dfe2ca01
+# Image info: https://catalog.redhat.com/software/containers/ubi10/nodejs-18/62e8e7ed22d1d3c2dfe2ca01
 # Relevant PRs:
 #   - https://github.com/konveyor/tackle2-ui/pull/1746
 #   - https://github.com/konveyor/tackle2-ui/pull/1781
 
 # Builder image
-FROM registry.access.redhat.com/ubi9/nodejs-18:1-88 as builder
+FROM registry.access.redhat.com/ubi10/nodejs-22:latest as builder
 USER 1001
 COPY --chown=1001 . .
 # Update assets
@@ -23,7 +23,7 @@ ARG VERSION=main
 RUN sed -i "s,_VERSION_,${VERSION/main/latest},g" ./public/version.js
 RUN npm clean-install && CI=true PUBLIC_URL=. npm run build
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal
+FROM registry.access.redhat.com/ubi10/ubi-minimal
 
 COPY --from=go-builder /output-parser/js-bundle-generator /usr/bin/js-bundle-generator
 COPY --from=builder /opt/app-root/src/build /usr/local/static-report
