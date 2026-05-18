@@ -2,11 +2,9 @@ import React from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 
 import {
+  Content,
   Divider,
   PageSection,
-  PageSectionVariants,
-  Text,
-  TextContent,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -51,15 +49,15 @@ export const InsightsList: React.FC = () => {
         </Toolbar>
       </PageSection>
       <Divider />
-      <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <Text component="h1">Insights</Text>
-          <Text component="small">
+      <PageSection variant="secondary">
+        <Content>
+          <Content component="h1">Insights</Content>
+          <Content component="small">
             This report provides a concise summary of all insights identified - issues with zero effort.
-          </Text>
-        </TextContent>
+          </Content>
+        </Content>
       </PageSection>
-      <PageSection variant={PageSectionVariants.default}>
+      <PageSection variant="default">
         <ViolationsTable applicationId={applicationId} insightsMode={true} />
       </PageSection>
     </>

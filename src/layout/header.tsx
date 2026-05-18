@@ -10,6 +10,7 @@ import {
   Masthead,
   MastheadBrand,
   MastheadContent,
+  MastheadLogo,
   MastheadMain,
   MastheadToggle,
   MenuToggle,
@@ -44,25 +45,27 @@ export const HeaderApp: React.FC = () => {
         </MastheadToggle>
         <MastheadMain>
           <MastheadBrand>
-            <Brand
-              src={Theme.logoNavbarSrc}
-              alt="Brand"
-            >
-              <source media="(min-width: 768px)" srcSet={Theme.logoNavbarSrc} />
-              <source srcSet={Theme.logoNavbarSrc} />
-            </Brand>
+            <MastheadLogo>
+              <Brand
+                src={Theme.logoNavbarSrc}
+                alt="Brand"
+              >
+                <source media="(min-width: 768px)" srcSet={Theme.logoNavbarSrc} />
+                <source srcSet={Theme.logoNavbarSrc} />
+              </Brand>
+            </MastheadLogo>
           </MastheadBrand>
         </MastheadMain>
         <MastheadContent>
           <Toolbar isFullHeight isStatic>
             <ToolbarContent>
               <ToolbarGroup
-                variant="icon-button-group"
-                align={{ default: "alignRight" }}
-                spacer={{ default: "spacerNone", md: "spacerMd" }}
+                variant="action-group-plain"
+                align={{ default: "alignEnd" }}
+                gap={{ default: "gapNone", md: "gapMd" }}
               >
                 <ToolbarGroup
-                  variant="icon-button-group"
+                  variant="action-group-plain"
                   visibility={{ default: "hidden", lg: "visible" }}
                 >
                   <ToolbarItem>
