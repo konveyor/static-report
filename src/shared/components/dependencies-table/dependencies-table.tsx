@@ -203,7 +203,7 @@ export const DependenciesTable: React.FC<IDependenciesTableProps> = ({
                   />
                 </ToolbarItem>
                 <ToolbarFilter
-                  chips={filters.get("labels")}
+                  labels={filters.get("labels")}
                   deleteLabel={(
                     category: string | ToolbarLabelGroup,
                     chip: ToolbarLabel | string

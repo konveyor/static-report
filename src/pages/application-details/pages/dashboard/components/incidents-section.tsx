@@ -7,7 +7,7 @@ import {
   ChartGroup,
   ChartThemeColor,
   ChartTooltip,
-} from "@patternfly/react-charts/victory";
+} from "@patternfly/react-charts";
 import {
   Card,
   CardBody,
