@@ -22,7 +22,7 @@
     "react-dom": "^18.3.1",
     "react-markdown": "^8.0.7",
     "react-router-dom": "^6.30.3",
-    "react-scripts": "^4.0.1",
+    "react-scripts": "^5.0.1",
     "remark-gfm": "^3.0.1",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
     "typesafe-actions": "^5.1.0",
@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "echarts": "^5.6.0 || ^6.0.0",
-    "monaco-editor-webpack-plugin": "7.0.1",
+    "monaco-editor-webpack-plugin": "^7.1.1",
     "react-app-rewired": "^2.2.1",
     "victory-area": "^37.3.6",
     "victory-axis": "^37.3.6",
