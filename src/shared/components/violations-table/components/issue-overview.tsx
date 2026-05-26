@@ -28,11 +28,9 @@ import FilterIcon from "@patternfly/react-icons/dist/esm/icons/filter-icon";
 import { useTable, useTableControls } from "@app/shared/hooks";
 
 import { IssueProcessed } from "@app/models/api-enriched";
-import {
-  ConditionalTableBody,
-  SimpleMarkdown,
-  SimplePagination,
-} from "@app/shared/components";
+import { ConditionalTableBody } from "@app/shared/components/table-controls/conditional-table-body";
+import { SimplePagination } from "@app/shared/components/table-controls/simple-pagination";
+import { SimpleMarkdown } from "@app/shared/components/simple-markdown";
 import { getMarkdown } from "@app/utils/utils";
 import { DispersedFile } from "@app/models/file";
 import { useDispersedFiles } from "@app/queries/report";

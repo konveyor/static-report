@@ -7,8 +7,6 @@ import {
   CardTitle,
   Content,
   Drawer,
-  DrawerActions,
-  DrawerCloseButton,
   DrawerContent,
   DrawerContentBody,
   DrawerHead,
@@ -28,7 +26,8 @@ import InfoAltIcon from "@patternfly/react-icons/dist/esm/icons/info-alt-icon";
 import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
 
 import { LinkDto } from "@app/api/report";
-import { ConditionalRender, SimpleMarkdown } from "@app/shared/components";
+import { ConditionalRender } from "@app/shared/components/conditional-render";
+import { SimpleMarkdown } from "@app/shared/components/simple-markdown";
 import { getMarkdown } from "@app/utils/utils";
 import { IssueProcessed } from "@app/models/api-enriched";
 import { IncidentCoordinates } from "@app/models/file";
@@ -188,9 +187,6 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
             isResizable
           >
             <DrawerHead>
-              <DrawerActions>
-                <DrawerCloseButton />
-              </DrawerActions>
               <Card isLarge>
                 <CardHeader>
                   <CardTitle>

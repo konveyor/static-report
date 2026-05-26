@@ -5,7 +5,6 @@ import {
   Content,
   Divider,
   PageSection,
-  PageSectionVariants,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -50,16 +49,14 @@ export const DependenciesList: React.FC = () => {
         </Toolbar>
       </PageSection>
       <Divider />
-      <PageSection variant="secondary">
-        <Content>
-          <Content component="h1">Dependencies</Content>
-          <Content component="small">
-            This report lists all found Java libraries embedded within the
-            analyzed application.
-          </Content>
+      <PageSection>
+        <Content component="h1">Dependencies</Content>
+        <Content component="p">
+          This report lists all found Java libraries embedded within the
+          analyzed application.
         </Content>
       </PageSection>
-      <PageSection variant={PageSectionVariants.default}>
+      <PageSection variant="secondary">
         <DependenciesTable applicationId={applicationId} />
       </PageSection>
     </>

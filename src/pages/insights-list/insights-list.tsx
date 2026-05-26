@@ -49,15 +49,13 @@ export const InsightsList: React.FC = () => {
         </Toolbar>
       </PageSection>
       <Divider />
-      <PageSection variant="secondary">
-        <Content>
-          <Content component="h1">Insights</Content>
-          <Content component="small">
-            This report provides a concise summary of all insights identified - issues with zero effort.
-          </Content>
+      <PageSection>
+        <Content component="h1">Insights</Content>
+        <Content component="p">
+          This report provides a concise summary of all insights identified - issues with zero effort.
         </Content>
       </PageSection>
-      <PageSection variant="default">
+      <PageSection variant="secondary">
         <ViolationsTable applicationId={applicationId} insightsMode={true} />
       </PageSection>
     </>

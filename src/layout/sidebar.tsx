@@ -27,8 +27,6 @@ export const SidebarApp: React.FC = () => {
           >
             Applications
           </NavItem>
-        </NavList>
-        <NavList>
           <NavItem
             component={({ className, children }) => (
               <NavLink
@@ -47,8 +45,6 @@ export const SidebarApp: React.FC = () => {
           >
             Issues
           </NavItem>
-        </NavList>
-        <NavList>
           <NavItem
             component={({ className, children }) => (
               <NavLink
@@ -67,8 +63,6 @@ export const SidebarApp: React.FC = () => {
           >
             Insights
           </NavItem>
-        </NavList>
-        <NavList>
           <NavItem
             component={({ className, children }) => (
               <NavLink

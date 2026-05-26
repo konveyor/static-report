@@ -101,6 +101,7 @@ export const SimpleContextSelector: React.FC<ISimpleContextSelectorProps> = ({
           ref={toggleRef}
           onClick={() => setIsSelectorOpen((prev) => !prev)}
           isExpanded={isSelectorOpen}
+          isFullWidth
           className="firstChildBordered"
         >
           {currentContext?.label}

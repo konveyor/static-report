@@ -37,7 +37,7 @@ export const HeaderApp: React.FC = () => {
   return (
     <>
       <AboutApp isOpen={isAboutOpen} onClose={toggleIsAboutOpen} />
-      <Masthead>
+      <Masthead display={{ default: "inline" }}>
         <MastheadToggle>
           <PageToggleButton variant="plain" aria-label="Global navigation">
             <BarsIcon />
@@ -49,6 +49,7 @@ export const HeaderApp: React.FC = () => {
               <Brand
                 src={Theme.logoNavbarSrc}
                 alt="Brand"
+                heights={{ default: "36px" }}
               >
                 <source media="(min-width: 768px)" srcSet={Theme.logoNavbarSrc} />
                 <source srcSet={Theme.logoNavbarSrc} />

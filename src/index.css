@@ -1,3 +1,88 @@
-@import "~@patternfly/react-core/dist/styles/base.css";
-@import "~@patternfly/react-core/dist/styles/base-no-reset.css";
-@import "~@patternfly/patternfly/patternfly-addons.css";
+@import "@patternfly/react-core/dist/styles/base.css";
+@import "@patternfly/react-core/dist/styles/base-no-reset.css";
+@import "@patternfly/patternfly/patternfly-addons.css";
+
+/* PF6 removed component-level theme="dark" prop; override tokens directly.
+   PF6 Page uses CSS grid with subgrid on the masthead, which forces stacking.
+   Override to flex to match PF5 inline masthead layout. */
+/* Add padding to inline filter input inside select dropdowns */
+.pf-v6-c-menu__content > .pf-v6-c-text-input-group {
+  padding: var(--pf-t--global--spacer--sm);
+}
+
+/* Align toolbar items vertically (e.g. "Application:" label with dropdown) */
+.pf-v6-c-page .pf-v6-c-toolbar__content {
+  align-items: center;
+}
+
+html .pf-v6-c-page {
+  --pf-v6-c-page--BackgroundColor: var(--pf-t--color--white);
+}
+
+html .pf-v6-c-page > .pf-v6-c-page__main-container {
+  border-radius: 0;
+  margin: 0;
+  min-height: 100%;
+}
+
+.pf-v6-c-page > .pf-v6-c-masthead {
+  --pf-v6-c-masthead--BackgroundColor: var(--pf-t--color--gray--95);
+  display: flex;
+  align-items: center;
+  gap: var(--pf-t--global--spacer--md);
+  color: var(--pf-t--color--white);
+}
+
+.pf-v6-c-page > .pf-v6-c-masthead > .pf-v6-c-masthead__content {
+  flex: 1;
+}
+
+.pf-v6-c-page > .pf-v6-c-masthead .pf-v6-c-button.pf-m-plain {
+  --pf-v6-c-button--m-plain--Color: var(--pf-t--color--white);
+  --pf-v6-c-button--m-plain__icon--Color: var(--pf-t--color--white);
+}
+
+.pf-v6-c-page > .pf-v6-c-page__sidebar {
+  --pf-v6-c-page__sidebar--BackgroundColor: var(--pf-t--color--gray--95);
+}
+
+.pf-v6-c-about-modal-box.about-app__component {
+  --pf-v6-c-about-modal-box--BackgroundColor: var(--pf-t--color--gray--95);
+  --pf-v6-c-content--Color: var(--pf-t--color--white);
+  --pf-v6-c-content--heading--Color: var(--pf-t--color--white);
+  --pf-v6-c-content--a--Color: var(--pf-t--color--white);
+  color: var(--pf-t--color--white);
+}
+
+.pf-v6-c-about-modal-box.about-app__component .pf-v6-c-about-modal-box__close .pf-v6-c-button {
+  --pf-v6-c-button__icon--Color: var(--pf-t--color--white);
+  --pf-v6-c-button--m-plain__icon--Color: var(--pf-t--color--white);
+  color: var(--pf-t--color--white);
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.pf-v6-c-page__main-section.pf-m-secondary .pf-v6-c-menu-toggle {
+  --pf-v6-c-menu-toggle--BorderColor: var(--pf-t--global--border--color--hover);
+}
+
+/* PF6 pagination page input: match PF5 white background with border */
+.pf-v6-c-pagination__nav-page-select .pf-v6-c-form-control {
+  --pf-v6-c-form-control--BackgroundColor: var(--pf-t--color--white);
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--small);
+}
+
+/* PF6 removes borders in nested tables; restore them for file list in expanded issues */
+.pf-v6-c-page .pf-v6-c-table .pf-v6-c-table :is(.pf-v6-c-table__tbody, .pf-v6-c-table__tr:last-child) {
+  border-block-end: 1px solid var(--pf-t--global--border--color--default);
+}
+
+.pf-v6-c-page > .pf-v6-c-page__sidebar .pf-v6-c-nav {
+  --pf-v6-c-nav__link--Color: var(--pf-t--color--white);
+  --pf-v6-c-nav__link--hover--Color: var(--pf-t--color--white);
+  --pf-v6-c-nav__link--hover--BackgroundColor: var(--pf-t--color--gray--80);
+  --pf-v6-c-nav__link--m-current--Color: var(--pf-t--color--white);
+  --pf-v6-c-nav__link--m-current--BackgroundColor: var(--pf-t--color--gray--80);
+}

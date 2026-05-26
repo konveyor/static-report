@@ -7,7 +7,7 @@
 }
 
 .pf-v6-c-table.application-list-table tbody > tr > td.pf-v6-c-table__toggle {
-  padding-bottom: var(--pf-c-table--tbody--cell--PaddingBottom);
+  padding-bottom: var(--pf-v6-c-table__button--PaddingBlockEnd);
 }
 
 .pf-v6-c-table.application-list-table tbody > tr > td.pf-v6-c-table__toggle .pf-v6-c-button {
@@ -20,16 +20,16 @@
 }
 
 .pf-v6-c-table.application-list-table table.expanded-content tr > td {
-  padding-left: var(--pf-global--spacer--xl);
+  padding-left: var(--pf-t--global--spacer--xl);
 }
 
 .pf-v6-c-table.application-list-table button.clickable-progress-bar {
-  margin: calc(0px - var(--pf-global--spacer--form-element))
-    calc(0px - var(--pf-global--spacer--md));
+  margin: calc(0px - var(--pf-t--global--spacer--sm))
+    calc(0px - var(--pf-t--global--spacer--md));
   width: 100%;
   text-align: left;
 }
 
 .application-list-table .pf-v6-c-progress {
-  --pf-c-progress--GridGap: var(--pf-global--spacer--xs);
+  --pf-v6-c-progress--GridGap: var(--pf-t--global--spacer--xs);
 }

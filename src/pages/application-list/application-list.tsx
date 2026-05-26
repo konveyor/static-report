@@ -142,16 +142,14 @@ export const ApplicationList: React.FC = () => {
 
   return (
     <>
-      <PageSection variant="secondary">
-        <Content>
-          <Content component="h1">Applications</Content>
-          <Content component="small">
-            This report lists all analyzed applications. Select an individual
-            application to show more details.
-          </Content>
+      <PageSection>
+        <Content component="h1">Applications</Content>
+        <Content component="p">
+          This report lists all analyzed applications. Select an individual
+          application to show more details.
         </Content>
       </PageSection>
-      <PageSection>
+      <PageSection variant="secondary">
         <Toolbar
           className="pf-m-toggle-group-container"
           collapseListedFiltersBreakpoint="xl"

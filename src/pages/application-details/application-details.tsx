@@ -71,10 +71,10 @@ export const ApplicationEdit: React.FC = () => {
           <BreadcrumbItem isActive>{application?.name}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
-      <PageSection type="default" variant="secondary">
+      <PageSection type="default">
         <Content component="h1">{application?.name}</Content>
       </PageSection>
-      <PageSection type="tabs" variant="secondary">
+      <PageSection type="tabs">
         <Tabs
           role="region"
           activeKey={tabItems.find((e) => e.path === location.pathname)?.path}

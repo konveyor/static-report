@@ -34,13 +34,10 @@ import { compareByCategoryFn } from "@app/models/api-enriched";
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
 import { IssueProcessed } from "@app/models/api-enriched";
 import { useAllApplications, useCodeSnip } from "@app/queries/report";
-import {
-  SimpleSelect,
-  OptionWithValue,
-  FileEditor,
-  ConditionalTableBody,
-  SimplePagination,
-} from "@app/shared/components";
+import { SimpleSelect, OptionWithValue } from "@app/shared/components/simple-select";
+import { FileEditor } from "@app/shared/components/file-editor";
+import { ConditionalTableBody } from "@app/shared/components/table-controls/conditional-table-body";
+import { SimplePagination } from "@app/shared/components/table-controls/simple-pagination";
 import {
   useModal,
   useTable,

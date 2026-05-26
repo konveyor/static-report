@@ -25,12 +25,9 @@ import { useDebounce } from "usehooks-ts";
 import { DependencyDto } from "@app/api/report";
 import { ALL_APPLICATIONS_ID } from "@app/Constants";
 import { useAllApplications } from "@app/queries/report";
-import {
-  SimpleSelect,
-  OptionWithValue,
-  SimplePagination,
-  ConditionalTableBody,
-} from "@app/shared/components";
+import { SimpleSelect, OptionWithValue } from "@app/shared/components/simple-select";
+import { SimplePagination } from "@app/shared/components/table-controls/simple-pagination";
+import { ConditionalTableBody } from "@app/shared/components/table-controls/conditional-table-body";
 import { useTable, useTableControls, useToolbar } from "@app/shared/hooks";
 
 const compareToByColumn = (
