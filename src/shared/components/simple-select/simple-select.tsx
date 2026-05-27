@@ -43,6 +43,11 @@ const optionToString = (option: OptionLike): string => {
   return option.toString();
 };
 
+const optionToId = (option: OptionLike): string => {
+  if (typeof option === "string") return option;
+  return String(option.value);
+};
+
 const isOptionSelected = (
   option: OptionLike,
   selected: OptionLike | OptionLike[] | undefined
@@ -91,7 +96,7 @@ export const SimpleSelect: React.FC<ISimpleSelectProps> = ({
     _event: React.MouseEvent<Element, MouseEvent> | undefined,
     itemId: string | number | undefined
   ) => {
-    const selected = options.find((o) => optionToString(o) === String(itemId));
+    const selected = options.find((o) => optionToId(o) === String(itemId));
     if (selected) {
       onChange(selected);
     }
@@ -132,9 +137,9 @@ export const SimpleSelect: React.FC<ISimpleSelectProps> = ({
       isOpen={isOpen}
       selected={
         Array.isArray(value)
-          ? value.map(optionToString)
+          ? value.map(optionToId)
           : value
-          ? optionToString(value)
+          ? optionToId(value)
           : undefined
       }
       onSelect={onSelectHandler}
@@ -171,7 +176,7 @@ export const SimpleSelect: React.FC<ISimpleSelectProps> = ({
           return (
             <SelectOption
               key={`${index}-${label}`}
-              value={label}
+              value={optionToId(option)}
               hasCheckbox={isCheckbox}
               isSelected={selected}
             >

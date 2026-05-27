@@ -13,7 +13,7 @@ module.exports = function override(config, env) {
   config.resolve = {
     ...config.resolve,
     alias: {
-      ...config.alias,
+      ...config.resolve.alias,
       "@app": path.resolve(__dirname, "src/"),
     },
     plugins: [

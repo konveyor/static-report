@@ -95,6 +95,11 @@ export const SimpleContextSelector: React.FC<ISimpleContextSelectorProps> = ({
   return (
     <Select
       isOpen={isSelectorOpen}
+      selected={currentContext?.key}
+      onSelect={(_event, itemId) => {
+        const found = allContexts.find((c) => c.key === String(itemId));
+        if (found) onSelect(found);
+      }}
       onOpenChange={setIsSelectorOpen}
       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
         <MenuToggle
@@ -122,7 +127,7 @@ export const SimpleContextSelector: React.FC<ISimpleContextSelectorProps> = ({
               f.label.toLowerCase().indexOf(filterText.toLowerCase()) !== -1
           )
           .map((item, index) => (
-            <SelectOption key={index} onClick={() => onSelect(item)}>
+            <SelectOption key={index} value={item.key}>
               {item.label}
             </SelectOption>
           ))}

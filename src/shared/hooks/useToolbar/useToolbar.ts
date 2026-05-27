@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { ToolbarLabel } from '@patternfly/react-core';
 
-const getToolbarChipKey = (value: string | ToolbarLabel) => {
+const getToolbarLabelKey = (value: string | ToolbarLabel) => {
   return typeof value === 'string' ? value : value.key;
 };
 
@@ -30,8 +30,8 @@ export const useToolbar = <K, T extends FilterType>(
 
   const addFilter = (key: K, value: T) => {
     setFilters((current) => {
-      const currentChips = current.get(key) || [];
-      return new Map(current).set(key, [...currentChips, value]);
+      const currentLabels = current.get(key) || [];
+      return new Map(current).set(key, [...currentLabels, value]);
     });
   };
 
@@ -49,9 +49,9 @@ export const useToolbar = <K, T extends FilterType>(
       }
 
       const newValue = (current.get(key) || []).filter((f) => {
-        const fkey = getToolbarChipKey(f);
+        const fkey = getToolbarLabelKey(f);
         return !elementsToBeRemoved.some((r) => {
-          const rKey = getToolbarChipKey(r);
+          const rKey = getToolbarLabelKey(r);
           return fkey === rKey;
         });
       });
