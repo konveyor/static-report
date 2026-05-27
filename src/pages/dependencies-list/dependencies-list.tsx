@@ -56,7 +56,7 @@ export const DependenciesList: React.FC = () => {
           analyzed application.
         </Content>
       </PageSection>
-      <PageSection variant="secondary">
+      <PageSection>
         <DependenciesTable applicationId={applicationId} />
       </PageSection>
     </>

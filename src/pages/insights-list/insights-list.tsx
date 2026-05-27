@@ -55,7 +55,7 @@ export const InsightsList: React.FC = () => {
           This report provides a concise summary of all insights identified - issues with zero effort.
         </Content>
       </PageSection>
-      <PageSection variant="secondary">
+      <PageSection>
         <ViolationsTable applicationId={applicationId} insightsMode={true} />
       </PageSection>
     </>

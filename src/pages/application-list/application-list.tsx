@@ -149,7 +149,7 @@ export const ApplicationList: React.FC = () => {
           application to show more details.
         </Content>
       </PageSection>
-      <PageSection variant="secondary">
+      <PageSection>
         <Toolbar
           className="pf-m-toggle-group-container"
           collapseListedFiltersBreakpoint="xl"

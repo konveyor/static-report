@@ -55,7 +55,7 @@ export const IssuesList: React.FC = () => {
           This report provides a concise summary of all issues identified.
         </Content>
       </PageSection>
-      <PageSection variant="secondary">
+      <PageSection>
         <ViolationsTable applicationId={applicationId} />
       </PageSection>
     </>
