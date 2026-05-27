@@ -231,6 +231,7 @@ export const FileEditor: React.FC<IFileEditorProps> = ({
                   glyphMargin: true,
                   "semanticHighlighting.enabled": true,
                   renderValidationDecorations: "on",
+                  hover: { above: false },
                   lineNumbers: (lineNum: number) =>
                     String(relativeToAbsoluteLineNum(lineNum))
                 }}
