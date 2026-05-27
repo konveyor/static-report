@@ -5,10 +5,13 @@
 /* PF6 removed component-level theme="dark" prop; override tokens directly.
    PF6 Page uses CSS grid with subgrid on the masthead, which forces stacking.
    Override to flex to match PF5 inline masthead layout. */
-/* Style inline filter input inside select dropdowns to look like an input field */
-.pf-v6-c-menu__content > .pf-v6-c-text-input-group {
+/* Style inline filter input inside select dropdowns */
+.pf-v6-c-menu .pf-v6-c-menu__content > .pf-v6-c-text-input-group {
   padding: var(--pf-t--global--spacer--sm);
   border-bottom: 1px solid var(--pf-t--global--border--color--default);
+  --pf-v6-c-text-input-group--BorderWidth: 0;
+  --pf-v6-c-text-input-group--BackgroundColor: transparent;
+  background-color: transparent;
 }
 
 .pf-v6-c-menu__content > .pf-v6-c-text-input-group .pf-v6-c-text-input-group__text-input {
@@ -89,10 +92,10 @@ html .pf-v6-c-page > .pf-v6-c-page__main-container {
 
 /* PF6 pagination page input: match PF5 white background with border */
 .pf-v6-c-page .pf-v6-c-pagination__nav-page-select .pf-v6-c-form-control {
+  --pf-v6-c-form-control--BackgroundColor: var(--pf-t--color--white);
   background-color: var(--pf-t--color--white);
-  border: 1px solid var(--pf-t--global--border--color--default);
+  outline: 1px solid var(--pf-t--global--border--color--default);
   border-radius: var(--pf-t--global--border--radius--small);
-  padding: 0 var(--pf-t--global--spacer--sm);
 }
 
 /* PF6 removes borders in nested tables; restore them for file list in expanded issues */
