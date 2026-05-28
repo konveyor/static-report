@@ -35,7 +35,7 @@ export const DependenciesList: React.FC = () => {
 
   return (
     <>
-      <PageSection padding={{ default: "noPadding" }}>
+      <PageSection>
         <Toolbar>
           <ToolbarContent>
             <ToolbarItem>Application:</ToolbarItem>
