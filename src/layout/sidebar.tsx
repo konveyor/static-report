@@ -14,8 +14,9 @@ export const SidebarApp: React.FC = () => {
       <Nav id="nav-sidebar" aria-label="Nav">
         <NavList>
           <NavItem
-            component={({ className, children }) => (
+            component={({ className, children, ...props }) => (
               <NavLink
+                {...props}
                 to="/applications"
                 className={({ isActive }) =>
                   css(className, isActive ? "pf-m-current" : "")
@@ -28,8 +29,9 @@ export const SidebarApp: React.FC = () => {
             Applications
           </NavItem>
           <NavItem
-            component={({ className, children }) => (
+            component={({ className, children, ...props }) => (
               <NavLink
+                {...props}
                 to={
                   !currentContext
                     ? "/issues/applications"
@@ -46,8 +48,9 @@ export const SidebarApp: React.FC = () => {
             Issues
           </NavItem>
           <NavItem
-            component={({ className, children }) => (
+            component={({ className, children, ...props }) => (
               <NavLink
+                {...props}
                 to={
                   !currentContext
                     ? "/insights/applications"
@@ -64,8 +67,9 @@ export const SidebarApp: React.FC = () => {
             Insights
           </NavItem>
           <NavItem
-            component={({ className, children }) => (
+            component={({ className, children, ...props }) => (
               <NavLink
+                {...props}
                 to={
                   !currentContext
                     ? "/dependencies/applications"
