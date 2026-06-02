@@ -77,6 +77,7 @@
     "victory-tooltip": "^37.3.6",
     "victory-voronoi-container": "^37.3.6",
     "victory-zoom-container": "^37.3.6",
-    "vite": "^6.4.2"
+    "vite": "^6.4.2",
+    "vite-plugin-singlefile": "^2.3.3"
   }
 }
