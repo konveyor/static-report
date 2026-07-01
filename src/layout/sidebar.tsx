@@ -26,7 +26,7 @@ export const SidebarApp: React.FC = () => {
             itemId="applications"
             to="/applications"
             component={NavLinkAdapter}
-            isActive={location.pathname === "/applications"}
+            isActive={location.pathname.startsWith("/applications")}
           >
             Applications
           </NavItem>
